@@ -1,0 +1,10 @@
+hexbed
+src/t
+src/td
+*.o
+*.d
+*.mo
+*.po~
+*.bin
+
+

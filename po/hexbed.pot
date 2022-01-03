@@ -1,0 +1,683 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-01-03 14:45+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: src/ui/menuhelp.cc:29
+msgid "&About"
+msgstr ""
+
+#: src/ui/menuhelp.cc:30
+msgid "Displays information about this application"
+msgstr ""
+
+#: src/ui/menuhelp.cc:31
+msgid "&Help"
+msgstr ""
+
+#: src/ui/menuedit.cc:30
+msgid "&Undo"
+msgstr ""
+
+#: src/ui/menuedit.cc:30
+msgid "Undoes the last action"
+msgstr ""
+
+#: src/ui/menuedit.cc:32
+msgid "&Redo"
+msgstr ""
+
+#: src/ui/menuedit.cc:32
+msgid "Redoes the last undone action"
+msgstr ""
+
+#: src/ui/menuedit.cc:35
+msgid "Cu&t"
+msgstr ""
+
+#: src/ui/menuedit.cc:36
+msgid "Copies the selection and removes it"
+msgstr ""
+
+#: src/ui/menuedit.cc:37
+msgid "&Copy"
+msgstr ""
+
+#: src/ui/menuedit.cc:37
+msgid "Copies the selection"
+msgstr ""
+
+#: src/ui/menuedit.cc:39
+msgid "&Paste Insert"
+msgstr ""
+
+#: src/ui/menuedit.cc:40
+msgid "Pastes data from the clipboard and inserts it at the caret"
+msgstr ""
+
+#: src/ui/menuedit.cc:42
+msgid "P&aste Overwrite"
+msgstr ""
+
+#: src/ui/menuedit.cc:43
+msgid "Pastes data from the clipboard, overwriting existing data"
+msgstr ""
+
+#: src/ui/menuedit.cc:45
+msgid "&Delete"
+msgstr ""
+
+#: src/ui/menuedit.cc:46
+msgid "Deletes the currently selected data"
+msgstr ""
+
+#: src/ui/menuedit.cc:49
+msgid "Select &all"
+msgstr ""
+
+#: src/ui/menuedit.cc:50
+msgid "Selects the entire file"
+msgstr ""
+
+#: src/ui/menuedit.cc:53
+msgid "Select &block..."
+msgstr ""
+
+#: src/ui/menuedit.cc:54
+msgid "Selects a block of bytes"
+msgstr ""
+
+#: src/ui/menuedit.cc:57
+msgid "&Insert mode"
+msgstr ""
+
+#: src/ui/menuedit.cc:58
+msgid "Inserts bytes typed in instead of overwriting existing ones"
+msgstr ""
+
+#: src/ui/menuedit.cc:61
+msgid "&Options"
+msgstr ""
+
+#: src/ui/menuedit.cc:62
+msgid "Opens the dialog for editing options or preferences"
+msgstr ""
+
+#: src/ui/menuedit.cc:64
+msgid "&Edit"
+msgstr ""
+
+#: src/ui/menufile.cc:29
+msgid "&New"
+msgstr ""
+
+#: src/ui/menufile.cc:29
+msgid "Creates a new file"
+msgstr ""
+
+#: src/ui/menufile.cc:31
+msgid "&Open..."
+msgstr ""
+
+#: src/ui/menufile.cc:31
+msgid "Opens an existing file"
+msgstr ""
+
+#: src/ui/menufile.cc:33
+msgid "&Save"
+msgstr ""
+
+#: src/ui/menufile.cc:34
+msgid "Saves the file in the current location"
+msgstr ""
+
+#: src/ui/menufile.cc:36
+msgid "Save &As..."
+msgstr ""
+
+#: src/ui/menufile.cc:37
+msgid "Saves the file in a new location"
+msgstr ""
+
+#: src/ui/menufile.cc:38
+msgid "&Reload"
+msgstr ""
+
+#: src/ui/menufile.cc:39
+msgid "Reload the open file and discard changes"
+msgstr ""
+
+#: src/ui/menufile.cc:40
+msgid "&Close"
+msgstr ""
+
+#: src/ui/menufile.cc:41
+msgid "Closes the current file"
+msgstr ""
+
+#: src/ui/menufile.cc:44
+msgid "Sa&ve all"
+msgstr ""
+
+#: src/ui/menufile.cc:45
+msgid "Saves all open files"
+msgstr ""
+
+#: src/ui/menufile.cc:46
+msgid "C&lose all"
+msgstr ""
+
+#: src/ui/menufile.cc:47
+msgid "Closes all open files"
+msgstr ""
+
+#: src/ui/menufile.cc:49
+msgid "E&xit"
+msgstr ""
+
+#: src/ui/menufile.cc:49
+msgid "Closes the application"
+msgstr ""
+
+#: src/ui/menufile.cc:51
+msgid "&File"
+msgstr ""
+
+#: src/ui/toolbar.cc:31
+msgid "New"
+msgstr ""
+
+#: src/ui/toolbar.cc:32
+msgid "Open"
+msgstr ""
+
+#: src/ui/toolbar.cc:35
+msgid "Save"
+msgstr ""
+
+#: src/ui/toolbar.cc:37
+msgid "Exit"
+msgstr ""
+
+#: src/ui/menuview.cc:32
+msgid "&Hex and text"
+msgstr ""
+
+#: src/ui/menuview.cc:33
+msgid "Both columns; hex and text data"
+msgstr ""
+
+#: src/ui/menuview.cc:36
+msgid "He&x only"
+msgstr ""
+
+#: src/ui/menuview.cc:37
+msgid "Show hex column only"
+msgstr ""
+
+#: src/ui/menuview.cc:40
+msgid "&Text only"
+msgstr ""
+
+#: src/ui/menuview.cc:41
+msgid "Show text column only"
+msgstr ""
+
+#: src/ui/menuview.cc:43
+msgid "&Columns"
+msgstr ""
+
+#: src/ui/menuview.cc:44
+msgid "Controls which columns to show"
+msgstr ""
+
+#: src/ui/menuview.cc:45
+msgid "&View"
+msgstr ""
+
+#: src/ui/menusearch.cc:30
+msgid "&Find..."
+msgstr ""
+
+#: src/ui/menusearch.cc:31
+msgid "Finds data and brings it into view"
+msgstr ""
+
+#: src/ui/menusearch.cc:33
+msgid "Fi&nd next"
+msgstr ""
+
+#: src/ui/menusearch.cc:34
+msgid "Finds the next match with the same search"
+msgstr ""
+
+#: src/ui/menusearch.cc:37 src/ui/dialogs/find.cc:75
+#: src/ui/dialogs/replace.cc:57
+msgid "Find &previous"
+msgstr ""
+
+#: src/ui/menusearch.cc:38
+msgid "Finds the previous match with the same search"
+msgstr ""
+
+#: src/ui/menusearch.cc:40
+msgid "&Replace..."
+msgstr ""
+
+#: src/ui/menusearch.cc:41
+msgid "Finds and replaces data in the file"
+msgstr ""
+
+#: src/ui/menusearch.cc:44
+msgid "&Go to..."
+msgstr ""
+
+#: src/ui/menusearch.cc:45
+msgid "Goes to a specific offset in the file"
+msgstr ""
+
+#: src/ui/menusearch.cc:47
+msgid "&Search"
+msgstr ""
+
+#: src/ui/context.cc:55
+msgid "Action in progress"
+msgstr ""
+
+#: src/ui/hexbed.cc:231
+msgid "Save a file"
+msgstr ""
+
+#: src/ui/hexbed.cc:232 src/ui/hexbed.cc:640
+msgid "All files (*.*)"
+msgstr ""
+
+#: src/ui/hexbed.cc:257
+#, c-format
+msgid "Failed to save file %s: %s"
+msgstr ""
+
+#: src/ui/hexbed.cc:280
+#, c-format
+msgid "'%s' has unsaved changes. Discard them and reload?"
+msgstr ""
+
+#: src/ui/hexbed.cc:300
+#, c-format
+msgid ""
+"Failed to load from file %s:\n"
+"%s"
+msgstr ""
+
+#: src/ui/hexbed.cc:305
+msgid "&Retry"
+msgstr ""
+
+#: src/ui/hexbed.cc:305
+msgid "&Cancel"
+msgstr ""
+
+#: src/ui/hexbed.cc:307
+msgid "Retry?"
+msgstr ""
+
+#: src/ui/hexbed.cc:328
+#, c-format
+msgid "'%s' has unsaved changes. Do you want to save it?"
+msgstr ""
+
+#: src/ui/hexbed.cc:450
+#, c-format
+msgid "New-%s"
+msgstr ""
+
+#: src/ui/hexbed.cc:454
+#, c-format
+msgid "Failed to create a new file: %s"
+msgstr ""
+
+#: src/ui/hexbed.cc:477
+#, c-format
+msgid "Failed to open file %s: %s"
+msgstr ""
+
+#: src/ui/hexbed.cc:486
+msgid "Read only"
+msgstr ""
+
+#: src/ui/hexbed.cc:515
+msgid "No more results found for this search."
+msgstr ""
+
+#: src/ui/hexbed.cc:521
+#, c-format
+msgid "Found and replaced %lu match."
+msgid_plural "Found and replaced %lu matches."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/ui/hexbed.cc:639
+msgid "Open a file"
+msgstr ""
+
+#: src/ui/hexbed.cc:713
+#, c-format
+msgid "Failed to copy: %s"
+msgstr ""
+
+#: src/ui/hexbed.cc:743
+msgid ""
+"Cannot paste the current clipboard contents, because it contains characters "
+"that the currently selected character encoding cannot represent."
+msgstr ""
+
+#: src/ui/hexbed.cc:746
+msgid ""
+"Cannot paste the current clipboard contents, because it does not contain "
+"valid hexadecimal data. Text data should be a string of hexadecimal bytes."
+msgstr ""
+
+#: src/ui/hexbed.cc:757
+#, c-format
+msgid "Failed to paste: %s"
+msgstr ""
+
+#: src/ui/hexbed.cc:804
+msgid "A hex editor."
+msgstr ""
+
+#: src/ui/dialogs/goto.cc:34
+msgid "Go to"
+msgstr ""
+
+#: src/ui/dialogs/goto.cc:58
+msgid "From"
+msgstr ""
+
+#: src/ui/dialogs/goto.cc:60
+msgid "Start"
+msgstr ""
+
+#: src/ui/dialogs/goto.cc:65
+msgid "Cursor"
+msgstr ""
+
+#: src/ui/dialogs/goto.cc:69
+msgid "End"
+msgstr ""
+
+#: src/ui/dialogs/goto.cc:85
+msgid "Offset:"
+msgstr ""
+
+#: src/ui/dialogs/radixpicker.cc:39
+msgid "Radix"
+msgstr ""
+
+#: src/ui/dialogs/radixpicker.cc:42
+msgid "Oct"
+msgstr ""
+
+#: src/ui/dialogs/radixpicker.cc:45
+msgid "Dec"
+msgstr ""
+
+#: src/ui/dialogs/radixpicker.cc:48
+msgid "Hex"
+msgstr ""
+
+#: src/ui/dialogs/selectblock.cc:35
+msgid "Select block"
+msgstr ""
+
+#: src/ui/dialogs/selectblock.cc:61
+msgid "Length:"
+msgstr ""
+
+#: src/ui/dialogs/selectblock.cc:65
+msgid "End:"
+msgstr ""
+
+#: src/ui/dialogs/selectblock.cc:87
+msgid "Start:"
+msgstr ""
+
+#: src/ui/dialogs/find.cc:43
+msgid "Hex data"
+msgstr ""
+
+#: src/ui/dialogs/find.cc:59
+msgid "Find"
+msgstr ""
+
+#: src/ui/dialogs/find.cc:72 src/ui/dialogs/replace.cc:54
+msgid "Find &next"
+msgstr ""
+
+#: src/ui/dialogs/find.cc:93 src/ui/dialogs/replace.cc:106
+msgid "Find data"
+msgstr ""
+
+#: src/ui/dialogs/find.cc:97
+msgid "&Wrap around"
+msgstr ""
+
+#: src/ui/dialogs/replace.cc:44 src/ui/dialogs/replace.cc:88
+msgid "Replace"
+msgstr ""
+
+#: src/ui/dialogs/replace.cc:68
+msgid "N&ext"
+msgstr ""
+
+#: src/ui/dialogs/replace.cc:71
+msgid "Pre&vious"
+msgstr ""
+
+#: src/ui/dialogs/replace.cc:75
+msgid "&All"
+msgstr ""
+
+#: src/ui/dialogs/replace.cc:82
+msgid "Replace and find"
+msgstr ""
+
+#: src/ui/dialogs/replace.cc:110
+msgid "&Wrap around (find only)"
+msgstr ""
+
+#: src/ui/dialogs/replace.cc:115
+msgid "Find and replace"
+msgstr ""
+
+#: src/ui/clipboard.cc:46 src/ui/clipboard.cc:84
+msgid "Failed to open the clipboard"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:36
+msgid "Appearance"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:70
+msgid "Font"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:71
+msgid "Hex view font"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:72
+msgid "Colors"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:73
+msgid "Background"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:74
+msgid "Offset labels"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:76
+msgid "Hex data, odd columns"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:77
+msgid "Hex data, even columns"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:78
+msgid "Text, printable"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:79
+msgid "Text, non-printable"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:81
+msgid "Selection background"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:82
+msgid "Selection foreground"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:83
+msgid "Secondary selection background"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:85
+msgid "Secondary selection foreground"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:87
+msgid "Alignment hint"
+msgstr ""
+
+#: src/ui/settings/appearance.cc:93
+msgid "Using a non-monospace font is not recommended."
+msgstr ""
+
+#: src/ui/settings/layout.cc:34
+msgid "Layout"
+msgstr ""
+
+#: src/ui/settings/layout.cc:47
+msgid "Display"
+msgstr ""
+
+#: src/ui/settings/layout.cc:48
+msgid "Use uppercase hex characters (A-F)"
+msgstr ""
+
+#: src/ui/settings/layout.cc:58
+msgid "Fit as many columns as possible"
+msgstr ""
+
+#: src/ui/settings/layout.cc:66
+msgid "Number of columns"
+msgstr ""
+
+#. / group sizes
+#: src/ui/settings/layout.cc:69
+msgid "Group size"
+msgstr ""
+
+#: src/ui/settings/layout.cc:70
+msgid "1 (byte)"
+msgstr ""
+
+#: src/ui/settings/layout.cc:70
+msgid "2 (word)"
+msgstr ""
+
+#: src/ui/settings/layout.cc:70
+msgid "4 (dword)"
+msgstr ""
+
+#: src/ui/settings/layout.cc:71
+msgid "8 (qword)"
+msgstr ""
+
+#: src/ui/settings/layout.cc:71
+msgid "16 (oword)"
+msgstr ""
+
+#. / offset radix
+#: src/ui/settings/layout.cc:74
+msgid "Offset radix"
+msgstr ""
+
+#: src/ui/settings/layout.cc:75
+msgid "8 (octal)"
+msgstr ""
+
+#: src/ui/settings/layout.cc:75
+msgid "10 (decimal)"
+msgstr ""
+
+#: src/ui/settings/layout.cc:75
+msgid "16 (hex)"
+msgstr ""
+
+#: src/ui/settings/general.cc:42
+msgid "Undo"
+msgstr ""
+
+#: src/ui/settings/general.cc:44
+msgid ""
+"Note that the undo history may be shorter, as older undo history will be "
+"dropped in case of insufficient memory."
+msgstr ""
+
+#: src/ui/settings/general.cc:46
+msgid "Maximum length of undo history"
+msgstr ""
+
+#: src/ui/settings.cc:53 src/ui/settings.cc:76
+msgid "Options"
+msgstr ""
+
+#: src/ui/settings.cc:141
+msgid ""
+"One or more of the settings you have specified is invalid. Please check your "
+"settings and try again."
+msgstr ""
+
+#: src/ui/status.cc:42
+msgid "Insert"
+msgstr ""
+
+#: src/ui/status.cc:44
+msgid "Overwrite"
+msgstr ""
+
+#: src/ui/status.cc:84
+#, c-format
+msgid "Offset: %s"
+msgstr ""
+
+#: src/ui/status.cc:89
+#, c-format
+msgid "Block: %s"
+msgstr ""
+
+#: src/ui/status.cc:92
+#, c-format
+msgid "Length: %s"
+msgstr ""

@@ -1,0 +1,692 @@
+# HexBed hex editor.
+# Copyright (C) 2021-2022 Sampo Hippeläinen (hisahi)
+# This file is distributed under the same license as the HexBed package.
+# Sampo Hippeläinen <sampo.hippelainen@gmail.com>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.4.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-01-03 14:45+0200\n"
+"PO-Revision-Date: 2021-12-23 21:14+0200\n"
+"Last-Translator: Sampo Hippeläinen <sampo.hippelainen@gmail.com>\n"
+"Language-Team: fi\n"
+"Language: fi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/ui/menuhelp.cc:29
+msgid "&About"
+msgstr "&Tietoja"
+
+#: src/ui/menuhelp.cc:30
+msgid "Displays information about this application"
+msgstr "Näyttää tietoja ohjelmasta"
+
+#: src/ui/menuhelp.cc:31
+msgid "&Help"
+msgstr "&Ohje"
+
+#: src/ui/menuedit.cc:30
+msgid "&Undo"
+msgstr "&Kumoa"
+
+#: src/ui/menuedit.cc:30
+msgid "Undoes the last action"
+msgstr "Kumoaa viimeisimmän muokkauksen"
+
+#: src/ui/menuedit.cc:32
+msgid "&Redo"
+msgstr "&Tee uudelleen"
+
+#: src/ui/menuedit.cc:32
+msgid "Redoes the last undone action"
+msgstr "Suorittaa viimeksi kumotun muokkauksen uudelleen"
+
+#: src/ui/menuedit.cc:35
+msgid "Cu&t"
+msgstr "&Leikkaa"
+
+#: src/ui/menuedit.cc:36
+msgid "Copies the selection and removes it"
+msgstr "Kopioi valinnan ja poistaa sen"
+
+#: src/ui/menuedit.cc:37
+msgid "&Copy"
+msgstr "K&opioi"
+
+#: src/ui/menuedit.cc:37
+msgid "Copies the selection"
+msgstr "Kopioi valinnan"
+
+#: src/ui/menuedit.cc:39
+msgid "&Paste Insert"
+msgstr "L&iitä väliin"
+
+#: src/ui/menuedit.cc:40
+msgid "Pastes data from the clipboard and inserts it at the caret"
+msgstr "Liittää leikepöydältä tavuja ja lisää väliin kohdistimen kohdalle"
+
+#: src/ui/menuedit.cc:42
+msgid "P&aste Overwrite"
+msgstr "Liit&ä ja korvaa"
+
+#: src/ui/menuedit.cc:43
+msgid "Pastes data from the clipboard, overwriting existing data"
+msgstr "Liittää leikepöydältä tavuja kohdistimen kohdalla olevia korvaten"
+
+#: src/ui/menuedit.cc:45
+msgid "&Delete"
+msgstr "&Poista"
+
+#: src/ui/menuedit.cc:46
+msgid "Deletes the currently selected data"
+msgstr "Poistaa valitun tavualueen"
+
+#: src/ui/menuedit.cc:49
+msgid "Select &all"
+msgstr "&Valitse kaikki"
+
+#: src/ui/menuedit.cc:50
+msgid "Selects the entire file"
+msgstr "Valitsee koko tiedoston"
+
+#: src/ui/menuedit.cc:53
+msgid "Select &block..."
+msgstr "V&alitse alue..."
+
+#: src/ui/menuedit.cc:54
+msgid "Selects a block of bytes"
+msgstr "Valitsee tavualueen"
+
+#: src/ui/menuedit.cc:57
+msgid "&Insert mode"
+msgstr "&Lisäystila"
+
+#: src/ui/menuedit.cc:58
+msgid "Inserts bytes typed in instead of overwriting existing ones"
+msgstr "Lisää tavuja väliin korvaamisen sijasta"
+
+#: src/ui/menuedit.cc:61
+msgid "&Options"
+msgstr "&Asetukset"
+
+#: src/ui/menuedit.cc:62
+msgid "Opens the dialog for editing options or preferences"
+msgstr "Avaa ohjelman asetukset"
+
+#: src/ui/menuedit.cc:64
+msgid "&Edit"
+msgstr "&Muokkaa"
+
+#: src/ui/menufile.cc:29
+msgid "&New"
+msgstr "&Uusi"
+
+#: src/ui/menufile.cc:29
+msgid "Creates a new file"
+msgstr "Luo uuden tiedoston"
+
+#: src/ui/menufile.cc:31
+msgid "&Open..."
+msgstr "&Avaa..."
+
+#: src/ui/menufile.cc:31
+msgid "Opens an existing file"
+msgstr "Avaa olemassa olevan tiedoston"
+
+#: src/ui/menufile.cc:33
+msgid "&Save"
+msgstr "&Tallenna"
+
+#: src/ui/menufile.cc:34
+msgid "Saves the file in the current location"
+msgstr "Tallentaa tiedoston samaan sijaintiin"
+
+#: src/ui/menufile.cc:36
+msgid "Save &As..."
+msgstr "Tallenna &nimellä..."
+
+#: src/ui/menufile.cc:37
+msgid "Saves the file in a new location"
+msgstr "Tallentaa tiedoston uuteen sijaintiin"
+
+#: src/ui/menufile.cc:38
+msgid "&Reload"
+msgstr "Avaa &uudelleen"
+
+#: src/ui/menufile.cc:39
+msgid "Reload the open file and discard changes"
+msgstr "Avaa tiedoston uudelleen ja hylkää muutokset"
+
+#: src/ui/menufile.cc:40
+msgid "&Close"
+msgstr "&Sulje"
+
+#: src/ui/menufile.cc:41
+msgid "Closes the current file"
+msgstr "Sulkee tämänhetkisen tiedoston"
+
+#: src/ui/menufile.cc:44
+msgid "Sa&ve all"
+msgstr "Tallenna &kaikki"
+
+#: src/ui/menufile.cc:45
+msgid "Saves all open files"
+msgstr "Tallentaa kaikki avoimet tiedostot"
+
+#: src/ui/menufile.cc:46
+msgid "C&lose all"
+msgstr "Sul&je kaikki"
+
+#: src/ui/menufile.cc:47
+msgid "Closes all open files"
+msgstr "Sulkee kaikki avoimet tiedostot"
+
+#: src/ui/menufile.cc:49
+msgid "E&xit"
+msgstr "&Lopeta"
+
+#: src/ui/menufile.cc:49
+msgid "Closes the application"
+msgstr "Sulkee ohjelman"
+
+#: src/ui/menufile.cc:51
+msgid "&File"
+msgstr "&Tiedosto"
+
+#: src/ui/toolbar.cc:31
+msgid "New"
+msgstr "Uusi"
+
+#: src/ui/toolbar.cc:32
+msgid "Open"
+msgstr "Avaa"
+
+#: src/ui/toolbar.cc:35
+msgid "Save"
+msgstr "Tallenna"
+
+#: src/ui/toolbar.cc:37
+msgid "Exit"
+msgstr "Lopeta"
+
+#: src/ui/menuview.cc:32
+msgid "&Hex and text"
+msgstr "&Molemmat"
+
+#: src/ui/menuview.cc:33
+msgid "Both columns; hex and text data"
+msgstr "Molemmat sarakkeet, sekä heksamuotoinen että tekstimuotoinen tieto"
+
+#: src/ui/menuview.cc:36
+msgid "He&x only"
+msgstr "Vain heksa"
+
+#: src/ui/menuview.cc:37
+msgid "Show hex column only"
+msgstr "Vain heksamuotoinen tieto"
+
+#: src/ui/menuview.cc:40
+msgid "&Text only"
+msgstr "Vain teksti"
+
+#: src/ui/menuview.cc:41
+msgid "Show text column only"
+msgstr "Vain tekstimuotoinen tieto"
+
+#: src/ui/menuview.cc:43
+msgid "&Columns"
+msgstr "&Sarakkeet"
+
+#: src/ui/menuview.cc:44
+msgid "Controls which columns to show"
+msgstr "Määrittelee näytettävät sarakkeet"
+
+#: src/ui/menuview.cc:45
+msgid "&View"
+msgstr "&Näytä"
+
+#: src/ui/menusearch.cc:30
+msgid "&Find..."
+msgstr "&Etsi..."
+
+#: src/ui/menusearch.cc:31
+msgid "Finds data and brings it into view"
+msgstr "Etsii tavuja ja tuo ne näkyville"
+
+#: src/ui/menusearch.cc:33
+msgid "Fi&nd next"
+msgstr "Et&si seuraava"
+
+#: src/ui/menusearch.cc:34
+msgid "Finds the next match with the same search"
+msgstr "Etsii seuraavan tuloksen viime haulla"
+
+#: src/ui/menusearch.cc:37 src/ui/dialogs/find.cc:75
+#: src/ui/dialogs/replace.cc:57
+msgid "Find &previous"
+msgstr "Etsi e&dellinen"
+
+#: src/ui/menusearch.cc:38
+msgid "Finds the previous match with the same search"
+msgstr "Etsii edellisen tuloksen viime haulla"
+
+#: src/ui/menusearch.cc:40
+msgid "&Replace..."
+msgstr "&Korvaa..."
+
+#: src/ui/menusearch.cc:41
+msgid "Finds and replaces data in the file"
+msgstr "Etsii ja korvaa pätkiä tiedostosta"
+
+#: src/ui/menusearch.cc:44
+msgid "&Go to..."
+msgstr "&Siirry..."
+
+#: src/ui/menusearch.cc:45
+msgid "Goes to a specific offset in the file"
+msgstr "Siirtyy haluttuun kohtaan tiedostoa"
+
+#: src/ui/menusearch.cc:47
+msgid "&Search"
+msgstr "&Etsi"
+
+#: src/ui/context.cc:55
+msgid "Action in progress"
+msgstr "Toimintoa suoritetaan"
+
+#: src/ui/hexbed.cc:231
+msgid "Save a file"
+msgstr "Tallenna tiedosto"
+
+#: src/ui/hexbed.cc:232 src/ui/hexbed.cc:640
+msgid "All files (*.*)"
+msgstr "Kaikki tiedostot (*.*)"
+
+#: src/ui/hexbed.cc:257
+#, c-format
+msgid "Failed to save file %s: %s"
+msgstr "Tiedoston %s tallentaminen epäonnistui: %s"
+
+#: src/ui/hexbed.cc:280
+#, c-format
+msgid "'%s' has unsaved changes. Discard them and reload?"
+msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Hylätäänkö ne?"
+
+#: src/ui/hexbed.cc:300
+#, c-format
+msgid ""
+"Failed to load from file %s:\n"
+"%s"
+msgstr ""
+"Tiedostosta %s ei voitu lukea:\n"
+"%s"
+
+#: src/ui/hexbed.cc:305
+msgid "&Retry"
+msgstr "&Uudelleen"
+
+#: src/ui/hexbed.cc:305
+msgid "&Cancel"
+msgstr "&Peruuta"
+
+#: src/ui/hexbed.cc:307
+msgid "Retry?"
+msgstr "Yritetäänkö uudelleen?"
+
+#: src/ui/hexbed.cc:328
+#, c-format
+msgid "'%s' has unsaved changes. Do you want to save it?"
+msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Haluatko tallentaa ne?"
+
+#: src/ui/hexbed.cc:450
+#, c-format
+msgid "New-%s"
+msgstr "Uusi-%s"
+
+#: src/ui/hexbed.cc:454
+#, c-format
+msgid "Failed to create a new file: %s"
+msgstr "Uuden tiedoston luonti epäonnistui: %s"
+
+#: src/ui/hexbed.cc:477
+#, c-format
+msgid "Failed to open file %s: %s"
+msgstr "Tiedoston %s avaaminen epäonnistui: %s"
+
+#: src/ui/hexbed.cc:486
+msgid "Read only"
+msgstr "Vain luku"
+
+#: src/ui/hexbed.cc:515
+msgid "No more results found for this search."
+msgstr "Tällä haulla ei löytynyt lisää tuloksia."
+
+#: src/ui/hexbed.cc:521
+#, c-format
+msgid "Found and replaced %lu match."
+msgid_plural "Found and replaced %lu matches."
+msgstr[0] "%lu esiintymä korvattiin."
+msgstr[1] "%lu esiintymää korvattiin."
+
+#: src/ui/hexbed.cc:639
+msgid "Open a file"
+msgstr "Avaa tiedosto"
+
+#: src/ui/hexbed.cc:713
+#, c-format
+msgid "Failed to copy: %s"
+msgstr "Kopiointi epäonnistui: %s"
+
+#: src/ui/hexbed.cc:743
+msgid ""
+"Cannot paste the current clipboard contents, because it contains characters "
+"that the currently selected character encoding cannot represent."
+msgstr ""
+"Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä on merkkejä, joita "
+"valittu merkistökoodaus ei tue."
+
+#: src/ui/hexbed.cc:746
+msgid ""
+"Cannot paste the current clipboard contents, because it does not contain "
+"valid hexadecimal data. Text data should be a string of hexadecimal bytes."
+msgstr ""
+"Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä ei ole kelvollista "
+"heksadesimaalimuotoista tietoa. Tekstin tulisi olla heksadesimaalisia tavuja."
+
+#: src/ui/hexbed.cc:757
+#, c-format
+msgid "Failed to paste: %s"
+msgstr "Liittäminen epäonnistui: %s"
+
+#: src/ui/hexbed.cc:804
+msgid "A hex editor."
+msgstr "Tavumuokkain."
+
+#: src/ui/dialogs/goto.cc:34
+msgid "Go to"
+msgstr "Siirry"
+
+#: src/ui/dialogs/goto.cc:58
+msgid "From"
+msgstr "Laskettuna"
+
+#: src/ui/dialogs/goto.cc:60
+msgid "Start"
+msgstr "Alusta"
+
+#: src/ui/dialogs/goto.cc:65
+msgid "Cursor"
+msgstr "Kohdistimesta"
+
+#: src/ui/dialogs/goto.cc:69
+msgid "End"
+msgstr "Lopusta"
+
+#: src/ui/dialogs/goto.cc:85
+msgid "Offset:"
+msgstr "Osoite:"
+
+#: src/ui/dialogs/radixpicker.cc:39
+msgid "Radix"
+msgstr "Kantaluku"
+
+#: src/ui/dialogs/radixpicker.cc:42
+msgid "Oct"
+msgstr "Oktaali"
+
+#: src/ui/dialogs/radixpicker.cc:45
+msgid "Dec"
+msgstr "Desimaali"
+
+#: src/ui/dialogs/radixpicker.cc:48
+msgid "Hex"
+msgstr "Heksa"
+
+#: src/ui/dialogs/selectblock.cc:35
+msgid "Select block"
+msgstr "Valitse alue"
+
+#: src/ui/dialogs/selectblock.cc:61
+msgid "Length:"
+msgstr "Pituus:"
+
+#: src/ui/dialogs/selectblock.cc:65
+msgid "End:"
+msgstr "Loppu:"
+
+#: src/ui/dialogs/selectblock.cc:87
+msgid "Start:"
+msgstr "Alku:"
+
+#: src/ui/dialogs/find.cc:43
+msgid "Hex data"
+msgstr "Heksatieto"
+
+#: src/ui/dialogs/find.cc:59
+msgid "Find"
+msgstr "Etsi"
+
+#: src/ui/dialogs/find.cc:72 src/ui/dialogs/replace.cc:54
+msgid "Find &next"
+msgstr "Etsi &seuraava"
+
+#: src/ui/dialogs/find.cc:93 src/ui/dialogs/replace.cc:106
+msgid "Find data"
+msgstr "Haku"
+
+#: src/ui/dialogs/find.cc:97
+msgid "&Wrap around"
+msgstr "Kul&je tiedosto ympäri"
+
+#: src/ui/dialogs/replace.cc:44 src/ui/dialogs/replace.cc:88
+msgid "Replace"
+msgstr "Korvaa"
+
+#: src/ui/dialogs/replace.cc:68
+msgid "N&ext"
+msgstr "S&euraava"
+
+#: src/ui/dialogs/replace.cc:71
+msgid "Pre&vious"
+msgstr "Ede&llinen"
+
+#: src/ui/dialogs/replace.cc:75
+msgid "&All"
+msgstr "Ka&ikki"
+
+#: src/ui/dialogs/replace.cc:82
+msgid "Replace and find"
+msgstr "Korvaa ja hae"
+
+#: src/ui/dialogs/replace.cc:110
+msgid "&Wrap around (find only)"
+msgstr "Kul&je tiedosto ympäri (etsittäessä)"
+
+#: src/ui/dialogs/replace.cc:115
+msgid "Find and replace"
+msgstr "Etsi ja korvaa"
+
+#: src/ui/clipboard.cc:46 src/ui/clipboard.cc:84
+msgid "Failed to open the clipboard"
+msgstr "Leikepöydän avaaminen epäonnistui"
+
+#: src/ui/settings/appearance.cc:36
+msgid "Appearance"
+msgstr "Ulkoasu"
+
+#: src/ui/settings/appearance.cc:70
+msgid "Font"
+msgstr "Kirjasin"
+
+#: src/ui/settings/appearance.cc:71
+msgid "Hex view font"
+msgstr "Päänäkymän kirjasin"
+
+#: src/ui/settings/appearance.cc:72
+msgid "Colors"
+msgstr "Värit"
+
+#: src/ui/settings/appearance.cc:73
+msgid "Background"
+msgstr "Tausta"
+
+#: src/ui/settings/appearance.cc:74
+msgid "Offset labels"
+msgstr "Osoitetekstit"
+
+#: src/ui/settings/appearance.cc:76
+msgid "Hex data, odd columns"
+msgstr "Tavut, parittomat sarakkeet"
+
+#: src/ui/settings/appearance.cc:77
+msgid "Hex data, even columns"
+msgstr "Tavut, parilliset sarakkeet"
+
+#: src/ui/settings/appearance.cc:78
+msgid "Text, printable"
+msgstr "Teksti (tulostettava)"
+
+#: src/ui/settings/appearance.cc:79
+msgid "Text, non-printable"
+msgstr "Teksti (ei tulostettava)"
+
+#: src/ui/settings/appearance.cc:81
+msgid "Selection background"
+msgstr "Valitun alueen tausta"
+
+#: src/ui/settings/appearance.cc:82
+msgid "Selection foreground"
+msgstr "Valitun alueen edusta"
+
+#: src/ui/settings/appearance.cc:83
+msgid "Secondary selection background"
+msgstr "Valitun alueen toinen tausta"
+
+#: src/ui/settings/appearance.cc:85
+msgid "Secondary selection foreground"
+msgstr "Valitun alueen toinen edusta"
+
+#: src/ui/settings/appearance.cc:87
+msgid "Alignment hint"
+msgstr "Apukohdistin"
+
+#: src/ui/settings/appearance.cc:93
+msgid "Using a non-monospace font is not recommended."
+msgstr "Vaihtuvalevyisen kirjasimen käyttöä ei suositella."
+
+#: src/ui/settings/layout.cc:34
+msgid "Layout"
+msgstr "Asettelu"
+
+#: src/ui/settings/layout.cc:47
+msgid "Display"
+msgstr "Näyttö"
+
+#: src/ui/settings/layout.cc:48
+msgid "Use uppercase hex characters (A-F)"
+msgstr "Käytä isoja kirjaimia heksadesimaaleissa (A-F)"
+
+#: src/ui/settings/layout.cc:58
+msgid "Fit as many columns as possible"
+msgstr "Mahduta mahdollisimman monta saraketta"
+
+#: src/ui/settings/layout.cc:66
+msgid "Number of columns"
+msgstr "Sarakkeiden lukumäärä"
+
+#. / group sizes
+#: src/ui/settings/layout.cc:69
+msgid "Group size"
+msgstr "Ryhmitys"
+
+#: src/ui/settings/layout.cc:70
+msgid "1 (byte)"
+msgstr "1 (tavu)"
+
+#: src/ui/settings/layout.cc:70
+msgid "2 (word)"
+msgstr "2 (sana)"
+
+#: src/ui/settings/layout.cc:70
+msgid "4 (dword)"
+msgstr "4 (kaksoissana)"
+
+#: src/ui/settings/layout.cc:71
+msgid "8 (qword)"
+msgstr "8 (neloissana)"
+
+#: src/ui/settings/layout.cc:71
+msgid "16 (oword)"
+msgstr "16 (kahdeksoissana)"
+
+#. / offset radix
+#: src/ui/settings/layout.cc:74
+msgid "Offset radix"
+msgstr "Osoitteiden kantaluku"
+
+#: src/ui/settings/layout.cc:75
+msgid "8 (octal)"
+msgstr "8 (oktaali)"
+
+#: src/ui/settings/layout.cc:75
+msgid "10 (decimal)"
+msgstr "10 (desimaali)"
+
+#: src/ui/settings/layout.cc:75
+msgid "16 (hex)"
+msgstr "16 (heksadesimaali)"
+
+#: src/ui/settings/general.cc:42
+msgid "Undo"
+msgstr "Kumoaminen"
+
+#: src/ui/settings/general.cc:44
+msgid ""
+"Note that the undo history may be shorter, as older undo history will be "
+"dropped in case of insufficient memory."
+msgstr ""
+"Kumoamishistoria saattaa olla lyhyempikin, sillä ohjelma hylkää vanhempaa "
+"kumoamishistoriaa muistin ehtyessä."
+
+#: src/ui/settings/general.cc:46
+msgid "Maximum length of undo history"
+msgstr "Kumoamishistorian enimmäispituus"
+
+#: src/ui/settings.cc:53 src/ui/settings.cc:76
+msgid "Options"
+msgstr "Asetukset"
+
+#: src/ui/settings.cc:141
+msgid ""
+"One or more of the settings you have specified is invalid. Please check your "
+"settings and try again."
+msgstr ""
+"Jokin määrittelemistäsi asetuksista on väärin. Tarkista asetuksesi ja yritä "
+"uudelleen."
+
+#: src/ui/status.cc:42
+msgid "Insert"
+msgstr "Lisää"
+
+#: src/ui/status.cc:44
+msgid "Overwrite"
+msgstr "Korvaa"
+
+#: src/ui/status.cc:84
+#, c-format
+msgid "Offset: %s"
+msgstr "Osoite: %s"
+
+#: src/ui/status.cc:89
+#, c-format
+msgid "Block: %s"
+msgstr "Lohko: %s"
+
+#: src/ui/status.cc:92
+#, c-format
+msgid "Length: %s"
+msgstr "Pituus: %s"
