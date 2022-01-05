@@ -253,10 +253,10 @@ FILE_unique_ptr fopen_replace_before(const std::string& filename,
         FILE_unique_ptr fp;
         std::uniform_int_distribution distr{0, 15};
         for (int tries = 0; tries < 20; ++tries) {
-            errno = 0;
             char* buf = tmpfn.data() + rndoff;
             buf[0] = HEX_LOWERCASE[tries & 15];
             for (int i = 1; i < 6; ++i) buf[i] = HEX_LOWERCASE[distr(re)];
+            errno = 0;
             fp = fopen_unique(tmpfn.c_str(), "wxb");
             if (fp) break;
         }
@@ -267,13 +267,16 @@ FILE_unique_ptr fopen_replace_before(const std::string& filename,
     }
 }
 
-void filesystem_swap(const std::string& fn1, const std::string& fn2) {
+static void filesystem_swap(const std::string& fn1, const std::string& fn2) {
     std::string tmpfn = fn1 + ".hexbedtmp000000";
     size_t rndoff = tmpfn.size() - 6;
     FILE_unique_ptr fp;
     std::uniform_int_distribution distr{0, 15};
     std::error_code ec;
     for (int tries = 0; tries < 20; ++tries) {
+        char* buf = tmpfn.data() + rndoff;
+        buf[0] = HEX_LOWERCASE[tries & 15];
+        for (int i = 1; i < 6; ++i) buf[i] = HEX_LOWERCASE[distr(re)];
         std::filesystem::rename(fn1, tmpfn, ec);
         if (!ec) {
             std::filesystem::rename(fn2, fn1);
