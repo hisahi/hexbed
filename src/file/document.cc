@@ -68,14 +68,15 @@ static std::unique_ptr<HexBedBuffer> bufferOpen(const std::string& filename) {
 
 void HexBedDocument::grow() {}
 
-HexBedDocument::HexBedDocument(HexBedContext* ctx)
+HexBedDocument::HexBedDocument(std::shared_ptr<HexBedContext> ctx)
     : context_(ctx), filename_(), buffer_(bufferNew()), treble_(0) {}
 
-HexBedDocument::HexBedDocument(HexBedContext* ctx, const std::string& filename)
+HexBedDocument::HexBedDocument(std::shared_ptr<HexBedContext> ctx,
+                               const std::string& filename)
     : HexBedDocument(ctx, filename, false) {}
 
-HexBedDocument::HexBedDocument(HexBedContext* ctx, const std::string& filename,
-                               bool readOnly)
+HexBedDocument::HexBedDocument(std::shared_ptr<HexBedContext> ctx,
+                               const std::string& filename, bool readOnly)
     : context_(ctx),
       filename_(filename),
       buffer_(bufferOpen(filename)),
@@ -754,9 +755,9 @@ void HexBedDocument::commit() {
         treble_.write(vbuf, 0, BUFSIZE_MAX);
     };
     if (treble_.isCleanOverlay())
-        buffer_->writeOverlay(lambda, filename_);
+        buffer_->writeOverlay(*context_, lambda, filename_);
     else
-        buffer_->write(lambda, filename_);
+        buffer_->write(*context_, lambda, filename_);
     discard();
 }
 
@@ -764,6 +765,7 @@ void HexBedDocument::commitAs(const std::string& filename) {
     truncateUndo();
     for (auto& undoEntry : undos_) undoEntry.detach();
     buffer_->writeNew(
+        *context_,
         [this](VirtualBuffer& vbuf) { treble_.write(vbuf, 0, BUFSIZE_MAX); },
         filename);
     filename_ = filename;
@@ -773,6 +775,7 @@ void HexBedDocument::commitAs(const std::string& filename) {
 
 void HexBedDocument::commitTo(const std::string& filename) {
     buffer_->writeCopy(
+        *context_,
         [this](VirtualBuffer& vbuf) { treble_.write(vbuf, 0, BUFSIZE_MAX); },
         filename);
 }

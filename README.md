@@ -10,13 +10,13 @@ A graphical hex editor, still a work in progress.
 * Setting for viewing hex only, text only or both
 * Opening files as read-only
 * Full undo & redo
+* Backup system (backs up files before overwriting)
 
 ## Planned features
 * Stability
 * Performance
 * Not losing data
 * Not having bugs
-* Backup system
 * Inserting blocks, bitwise operations, etc.
 * Bit editing
 * Search for text

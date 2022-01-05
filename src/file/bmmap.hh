@@ -27,6 +27,7 @@
 #include <memory>
 
 #include "common/error.hh"
+#include "file/context.hh"
 #include "file/document.hh"
 
 #define HEXBED_MMAP_OK 1
@@ -105,10 +106,14 @@ class HexBedBufferMmap : public HexBedBuffer {
   public:
     HexBedBufferMmap(const std::string& filename);
     bufsize read(bufoffset offset, bytespan data);
-    void write(WriteCallback write, const std::string& filename);
-    void writeOverlay(WriteCallback write, const std::string& filename);
-    void writeNew(WriteCallback write, const std::string& filename);
-    void writeCopy(WriteCallback write, const std::string& filename);
+    void write(HexBedContext& ctx, WriteCallback write,
+               const std::string& filename);
+    void writeOverlay(HexBedContext& ctx, WriteCallback write,
+                      const std::string& filename);
+    void writeNew(HexBedContext& ctx, WriteCallback write,
+                  const std::string& filename);
+    void writeCopy(HexBedContext& ctx, WriteCallback write,
+                   const std::string& filename);
     bufsize size() const noexcept;
 
     byte* extent(bufsize offset, bufsize& size);

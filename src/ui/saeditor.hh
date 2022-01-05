@@ -47,14 +47,14 @@ class HexBedStandaloneEditor : public wxPanel, public HexEditorParent {
     bool ScrollLine(int dir) override;
     bool ScrollPage(int dir) override;
     void OnSelectChanged() override;
-    void UpdateMenuEnabledSelect() override;
-    void UpdateMenuEnabledClip() override;
+    void OnEditorCopy() override;
 
     inline void ReloadConfig() override { FullUpdate(); }
     void ReloadFile() override;
     void SelectBytes(bufsize start, bufsize length, SelectFlags flags) override;
     void SelectNone() override;
     void GetSelection(bufsize& start, bufsize& length, bool& text) override;
+    HexBedPeekRegion PeekBufferAtCursor() override;
     void HintByteChanged(bufsize offset) override;
     void HintBytesChanged(bufsize begin) override;
     void HintBytesChanged(bufsize begin, bufsize end) override;

@@ -144,8 +144,7 @@ class HexEditorParent {
     virtual bool ScrollLine(int dir) = 0;
     virtual bool ScrollPage(int dir) = 0;
     virtual void OnSelectChanged() = 0;
-    virtual void UpdateMenuEnabledSelect() = 0;
-    virtual void UpdateMenuEnabledClip() = 0;
+    virtual void OnEditorCopy() = 0;
 
     virtual void ReloadConfig() = 0;
     virtual void ReloadFile() = 0;
@@ -153,6 +152,7 @@ class HexEditorParent {
                              SelectFlags flags) = 0;
     virtual void SelectNone() = 0;
     virtual void GetSelection(bufsize& start, bufsize& length, bool& text) = 0;
+    virtual HexBedPeekRegion PeekBufferAtCursor() = 0;
     virtual void HintByteChanged(bufsize offset) = 0;
     virtual void HintBytesChanged(bufsize begin) = 0;
     virtual void HintBytesChanged(bufsize begin, bufsize end) = 0;
@@ -187,12 +187,12 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     bool ScrollLine(int dir) override;
     bool ScrollPage(int dir) override;
     void OnSelectChanged() override;
-    void UpdateMenuEnabledSelect() override;
-    void UpdateMenuEnabledClip() override;
+    void OnEditorCopy() override;
 
     void SelectBytes(bufsize start, bufsize length, SelectFlags flags) override;
     void SelectNone() override;
     void GetSelection(bufsize& start, bufsize& length, bool& text) override;
+    HexBedPeekRegion PeekBufferAtCursor() override;
     void HintByteChanged(bufsize offset) override;
     void HintBytesChanged(bufsize begin) override;
     void HintBytesChanged(bufsize begin, bufsize end) override;

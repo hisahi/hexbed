@@ -42,17 +42,19 @@ class HexBedBufferNewVbuf : public VirtualBuffer {
 
 bufsize HexBedBufferNew::read(bufoffset offset, bytespan data) { return 0; }
 
-void HexBedBufferNew::write(WriteCallback write, const std::string& filename) {
+void HexBedBufferNew::write(HexBedContext& ctx, WriteCallback write,
+                            const std::string& filename) {
     HEXBED_ASSERT(0, "cannot write() a new file");
 }
 
-void HexBedBufferNew::writeOverlay(WriteCallback write,
+void HexBedBufferNew::writeOverlay(HexBedContext& ctx, WriteCallback write,
                                    const std::string& filename) {
     HEXBED_ASSERT(0, "cannot write() a new file");
 }
 
-void HexBedBufferNew::writeNew(WriteCallback write,
+void HexBedBufferNew::writeNew(HexBedContext& ctx, WriteCallback write,
                                const std::string& filename) {
+    if (ctx.shouldBackup()) makeBackupOf(ctx, filename);
     errno = 0;
     auto fp = fopen_unique(filename.c_str(), "wb");
     if (!fp) throw errno_to_exception(errno);
@@ -65,9 +67,9 @@ void HexBedBufferNew::writeNew(WriteCallback write,
     if (std::fflush(fp.get())) throw errno_to_exception(errno);
 }
 
-void HexBedBufferNew::writeCopy(WriteCallback write,
+void HexBedBufferNew::writeCopy(HexBedContext& ctx, WriteCallback write,
                                 const std::string& filename) {
-    writeNew(write, filename);
+    writeNew(ctx, write, filename);
 }
 
 bufsize HexBedBufferNew::size() const noexcept { return 0; }

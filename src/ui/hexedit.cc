@@ -134,7 +134,6 @@ void HexEditor::UpdateCaret(bufsize cur, bool redraw, bool eol) {
         if (sel_ >= off_) sel_ = std::min(sel_, off_ + bufn_);
         if (seln_) {
             seln_ = std::min(seln_, (off_ + bufn_) - sel_);
-            UpdateMenuEnabledSelect();
             parent_->OnSelectChanged();
         }
     }
@@ -182,7 +181,8 @@ void HexEditor::Rebuffer() {
 void HexEditor::SetRows(unsigned rows) {
     size_t oldSize = rows_ * columns_, newSize;
     rows_ = rows;
-    bufc_ = newSize = rows_ * columns_ + MAX_LOOKAHEAD;
+    bufviewable_ = rows_ * columns_;
+    bufc_ = newSize = bufviewable_ + MAX_LOOKAHEAD;
     buffer_.resize(newSize, 0);
     if (oldSize == bufn_ && newSize > oldSize)
         bufn_ = oldSize + Buffer(oldSize, newSize, off_ + oldSize);
@@ -195,7 +195,8 @@ void HexEditor::SetColumns(unsigned columns) {
     unsigned gs = static_cast<unsigned>(config().groupSize);
     group_ = std::bit_width(gs) - 1;
     HEXBED_ASSERT(columns_ > 0 && (!group_ || !(columns_ % gs)));
-    bufc_ = newSize = rows_ * columns_ + MAX_LOOKAHEAD;
+    bufviewable_ = rows_ * columns_;
+    bufc_ = newSize = bufviewable_ + MAX_LOOKAHEAD;
     buffer_.resize(newSize, 0);
     if (oldSize == bufn_ && newSize > oldSize)
         bufn_ = oldSize + Buffer(oldSize, newSize, off_ + oldSize);
@@ -251,11 +252,7 @@ unsigned HexEditor::FitColumns(wxCoord width) {
 
 unsigned HexEditor::GetLineHeight() { return lineHeight_; }
 
-void HexEditor::UpdateMenuEnabledSelect() {
-    parent_->UpdateMenuEnabledSelect();
-}
-
-void HexEditor::UpdateMenuEnabledClip() { parent_->UpdateMenuEnabledClip(); }
+void HexEditor::OnEditorCopy() { parent_->OnEditorCopy(); }
 
 void HexEditor::InitDraw() {
     dc_->SetFont(GetFont());
@@ -479,7 +476,6 @@ void HexEditor::SelectBytes(bufsize start, bufsize length, SelectFlags flags) {
     if (flags.isHighlightEnd()) parent_->BringOffsetToScreen(end);
     if (flags.isHighlightBegin()) parent_->BringOffsetToScreen(start);
     UpdateStatusBar();
-    UpdateMenuEnabledSelect();
     parent_->OnSelectChanged();
     RedrawLite();
 }
@@ -493,6 +489,16 @@ void HexEditor::GetSelection(bufsize& start, bufsize& length, bool& text) {
     start = seln_ ? sel_ : cur_;
     length = seldown_ ? 0 : seln_;
     text = curtext_;
+}
+
+HexBedPeekRegion HexEditor::PeekBufferAtCursor() {
+    const byte* buf = buffer_.data();
+    const byte* bufend = buf + bufn_;
+    bufsize caret = seln_ && selst_ == sel_ ? sel_ + seln_ : sel_;
+    if (caret < off_ || caret >= off_ + bufviewable_)
+        return HexBedPeekRegion{&document(), off_, const_bytespan{}};
+    const byte* bufat = buf + (caret - off_);
+    return HexBedPeekRegion{&document(), off_, const_bytespan{bufat, bufend}};
 }
 
 void HexEditor::HintByteChanged(bufsize offset) {
@@ -799,7 +805,6 @@ void HexEditor::Deselect() {
     if (hadSelect) {
         Redraw();
         UpdateStatusBar();
-        UpdateMenuEnabledSelect();
         parent_->OnSelectChanged();
     }
 }
@@ -810,7 +815,6 @@ void HexEditor::UpdateCaretSelect(bool shift, bufsize cur, bool redraw,
         StartSelection(cur_);
         UpdateCaret(cur, redraw, eol);
         UpdateSelectionDrag();
-        UpdateMenuEnabledSelect();
         parent_->OnSelectChanged();
     } else {
         UpdateCaret(cur, redraw && !seln_, eol);
@@ -835,7 +839,7 @@ void HexEditor::OnLMouseDown(wxMouseEvent& event) {
 void HexEditor::OnLMouseUp(wxMouseEvent& event) {
     seldown_ = false;
     timer_.Stop();
-    UpdateMenuEnabledSelect();
+    parent_->OnSelectChanged();
     event.Skip();
 }
 

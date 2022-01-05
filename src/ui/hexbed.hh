@@ -51,14 +51,14 @@ class HexBedMainFrame : public wxFrame {
     void ApplyConfig();
 
     void UpdateMenuEnabled(hexbed::ui::HexEditorParent& editor);
-    void UpdateMenuEnabledUndo(hexbed::ui::HexEditorParent& editor);
-    void UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& editor);
-    void UpdateMenuEnabledClip(hexbed::ui::HexEditorParent& editor);
+    void OnUndoRedo(hexbed::ui::HexEditorParent& editor);
+    void OnEditorCopy(hexbed::ui::HexEditorParent& editor);
 
     hexbed::ui::HexEditorParent* GetCurrentEditor();
     bool DoFindNext();
     bool DoFindPrevious();
     void OnReplaceDone(bufsize count);
+    void OnActiveEditorResize();
 
   private:
     void OnClose(wxCloseEvent& event);
@@ -102,6 +102,7 @@ class HexBedMainFrame : public wxFrame {
     void OnViewColumnsText(wxCommandEvent& event);
 
     void OnSelectChange(wxCommandEvent& event);
+    void UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& editor);
 
     hexbed::ui::HexBedEditor* GetEditor();
     hexbed::ui::HexBedEditor* GetEditor(size_t i);
@@ -126,7 +127,7 @@ class HexBedMainFrame : public wxFrame {
 
     wxDECLARE_EVENT_TABLE();
 
-    std::unique_ptr<HexBedContextMain> context_;
+    std::shared_ptr<HexBedContextMain> context_;
     wxAuiNotebook* tabs_;
     wxStatusBar* sbar_;
     std::uintmax_t newFileIndex_{0};

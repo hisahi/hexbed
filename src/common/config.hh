@@ -51,6 +51,7 @@ struct ConfigurationValues {
     std::string charset;
     std::string font;
     long showColumnTypes;
+    bool backupFiles;
 };
 
 class Configuration {

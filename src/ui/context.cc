@@ -23,14 +23,27 @@
 
 #include <wx/app.h>
 #include <wx/event.h>
+#include <wx/msgdlg.h>
 #include <wx/progdlg.h>
 
+#include "app/config.hh"
 #include "ui/editor.hh"
+#include "ui/format.hh"
 #include "ui/hexbed.hh"
 
 namespace hexbed {
 
 wxDEFINE_EVENT(TASK_SUBTHREAD_EVENT, wxThreadEvent);
+
+HexBedViewer::HexBedViewer(std::shared_ptr<HexBedContextMain> context,
+                           bufsize lookahead)
+    : ctx_(context), lookahead_(lookahead) {
+    ctx_->addViewer(this);
+}
+
+HexBedViewer::~HexBedViewer() {
+    if (ctx_) ctx_->removeViewer(this);
+}
 
 class HexBedTaskHandlerMain : public HexBedTaskHandler, wxEvtHandler {
   public:
@@ -118,12 +131,52 @@ HexBedContextMain::HexBedContextMain(hexbed::ui::HexBedMainFrame* main)
 
 HexBedTaskHandler* HexBedContextMain::getTaskHandler() { return task_.get(); }
 
+bool HexBedContextMain::shouldBackup() { return config().backupFiles; }
+
+FailureResponse HexBedContextMain::ifBackupFails(const char* message) {
+    wxMessageDialog dial(
+        main_, stringFormatWx(_("Backup failed:\n%s"), message), "HexBed",
+        wxYES_NO | wxCANCEL | wxCANCEL_DEFAULT | wxICON_EXCLAMATION);
+    if (dial.SetYesNoCancelLabels(_("&Retry"), _("&Ignore"), _("&Abort")))
+        dial.SetMessage(dial.GetMessage() + "\n\n" +
+                        _("'Retry' to try again, 'Ignore' to save anyway or "
+                          "'Abort' to cancel."));
+    else
+        dial.SetMessage(dial.GetMessage() + "\n\n" +
+                        _("Retry? 'Yes' to try again, 'No' to save anyway or "
+                          "'Cancel' to cancel."));
+    switch (dial.ShowModal()) {
+    case wxID_YES:
+        return FailureResponse::Retry;
+    case wxID_NO:
+        return FailureResponse::Ignore;
+    default:
+    case wxID_CANCEL:
+        return FailureResponse::Abort;
+    }
+}
+
+static HexBedPeekRegion makePeekBuffer(HexBedDocument* doc, bufsize start,
+                                       bytespan buffer) {
+    return HexBedPeekRegion{
+        doc, start, const_bytespan{buffer.begin(), doc->read(start, buffer)}};
+}
+
 void HexBedContextMain::announceBytesChanged(HexBedDocument* doc,
                                              bufsize start) {
     auto it = open_.find(doc);
     if (it != open_.end())
         for (hexbed::ui::HexEditorParent* editor : it->second)
             editor->HintBytesChanged(start);
+    if (doc == lastdoc_ && !viewers_.empty()) {
+        byte tmp[MAX_LOOKAHEAD];
+        HexBedPeekRegion peek =
+            makePeekBuffer(doc, lastoff_, bytespan{tmp, tmp + sizeof(tmp)});
+        for (HexBedViewer* viewer : viewers_) {
+            bufsize la = viewer->lookahead();
+            if (start + la < lastoff_) viewer->onUpdateCursor(peek);
+        }
+    }
 }
 
 void HexBedContextMain::announceBytesChanged(HexBedDocument* doc, bufsize start,
@@ -139,11 +192,27 @@ void HexBedContextMain::announceBytesChanged(HexBedDocument* doc, bufsize start,
                 editor->HintBytesChanged(start, start + length - 1);
         }
     }
+    if (doc == lastdoc_ && !viewers_.empty()) {
+        byte tmp[MAX_LOOKAHEAD];
+        HexBedPeekRegion peek =
+            makePeekBuffer(doc, lastoff_, bytespan{tmp, tmp + sizeof(tmp)});
+        for (HexBedViewer* viewer : viewers_) {
+            bufsize la = viewer->lookahead();
+            if (!(start + length < lastoff_ || start >= lastoff_ + la))
+                viewer->onUpdateCursor(peek);
+        }
+    }
 }
 
 void HexBedContextMain::announceUndoChanged(HexBedDocument* doc) {
     auto it = open_.find(doc);
-    if (it != open_.end()) main_->UpdateMenuEnabledUndo(*it->second[0]);
+    if (it != open_.end()) main_->OnUndoRedo(*it->second[0]);
+}
+
+void HexBedContextMain::announceCursorUpdate(HexBedPeekRegion peek) {
+    lastdoc_ = peek.document;
+    lastoff_ = peek.offset;
+    for (HexBedViewer* viewer : viewers_) viewer->onUpdateCursor(peek);
 }
 
 void HexBedContextMain::addWindow(hexbed::ui::HexEditorParent* editor) {
@@ -162,8 +231,7 @@ void HexBedContextMain::removeWindow(
     auto it = open_.find(document);
     if (it != open_.end()) {
         std::vector<hexbed::ui::HexEditorParent*>& editors = it->second;
-        editors.erase(std::remove(editors.begin(), editors.end(), editor),
-                      editors.end());
+        std::erase(editors, editor);
         if (editors.empty()) open_.erase(document);
     }
 }
@@ -174,6 +242,18 @@ void HexBedContextMain::updateWindows() {
             editor->ReloadConfig();
         }
     }
+}
+
+void HexBedContextMain::addViewer(HexBedViewer* viewer) {
+    viewers_.push_back(viewer);
+}
+
+void HexBedContextMain::removeViewer(HexBedViewer* viewer) noexcept {
+    std::erase(viewers_, viewer);
+}
+
+hexbed::ui::HexEditorParent* HexBedContextMain::activeWindow() noexcept {
+    return main_->GetCurrentEditor();
 }
 
 byte* HexBedContextMain::getSearchBuffer(bufsize n) {

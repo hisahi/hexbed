@@ -74,6 +74,10 @@ HexBedPrefsLayout::HexBedPrefsLayout(wxWindow* parent, ConfigurationValues* cfg)
     PREFS_SETTING_CHOICE(col, _("Offset radix"), offsetRadix, long,
                          {_("8 (octal)"), _("10 (decimal)"), _("16 (hex)")},
                          {8L, 10L, 16L});
+    /// character encodings
+    PREFS_SETTING_CHOICE(col, _("Text encoding"), charset, std::string,
+                         {_("ASCII"), _("Latin-1 (ISO 8859-1)")},
+                         {"ascii", "latin1"});
     PREFS_FINISHCOLUMN(col);
 }
 

@@ -35,9 +35,42 @@
 
 namespace hexbed {
 
+constexpr unsigned MAX_LOOKAHEAD = 256;
+
 struct EditorState {
     bool insert{false};
     bool searchWrapAround{false};
+};
+
+class HexBedContextMain;
+
+// a TEMPORARY view into the currently open file
+struct HexBedPeekRegion {
+    HexBedDocument* document{nullptr};
+    bufsize offset{0};
+    const_bytespan data{};
+};
+
+class HexBedViewer {
+  public:
+    HexBedViewer(std::shared_ptr<HexBedContextMain> context, bufsize lookahead);
+    HexBedViewer(HexBedViewer& copy) = default;
+    HexBedViewer(HexBedViewer&& move) = default;
+    HexBedViewer& operator=(HexBedViewer& copy) = default;
+    HexBedViewer& operator=(HexBedViewer&& move) = default;
+    virtual ~HexBedViewer();
+
+    inline bufsize lookahead() const noexcept { return lookahead_; }
+
+    /* peek may become invalid! you must copy the data if you need it
+       after onUpdateCursor ends */
+    virtual inline void onUpdateCursor(HexBedPeekRegion peek) {}
+
+  protected:
+    std::shared_ptr<HexBedContextMain> ctx_;
+
+  private:
+    bufsize lookahead_;
 };
 
 class HexBedContextMain : public HexBedContext {
@@ -45,14 +78,22 @@ class HexBedContextMain : public HexBedContext {
     HexBedContextMain(hexbed::ui::HexBedMainFrame* main_);
     HexBedTaskHandler* getTaskHandler();
 
+    bool shouldBackup();
+    FailureResponse ifBackupFails(const char* message);
+
     void announceBytesChanged(HexBedDocument* doc, bufsize start);
     void announceBytesChanged(HexBedDocument* doc, bufsize start,
                               bufsize length);
     void announceUndoChanged(HexBedDocument* doc);
+    void announceCursorUpdate(HexBedPeekRegion peek);
 
+    hexbed::ui::HexEditorParent* activeWindow() noexcept;
     void addWindow(hexbed::ui::HexEditorParent* editor);
     void removeWindow(hexbed::ui::HexEditorParent* editor) noexcept;
     void updateWindows();
+
+    void addViewer(HexBedViewer* viewer);
+    void removeViewer(HexBedViewer* viewer) noexcept;
 
     byte* getSearchBuffer(bufsize n);
     const_bytespan getSearchString() const noexcept;
@@ -70,6 +111,9 @@ class HexBedContextMain : public HexBedContext {
         open_;
     std::vector<byte> searchBuffer_;
     std::vector<byte> replaceBuffer_;
+    std::vector<HexBedViewer*> viewers_;
+    HexBedDocument* lastdoc_;
+    bufsize lastoff_;
 };
 
 }  // namespace hexbed

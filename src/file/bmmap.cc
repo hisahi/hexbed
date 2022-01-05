@@ -156,9 +156,11 @@ bufsize HexBedBufferMmap::read(bufoffset offset, bytespan data) {
     return data.size() - n;
 }
 
-void HexBedBufferMmap::write(WriteCallback write, const std::string& filename) {
+void HexBedBufferMmap::write(HexBedContext& ctx, WriteCallback write,
+                             const std::string& filename) {
     std::string tmpfn;
-    FILE_unique_ptr fp = fopen_replace_before(filename, tmpfn);
+    bool backup = ctx.shouldBackup();
+    FILE_unique_ptr fp = fopen_replace_before(filename, tmpfn, backup);
 
     HexBedBufferMmapVbuf vbuf(this, fp.get());
     write(vbuf);
@@ -170,17 +172,18 @@ void HexBedBufferMmap::write(WriteCallback write, const std::string& filename) {
     drop();
 
     // and replace it
-    fopen_replace_after(filename, tmpfn, std::move(fp));
+    fopen_replace_after(filename, tmpfn, backup, std::move(fp));
 }
 
-void HexBedBufferMmap::writeOverlay(WriteCallback write,
+void HexBedBufferMmap::writeOverlay(HexBedContext& ctx, WriteCallback write,
                                     const std::string& filename) {
-    HexBedBufferMmap::write(write, filename);
+    HexBedBufferMmap::write(ctx, write, filename);
 }
 
-void HexBedBufferMmap::writeNew(WriteCallback write,
+void HexBedBufferMmap::writeNew(HexBedContext& ctx, WriteCallback write,
                                 const std::string& filename) {
     if (!fd_) throw system_io_error("file is closed");
+    if (ctx.shouldBackup()) makeBackupOf(ctx, filename);
     errno = 0;
     auto fp = fopen_unique(filename.c_str(), "wb");
     if (!fp) throw errno_to_exception(errno);
@@ -193,9 +196,9 @@ void HexBedBufferMmap::writeNew(WriteCallback write,
     if (std::fflush(fp.get())) throw errno_to_exception(errno);
 }
 
-void HexBedBufferMmap::writeCopy(WriteCallback write,
-                                 const std::string& filename) {
-    writeNew(write, filename);
+void HexBedBufferMmap::writeCopy(HexBedContext& ctx, WriteCallback write,
+                                 const std::string& filenamep) {
+    writeNew(ctx, write, filename);
 }
 
 bufsize HexBedBufferMmap::size() const noexcept { return sz_; }

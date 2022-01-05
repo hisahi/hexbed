@@ -25,12 +25,16 @@
 #include <cstdio>
 #include <memory>
 
+#include "file/context.hh"
 #include "file/document.hh"
 
 namespace hexbed {
 
 using FILE_unique_ptr =
     std::unique_ptr<std::FILE, std::function<int(std::FILE*)>>;
+
+std::string getBackupFilename(const std::string& fn);
+void makeBackupOf(HexBedContext& ctx, const std::string& fn);
 
 inline FILE_unique_ptr fopen_unique(const char* filename, const char* mode) {
     return FILE_unique_ptr(std::fopen(filename, mode), [](std::FILE* fp) {
@@ -46,18 +50,23 @@ inline FILE_unique_ptr freopen_unique(const char* filename, const char* mode,
 }
 
 FILE_unique_ptr fopen_replace_before(const std::string& filename,
-                                     std::string& tempfilename);
+                                     std::string& tempfilename, bool backup);
 void fopen_replace_after(const std::string& filename,
-                         const std::string& tempfilename, FILE_unique_ptr&& f);
+                         const std::string& tempfilename, bool backup,
+                         FILE_unique_ptr&& f);
 
 class HexBedBufferFile : public HexBedBuffer {
   public:
     HexBedBufferFile(const std::string& filename);
     bufsize read(bufoffset offset, bytespan data);
-    void write(WriteCallback write, const std::string& filename);
-    void writeOverlay(WriteCallback write, const std::string& filename);
-    void writeNew(WriteCallback write, const std::string& filename);
-    void writeCopy(WriteCallback write, const std::string& filename);
+    void write(HexBedContext& ctx, WriteCallback write,
+               const std::string& filename);
+    void writeOverlay(HexBedContext& ctx, WriteCallback write,
+                      const std::string& filename);
+    void writeNew(HexBedContext& ctx, WriteCallback write,
+                  const std::string& filename);
+    void writeCopy(HexBedContext& ctx, WriteCallback write,
+                   const std::string& filename);
     // bufsize size() noexcept;
     bufsize size() const noexcept;
 

@@ -59,6 +59,7 @@ void Configuration::loadValues() {
     values_.charset = loadString("charset", "ascii");
     values_.font = loadString("font", "");
     values_.showColumnTypes = loadIntRange("showColumnTypes", 3, 1, 3);
+    values_.backupFiles = loadBool("backupFiles", true);
 }
 
 void Configuration::applySettings() {
@@ -88,6 +89,7 @@ void Configuration::saveValues() {
     saveString("charset", values_.charset);
     saveString("font", values_.font);
     saveInt("showColumnTypes", values_.showColumnTypes);
+    saveBool("backupFiles", values_.backupFiles);
 }
 
 long Configuration::loadColor(const std::string& key, long def) {

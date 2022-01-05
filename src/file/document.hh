@@ -44,11 +44,13 @@ struct HexBedRange {
 class HexBedBuffer {
   public:
     virtual bufsize read(bufoffset offset, bytespan data) = 0;
-    virtual void write(WriteCallback write, const std::string& filename) = 0;
-    virtual void writeOverlay(WriteCallback write,
+    virtual void write(HexBedContext& ctx, WriteCallback write,
+                       const std::string& filename) = 0;
+    virtual void writeOverlay(HexBedContext& ctx, WriteCallback write,
                               const std::string& filename) = 0;
-    virtual void writeNew(WriteCallback write, const std::string& filename) = 0;
-    virtual void writeCopy(WriteCallback write,
+    virtual void writeNew(HexBedContext& ctx, WriteCallback write,
+                          const std::string& filename) = 0;
+    virtual void writeCopy(HexBedContext& ctx, WriteCallback write,
                            const std::string& filename) = 0;
 
     virtual bufsize size() noexcept;
@@ -160,10 +162,11 @@ class UndoGroupToken {
 
 class HexBedDocument {
   public:
-    HexBedDocument(HexBedContext* context);
-    HexBedDocument(HexBedContext* context, const std::string& filename);
-    HexBedDocument(HexBedContext* context, const std::string& filename,
-                   bool readOnly);
+    HexBedDocument(std::shared_ptr<HexBedContext> context);
+    HexBedDocument(std::shared_ptr<HexBedContext> context,
+                   const std::string& filename);
+    HexBedDocument(std::shared_ptr<HexBedContext> context,
+                   const std::string& filename, bool readOnly);
 
     HexBedDocument(HexBedDocument& copy) = delete;
     HexBedDocument(HexBedDocument&& move) = default;
@@ -214,7 +217,7 @@ class HexBedDocument {
     HexBedRange redo();
 
   private:
-    HexBedContext* context_;
+    std::shared_ptr<HexBedContext> context_;
     std::string filename_;
     std::unique_ptr<HexBedBuffer> buffer_;
     std::deque<HexBedUndoEntry> undos_;

@@ -101,9 +101,7 @@ void HexBedStandaloneEditor::FullUpdate() {
     Refresh();
 }
 
-void HexBedStandaloneEditor::UpdateMenuEnabledSelect() {}
-
-void HexBedStandaloneEditor::UpdateMenuEnabledClip() {}
+void HexBedStandaloneEditor::OnEditorCopy() {}
 
 void HexBedStandaloneEditor::LayoutUpdate() {
     group_ = config().groupSize;
@@ -206,6 +204,10 @@ void HexBedStandaloneEditor::SelectNone() { hexEdit_->SelectNone(); }
 void HexBedStandaloneEditor::GetSelection(bufsize& start, bufsize& length,
                                           bool& text) {
     hexEdit_->GetSelection(start, length, text);
+}
+
+HexBedPeekRegion HexBedStandaloneEditor::PeekBufferAtCursor() {
+    return hexEdit_->PeekBufferAtCursor();
 }
 
 void HexBedStandaloneEditor::OnSelectChanged() {

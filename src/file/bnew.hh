@@ -22,6 +22,7 @@
 #ifndef HEXBED_FILE_BNEW_HH
 #define HEXBED_FILE_BNEW_HH
 
+#include "file/context.hh"
 #include "file/document.hh"
 
 namespace hexbed {
@@ -29,10 +30,14 @@ namespace hexbed {
 class HexBedBufferNew : public HexBedBuffer {
   public:
     bufsize read(bufoffset offset, bytespan data);
-    void write(WriteCallback write, const std::string& filename);
-    void writeOverlay(WriteCallback write, const std::string& filename);
-    void writeNew(WriteCallback write, const std::string& filename);
-    void writeCopy(WriteCallback write, const std::string& filename);
+    void write(HexBedContext& ctx, WriteCallback write,
+               const std::string& filename);
+    void writeOverlay(HexBedContext& ctx, WriteCallback write,
+                      const std::string& filename);
+    void writeNew(HexBedContext& ctx, WriteCallback write,
+                  const std::string& filename);
+    void writeCopy(HexBedContext& ctx, WriteCallback write,
+                   const std::string& filename);
     bufsize size() const noexcept;
 };
 

@@ -29,9 +29,16 @@ namespace hexbed {
 struct HexBedDocument;
 struct HexBedTaskHandler;
 
+enum class FailureResponse { Abort, Retry, Ignore };
+
 class HexBedContext {
   public:
     inline virtual HexBedTaskHandler* getTaskHandler() { return nullptr; }
+
+    inline virtual bool shouldBackup() { return false; }
+    inline virtual FailureResponse ifBackupFails(const char* message) {
+        return FailureResponse::Abort;
+    }
 
     inline void announceFileChanged(HexBedDocument* doc) {
         announceBytesChanged(doc, 0);

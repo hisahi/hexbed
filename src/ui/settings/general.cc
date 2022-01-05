@@ -45,6 +45,9 @@ HexBedPrefsGeneral::HexBedPrefsGeneral(wxWindow* parent,
                   "history will be dropped in case of insufficient memory."));
     PREFS_SETTING_INT(col, _("Maximum length of undo history"),
                       undoHistoryMaximum, 1, std::numeric_limits<int>::max());
+    PREFS_HEADING(col, _("Backup"));
+    PREFS_SETTING_BOOL(col, _("Back up files (.bak) before overwriting"),
+                       backupFiles);
     PREFS_FINISHCOLUMN(col);
 }
 

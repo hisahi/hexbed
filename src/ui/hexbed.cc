@@ -175,7 +175,7 @@ int HexBedWxApp::OnExit() {
 HexBedMainFrame::HexBedMainFrame()
     : wxFrame(NULL, wxID_ANY, "HexBed", wxDefaultPosition, wxSize(-1, -1)) {
     tabs_ = new wxAuiNotebook(this, tabContainerID);
-    context_ = std::make_unique<HexBedContextMain>(this);
+    context_ = std::make_shared<HexBedContextMain>(this);
     wxMenuBar* menuBar = new wxMenuBar;
     hexbed::menu::createFileMenu(menuBar, fileOnlyMenuItems_);
     hexbed::menu::createEditMenu(menuBar, fileOnlyMenuItems_)
@@ -194,8 +194,8 @@ HexBedMainFrame::HexBedMainFrame()
     ApplyConfig();
     InitMenuEnabled();
     InitPreferences(this);
-    searchDocument_ = std::make_shared<HexBedDocument>(context_.get());
-    replaceDocument_ = std::make_shared<HexBedDocument>(context_.get());
+    searchDocument_ = std::make_shared<HexBedDocument>(context_);
+    replaceDocument_ = std::make_shared<HexBedDocument>(context_);
     menuBar->Check(hexbed::menu::MenuEdit_InsertMode, context_->state.insert);
 }
 
@@ -315,6 +315,7 @@ void HexBedMainFrame::FileReload(size_t i) {
 }
 
 void HexBedMainFrame::ApplyConfig() {
+    currentConfig.apply();
     HexEditor::InitConfig();
     context_->updateWindows();
 }
@@ -359,9 +360,16 @@ void HexBedMainFrame::UpdateFileOnly() {
 }
 
 void HexBedMainFrame::OnTabSwitch(wxAuiNotebookEvent& event) {
-    hexbed::ui::HexBedEditor* editor = GetEditor(tabs_->GetSelection());
+    int s = tabs_->GetSelection();
+    if (s == wxNOT_FOUND) {
+        InitMenuEnabled();
+        context_->announceCursorUpdate(HexBedPeekRegion{});
+        return;
+    }
+    hexbed::ui::HexBedEditor* editor = GetEditor(s);
     editor->Selected();
     UpdateMenuEnabled(*editor);
+    context_->announceCursorUpdate(editor->PeekBufferAtCursor());
     AddPendingEvent(wxCommandEvent(HEX_SELECT_EVENT));
 }
 
@@ -386,13 +394,13 @@ void HexBedMainFrame::UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& ed) {
     mbar.Enable(wxID_DELETE, seln > 0);
 }
 
-void HexBedMainFrame::UpdateMenuEnabledUndo(hexbed::ui::HexEditorParent& ed) {
+void HexBedMainFrame::OnUndoRedo(hexbed::ui::HexEditorParent& ed) {
     wxMenuBar& mbar = *GetMenuBar();
     mbar.Enable(wxID_UNDO, ed.document().canUndo());
     mbar.Enable(wxID_REDO, ed.document().canRedo());
 }
 
-void HexBedMainFrame::UpdateMenuEnabledClip(hexbed::ui::HexEditorParent& ed) {
+void HexBedMainFrame::OnEditorCopy(hexbed::ui::HexEditorParent& ed) {
     wxMenuBar& mbar = *GetMenuBar();
     mbar.Enable(wxID_PASTE, hexbed::clip::HasClipboard());
     mbar.Enable(hexbed::menu::MenuEdit_PasteReplace,
@@ -401,8 +409,8 @@ void HexBedMainFrame::UpdateMenuEnabledClip(hexbed::ui::HexEditorParent& ed) {
 
 void HexBedMainFrame::UpdateMenuEnabled(hexbed::ui::HexEditorParent& ed) {
     UpdateMenuEnabledSelect(ed);
-    UpdateMenuEnabledClip(ed);
-    UpdateMenuEnabledUndo(ed);
+    OnEditorCopy(ed);
+    OnUndoRedo(ed);
 }
 
 void HexBedMainFrame::OnTabClose(wxAuiNotebookEvent& event) {
@@ -415,6 +423,7 @@ void HexBedMainFrame::OnTabClose(wxAuiNotebookEvent& event) {
             InitMenuEnabled();
             hexbed::menu::updateStatusBarNoFile(GetStatusBar(),
                                                 context_->state);
+            context_->announceCursorUpdate(HexBedPeekRegion{});
         }
         context_->removeWindow(GetEditor(s));
         event.Allow();
@@ -427,7 +436,7 @@ std::unique_ptr<hexbed::ui::HexBedEditor> HexBedMainFrame::MakeEditor(
     Ts&&... args) {
     return std::make_unique<hexbed::ui::HexBedEditor>(
         this, this, context_.get(),
-        HexBedDocument(context_.get(), std::forward<Ts>(args)...));
+        HexBedDocument(context_, std::forward<Ts>(args)...));
 }
 
 void HexBedMainFrame::AddTab(std::unique_ptr<hexbed::ui::HexBedEditor>&& editor,
@@ -552,6 +561,13 @@ bool HexBedMainFrame::DoFindPrevious() {
 
 void HexBedMainFrame::OnSelectChange(wxCommandEvent& event) {
     AddPendingEvent(event);
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    if (ed) {
+        UpdateMenuEnabledSelect(*ed);
+        context_->announceCursorUpdate(ed->PeekBufferAtCursor());
+    } else {
+        context_->announceCursorUpdate(HexBedPeekRegion{});
+    }
 }
 
 void HexBedMainFrame::OnSearchFind(wxCommandEvent& event) {
@@ -683,7 +699,7 @@ void HexBedMainFrame::OnEditUndo(wxCommandEvent& event) {
     if (ed->document().canUndo()) {
         HexBedRange sel = ed->document().undo();
         ed->HintBytesChanged(0);
-        UpdateMenuEnabledUndo(*ed);
+        OnUndoRedo(*ed);
         ed->SelectBytes(sel.offset, sel.length,
                         SelectFlags().caretAtEnd().highlightCaret());
     }
@@ -694,7 +710,7 @@ void HexBedMainFrame::OnEditRedo(wxCommandEvent& event) {
     if (ed->document().canRedo()) {
         HexBedRange sel = ed->document().redo();
         ed->HintBytesChanged(0);
-        UpdateMenuEnabledUndo(*ed);
+        OnUndoRedo(*ed);
         ed->SelectBytes(sel.offset, sel.length,
                         SelectFlags().caretAtEnd().highlightCaret());
     }

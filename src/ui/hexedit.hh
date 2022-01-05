@@ -40,8 +40,6 @@
 namespace hexbed {
 namespace ui {
 
-constexpr unsigned MAX_LOOKAHEAD = 256;
-
 struct HitPoint {
     bufsize offset;
     bool text;
@@ -77,6 +75,7 @@ class HexEditor : public wxWindow {
     void SelectBytes(bufsize start, bufsize length, SelectFlags flags);
     void SelectNone();
     void GetSelection(bufsize& start, bufsize& length, bool& text);
+    HexBedPeekRegion PeekBufferAtCursor();
     void HintByteChanged(bufsize offset);
     void HintBytesChanged(bufsize begin);
     void HintBytesChanged(bufsize begin, bufsize end);
@@ -134,8 +133,7 @@ class HexEditor : public wxWindow {
     bool HitPos(wxCoord x, wxCoord y, HitPoint& point, bool drag);
     bufsize Buffer(bufsize beg, bufsize end, bufsize off);
 
-    void UpdateMenuEnabledSelect();
-    void UpdateMenuEnabledClip();
+    void OnEditorCopy();
 
     HexEditorParent* parent_;
     wxMemoryDC* dc_{nullptr};
@@ -164,6 +162,7 @@ class HexEditor : public wxWindow {
 
     std::vector<byte> buffer_;
     bufsize bufn_{0};
+    bufsize bufviewable_{0};
     bufsize bufc_{0};
 
     std::mutex mutex_;
