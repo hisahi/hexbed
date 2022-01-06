@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-03 14:45+0200\n"
+"POT-Creation-Date: 2022-01-06 19:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -246,7 +246,15 @@ msgstr ""
 msgid "Controls which columns to show"
 msgstr ""
 
-#: src/ui/menuview.cc:45
+#: src/ui/menuview.cc:46
+msgid "&Bit editor"
+msgstr ""
+
+#: src/ui/menuview.cc:47
+msgid "Shows the bit editor"
+msgstr ""
+
+#: src/ui/menuview.cc:48
 msgid "&View"
 msgstr ""
 
@@ -295,110 +303,137 @@ msgstr ""
 msgid "&Search"
 msgstr ""
 
-#: src/ui/context.cc:55
+#: src/ui/context.cc:76
 msgid "Action in progress"
 msgstr ""
 
-#: src/ui/hexbed.cc:231
+#: src/ui/context.cc:146
+#, c-format
+msgid ""
+"Backup failed:\n"
+"%s"
+msgstr ""
+
+#: src/ui/context.cc:148 src/ui/hexbed.cc:311
+msgid "&Retry"
+msgstr ""
+
+#: src/ui/context.cc:148
+msgid "&Ignore"
+msgstr ""
+
+#: src/ui/context.cc:148
+msgid "&Abort"
+msgstr ""
+
+#: src/ui/context.cc:150
+msgid "'Retry' to try again, 'Ignore' to save anyway or 'Abort' to cancel."
+msgstr ""
+
+#: src/ui/context.cc:154
+msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
+msgstr ""
+
+#: src/ui/hexbed.cc:235
 msgid "Save a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:232 src/ui/hexbed.cc:640
+#: src/ui/hexbed.cc:236 src/ui/hexbed.cc:678
 msgid "All files (*.*)"
 msgstr ""
 
-#: src/ui/hexbed.cc:257
+#: src/ui/hexbed.cc:262
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:280
+#: src/ui/hexbed.cc:285
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr ""
 
-#: src/ui/hexbed.cc:300
+#: src/ui/hexbed.cc:305
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:305
-msgid "&Retry"
-msgstr ""
-
-#: src/ui/hexbed.cc:305
+#: src/ui/hexbed.cc:311
 msgid "&Cancel"
 msgstr ""
 
-#: src/ui/hexbed.cc:307
+#: src/ui/hexbed.cc:313
 msgid "Retry?"
 msgstr ""
 
-#: src/ui/hexbed.cc:328
+#: src/ui/hexbed.cc:335
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr ""
 
-#: src/ui/hexbed.cc:450
+#: src/ui/hexbed.cc:464
 #, c-format
-msgid "New-%s"
+msgid "New-%llu"
 msgstr ""
 
-#: src/ui/hexbed.cc:454
+#: src/ui/hexbed.cc:468
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:477
+#: src/ui/hexbed.cc:492
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:486
+#: src/ui/hexbed.cc:501
 msgid "Read only"
 msgstr ""
 
-#: src/ui/hexbed.cc:515
+#: src/ui/hexbed.cc:535
 msgid "No more results found for this search."
 msgstr ""
 
-#: src/ui/hexbed.cc:521
+#: src/ui/hexbed.cc:541
 #, c-format
-msgid "Found and replaced %lu match."
-msgid_plural "Found and replaced %lu matches."
+msgid "Found and replaced %llu match."
+msgid_plural "Found and replaced %llu matches."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/hexbed.cc:639
+#: src/ui/hexbed.cc:677
 msgid "Open a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:713
+#: src/ui/hexbed.cc:751
 #, c-format
 msgid "Failed to copy: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:743
+#: src/ui/hexbed.cc:781
 msgid ""
 "Cannot paste the current clipboard contents, because it contains characters "
 "that the currently selected character encoding cannot represent."
 msgstr ""
 
-#: src/ui/hexbed.cc:746
+#: src/ui/hexbed.cc:784
 msgid ""
 "Cannot paste the current clipboard contents, because it does not contain "
 "valid hexadecimal data. Text data should be a string of hexadecimal bytes."
 msgstr ""
 
-#: src/ui/hexbed.cc:757
+#: src/ui/hexbed.cc:795
 #, c-format
 msgid "Failed to paste: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:804
+#: src/ui/hexbed.cc:842
 msgid "A hex editor."
+msgstr ""
+
+#: src/ui/tools/bitedit.cc:36
+msgid "Bit editor"
 msgstr ""
 
 #: src/ui/dialogs/goto.cc:34
@@ -635,6 +670,19 @@ msgstr ""
 msgid "16 (hex)"
 msgstr ""
 
+#. / character encodings
+#: src/ui/settings/layout.cc:78
+msgid "Text encoding"
+msgstr ""
+
+#: src/ui/settings/layout.cc:79
+msgid "ASCII"
+msgstr ""
+
+#: src/ui/settings/layout.cc:79
+msgid "Latin-1 (ISO 8859-1)"
+msgstr ""
+
 #: src/ui/settings/general.cc:42
 msgid "Undo"
 msgstr ""
@@ -647,6 +695,14 @@ msgstr ""
 
 #: src/ui/settings/general.cc:46
 msgid "Maximum length of undo history"
+msgstr ""
+
+#: src/ui/settings/general.cc:48
+msgid "Backup"
+msgstr ""
+
+#: src/ui/settings/general.cc:49
+msgid "Back up files (.bak) before overwriting"
 msgstr ""
 
 #: src/ui/settings.cc:53 src/ui/settings.cc:76

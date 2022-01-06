@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-03 14:45+0200\n"
+"POT-Creation-Date: 2022-01-06 19:10+0200\n"
 "PO-Revision-Date: 2021-12-23 21:14+0200\n"
 "Last-Translator: Sampo Hippeläinen <sampo.hippelainen@gmail.com>\n"
 "Language-Team: fi\n"
@@ -245,7 +245,15 @@ msgstr "&Sarakkeet"
 msgid "Controls which columns to show"
 msgstr "Määrittelee näytettävät sarakkeet"
 
-#: src/ui/menuview.cc:45
+#: src/ui/menuview.cc:46
+msgid "&Bit editor"
+msgstr "&Bittimuokkain"
+
+#: src/ui/menuview.cc:47
+msgid "Shows the bit editor"
+msgstr "Näyttää bittimuokkaimen"
+
+#: src/ui/menuview.cc:48
 msgid "&View"
 msgstr "&Näytä"
 
@@ -294,29 +302,62 @@ msgstr "Siirtyy haluttuun kohtaan tiedostoa"
 msgid "&Search"
 msgstr "&Etsi"
 
-#: src/ui/context.cc:55
+#: src/ui/context.cc:76
 msgid "Action in progress"
 msgstr "Toimintoa suoritetaan"
 
-#: src/ui/hexbed.cc:231
+#: src/ui/context.cc:146
+#, c-format
+msgid ""
+"Backup failed:\n"
+"%s"
+msgstr ""
+"Varmuuskopiointi epäonnistui:\n"
+"%s"
+
+#: src/ui/context.cc:148 src/ui/hexbed.cc:311
+msgid "&Retry"
+msgstr "&Uudelleen"
+
+#: src/ui/context.cc:148
+msgid "&Ignore"
+msgstr "&Ohita"
+
+#: src/ui/context.cc:148
+msgid "&Abort"
+msgstr "&Keskeytä"
+
+#: src/ui/context.cc:150
+msgid "'Retry' to try again, 'Ignore' to save anyway or 'Abort' to cancel."
+msgstr ""
+"'Uudelleen' yrittää uudelleen, 'Ohita' tallentaa joka tapauksessa ja "
+"'Keskeytä' peruuttaa tallennuksen."
+
+#: src/ui/context.cc:154
+msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
+msgstr ""
+"Yritetäänkö uudelleen? 'Ei' tallentaa silti ja 'Peruuta' "
+"peruuttaa tallennuksen."
+
+#: src/ui/hexbed.cc:235
 msgid "Save a file"
 msgstr "Tallenna tiedosto"
 
-#: src/ui/hexbed.cc:232 src/ui/hexbed.cc:640
+#: src/ui/hexbed.cc:236 src/ui/hexbed.cc:678
 msgid "All files (*.*)"
 msgstr "Kaikki tiedostot (*.*)"
 
-#: src/ui/hexbed.cc:257
+#: src/ui/hexbed.cc:262
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr "Tiedoston %s tallentaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:280
+#: src/ui/hexbed.cc:285
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Hylätäänkö ne?"
 
-#: src/ui/hexbed.cc:300
+#: src/ui/hexbed.cc:305
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
@@ -325,63 +366,59 @@ msgstr ""
 "Tiedostosta %s ei voitu lukea:\n"
 "%s"
 
-#: src/ui/hexbed.cc:305
-msgid "&Retry"
-msgstr "&Uudelleen"
-
-#: src/ui/hexbed.cc:305
+#: src/ui/hexbed.cc:311
 msgid "&Cancel"
 msgstr "&Peruuta"
 
-#: src/ui/hexbed.cc:307
+#: src/ui/hexbed.cc:313
 msgid "Retry?"
 msgstr "Yritetäänkö uudelleen?"
 
-#: src/ui/hexbed.cc:328
+#: src/ui/hexbed.cc:335
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Haluatko tallentaa ne?"
 
-#: src/ui/hexbed.cc:450
+#: src/ui/hexbed.cc:464
 #, c-format
-msgid "New-%s"
-msgstr "Uusi-%s"
+msgid "New-%llu"
+msgstr "Uusi-%llu"
 
-#: src/ui/hexbed.cc:454
+#: src/ui/hexbed.cc:468
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr "Uuden tiedoston luonti epäonnistui: %s"
 
-#: src/ui/hexbed.cc:477
+#: src/ui/hexbed.cc:492
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr "Tiedoston %s avaaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:486
+#: src/ui/hexbed.cc:501
 msgid "Read only"
 msgstr "Vain luku"
 
-#: src/ui/hexbed.cc:515
+#: src/ui/hexbed.cc:535
 msgid "No more results found for this search."
 msgstr "Tällä haulla ei löytynyt lisää tuloksia."
 
-#: src/ui/hexbed.cc:521
+#: src/ui/hexbed.cc:541
 #, c-format
-msgid "Found and replaced %lu match."
-msgid_plural "Found and replaced %lu matches."
-msgstr[0] "%lu esiintymä korvattiin."
-msgstr[1] "%lu esiintymää korvattiin."
+msgid "Found and replaced %llu match."
+msgid_plural "Found and replaced %llu matches."
+msgstr[0] "%llu esiintymä korvattiin."
+msgstr[1] "%llu esiintymää korvattiin."
 
-#: src/ui/hexbed.cc:639
+#: src/ui/hexbed.cc:677
 msgid "Open a file"
 msgstr "Avaa tiedosto"
 
-#: src/ui/hexbed.cc:713
+#: src/ui/hexbed.cc:751
 #, c-format
 msgid "Failed to copy: %s"
 msgstr "Kopiointi epäonnistui: %s"
 
-#: src/ui/hexbed.cc:743
+#: src/ui/hexbed.cc:781
 msgid ""
 "Cannot paste the current clipboard contents, because it contains characters "
 "that the currently selected character encoding cannot represent."
@@ -389,7 +426,7 @@ msgstr ""
 "Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä on merkkejä, joita "
 "valittu merkistökoodaus ei tue."
 
-#: src/ui/hexbed.cc:746
+#: src/ui/hexbed.cc:784
 msgid ""
 "Cannot paste the current clipboard contents, because it does not contain "
 "valid hexadecimal data. Text data should be a string of hexadecimal bytes."
@@ -397,14 +434,18 @@ msgstr ""
 "Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä ei ole kelvollista "
 "heksadesimaalimuotoista tietoa. Tekstin tulisi olla heksadesimaalisia tavuja."
 
-#: src/ui/hexbed.cc:757
+#: src/ui/hexbed.cc:795
 #, c-format
 msgid "Failed to paste: %s"
 msgstr "Liittäminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:804
+#: src/ui/hexbed.cc:842
 msgid "A hex editor."
 msgstr "Tavumuokkain."
+
+#: src/ui/tools/bitedit.cc:36
+msgid "Bit editor"
+msgstr "Bittimuokkain"
 
 #: src/ui/dialogs/goto.cc:34
 msgid "Go to"
@@ -640,6 +681,19 @@ msgstr "10 (desimaali)"
 msgid "16 (hex)"
 msgstr "16 (heksadesimaali)"
 
+#. / character encodings
+#: src/ui/settings/layout.cc:78
+msgid "Text encoding"
+msgstr "Tekstin merkistö"
+
+#: src/ui/settings/layout.cc:79
+msgid "ASCII"
+msgstr "ASCII"
+
+#: src/ui/settings/layout.cc:79
+msgid "Latin-1 (ISO 8859-1)"
+msgstr "Latin-1 (ISO 8859-1)"
+
 #: src/ui/settings/general.cc:42
 msgid "Undo"
 msgstr "Kumoaminen"
@@ -655,6 +709,14 @@ msgstr ""
 #: src/ui/settings/general.cc:46
 msgid "Maximum length of undo history"
 msgstr "Kumoamishistorian enimmäispituus"
+
+#: src/ui/settings/general.cc:48
+msgid "Backup"
+msgstr "Varmuuskopiointi"
+
+#: src/ui/settings/general.cc:49
+msgid "Back up files (.bak) before overwriting"
+msgstr "Luo varmuuskopio (.bak) ennen korvaamista"
 
 #: src/ui/settings.cc:53 src/ui/settings.cc:76
 msgid "Options"
