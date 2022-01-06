@@ -167,7 +167,9 @@ FailureResponse HexBedContextMain::ifBackupFails(const char* message) {
 static HexBedPeekRegion makePeekBuffer(HexBedDocument* doc, bufsize start,
                                        bytespan buffer) {
     return HexBedPeekRegion{
-        doc, start, const_bytespan{buffer.begin(), doc->read(start, buffer)}};
+        doc, start,
+        doc ? const_bytespan{buffer.begin(), doc->read(start, buffer)}
+            : const_bytespan{}};
 }
 
 void HexBedContextMain::announceBytesChanged(HexBedDocument* doc,

@@ -167,6 +167,7 @@ HexBedEditor::HexBedEditor(HexBedMainFrame* frame, wxWindow* parent,
 
     hexEdit_->Bind(wxEVT_MOUSEWHEEL, &HexBedEditor::OnMouseWheel, this);
     Layout();
+    cols_ = 0; // force a first-time row/column count update
     FullUpdate();
 }
 

@@ -181,7 +181,7 @@ void HexEditor::Rebuffer() {
 }
 
 void HexEditor::SetRows(unsigned rows) {
-    size_t oldSize = rows_ * columns_, newSize;
+    size_t oldSize = bufc_, newSize;
     rows_ = rows;
     bufviewable_ = rows_ * columns_;
     bufc_ = newSize = bufviewable_ + MAX_LOOKAHEAD;
@@ -192,7 +192,7 @@ void HexEditor::SetRows(unsigned rows) {
 }
 
 void HexEditor::SetColumns(unsigned columns) {
-    size_t oldSize = rows_ * columns_, newSize;
+    size_t oldSize = bufc_, newSize;
     columns_ = columns;
     unsigned gs = static_cast<unsigned>(config().groupSize);
     group_ = std::bit_width(gs) - 1;
