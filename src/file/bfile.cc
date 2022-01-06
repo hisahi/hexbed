@@ -245,7 +245,7 @@ FILE_unique_ptr fopen_replace_before(const std::string& filename,
         if (!ec) tempfilename = filename;
         fp = fopen_unique(tempfilename.c_str(), "wb");
         if (!fp) throw errno_to_exception(errno);
-        std::setvbuf(fp.get(), NULL, _IONBF, 0);
+        std::setvbuf(fp.get(), nullptr, _IONBF, 0);
         return fp;
     } else {
         std::string tmpfn = filename + ".hexbedtmp000000";
@@ -261,7 +261,7 @@ FILE_unique_ptr fopen_replace_before(const std::string& filename,
             if (fp) break;
         }
         if (!fp) throw errno_to_exception(errno);
-        std::setvbuf(fp.get(), NULL, _IONBF, 0);
+        std::setvbuf(fp.get(), nullptr, _IONBF, 0);
         tempfilename = tmpfn;
         return fp;
     }
@@ -329,7 +329,7 @@ void HexBedBufferFile::writeOverlay(HexBedContext& ctx, WriteCallback write,
         throw errno_to_exception(old_errno);
     }
 
-    std::setvbuf(fp.get(), NULL, _IONBF, 0);
+    std::setvbuf(fp.get(), nullptr, _IONBF, 0);
     HexBedBufferFileVbufOverlay vbuf(fp.get());
     write(vbuf);
 
@@ -350,7 +350,7 @@ void HexBedBufferFile::writeNew(HexBedContext& ctx, WriteCallback write,
     auto fp = fopen_unique(filename.c_str(), "wb");
     if (!fp) throw errno_to_exception(errno);
 
-    std::setvbuf(fp.get(), NULL, _IONBF, 0);
+    std::setvbuf(fp.get(), nullptr, _IONBF, 0);
     HexBedBufferFileVbuf vbuf(f_.get(), fp.get());
     write(vbuf);
 

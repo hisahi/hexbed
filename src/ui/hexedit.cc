@@ -128,6 +128,7 @@ void HexEditor::UpdateCaret() {
 }
 
 void HexEditor::UpdateCaret(bufsize cur, bool redraw, bool eol) {
+    bool changed = cur_ != cur;
     bufsize off2 = off_ + rows_ * columns_;
     if (bufn_ < bufc_) {
         if (cur >= off_) cur = std::min(cur, off_ + bufn_);
@@ -171,6 +172,7 @@ void HexEditor::UpdateCaret(bufsize cur, bool redraw, bool eol) {
         RedrawRow(newRow);
     }
     UpdateStatusBar();
+    if (changed) parent_->OnCaretMoved();
 }
 
 void HexEditor::Rebuffer() {
@@ -494,11 +496,11 @@ void HexEditor::GetSelection(bufsize& start, bufsize& length, bool& text) {
 HexBedPeekRegion HexEditor::PeekBufferAtCursor() {
     const byte* buf = buffer_.data();
     const byte* bufend = buf + bufn_;
-    bufsize caret = seln_ && selst_ == sel_ ? sel_ + seln_ : sel_;
+    bufsize caret = cur_;
     if (caret < off_ || caret >= off_ + bufviewable_)
-        return HexBedPeekRegion{&document(), off_, const_bytespan{}};
+        return HexBedPeekRegion{&document(), caret, const_bytespan{}};
     const byte* bufat = buf + (caret - off_);
-    return HexBedPeekRegion{&document(), off_, const_bytespan{bufat, bufend}};
+    return HexBedPeekRegion{&document(), caret, const_bytespan{bufat, bufend}};
 }
 
 void HexEditor::HintByteChanged(bufsize offset) {
@@ -539,6 +541,7 @@ void HexEditor::DoInsertByte(byte v) {
         cur_ = sel_;
         document().replace(sel_, seln_, 1, v);
         Deselect();
+        parent_->OnCaretMoved();
     } else {
         document().insert(cur_, v);
     }
@@ -678,6 +681,7 @@ void HexEditor::OnChar(wxKeyEvent& e) {
             DoRemoveBytes(sel_, seln_);
             Deselect();
             UpdateCaret();
+            parent_->OnCaretMoved();
         } else if (kc == WXK_BACK && curnibble_) {
             DoRemoveByte(cur_);
             curnibble_ = false;

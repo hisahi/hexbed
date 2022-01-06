@@ -46,6 +46,7 @@ class HexBedStandaloneEditor : public wxPanel, public HexEditorParent {
     void BringOffsetToScreen(bufsize offset) override;
     bool ScrollLine(int dir) override;
     bool ScrollPage(int dir) override;
+    void OnCaretMoved() override;
     void OnSelectChanged() override;
     void OnEditorCopy() override;
 

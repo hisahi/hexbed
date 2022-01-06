@@ -41,7 +41,6 @@
 #include "ui/dialogs/replace.hh"
 #include "ui/dialogs/selectblock.hh"
 #include "ui/editor.hh"
-#include "ui/format.hh"
 #include "ui/hexbed.hh"
 #include "ui/hexedit.hh"
 #include "ui/logger.hh"
@@ -103,9 +102,14 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
     EVT_MENU(wxID_REPLACE, HexBedMainFrame::OnSearchReplace)
     EVT_MENU(hexbed::menu::MenuSearch_GoTo, HexBedMainFrame::OnSearchGoTo)
 
-    EVT_MENU(hexbed::menu::MenuView_ShowColumnsBoth, HexBedMainFrame::OnViewColumnsBoth)
-    EVT_MENU(hexbed::menu::MenuView_ShowColumnsHex, HexBedMainFrame::OnViewColumnsHex)
-    EVT_MENU(hexbed::menu::MenuView_ShowColumnsText, HexBedMainFrame::OnViewColumnsText)
+    EVT_MENU(hexbed::menu::MenuView_ShowColumnsBoth,
+             HexBedMainFrame::OnViewColumnsBoth)
+    EVT_MENU(hexbed::menu::MenuView_ShowColumnsHex,
+             HexBedMainFrame::OnViewColumnsHex)
+    EVT_MENU(hexbed::menu::MenuView_ShowColumnsText,
+             HexBedMainFrame::OnViewColumnsText)
+    EVT_MENU(hexbed::menu::MenuView_BitEditor,
+             HexBedMainFrame::OnViewBitEditor)
 
     EVT_MENU(wxID_EXIT, HexBedMainFrame::OnExit)
     EVT_MENU(wxID_ABOUT, HexBedMainFrame::OnAbout)
@@ -254,9 +258,10 @@ bool HexBedMainFrame::FileSave(size_t i, bool saveAs) {
             editor->ReloadFile();
         } catch (...) {
             try {
-                wxMessageBox(stringFormatWx(_("Failed to save file %s: %s"),
-                                            saveAs ? sfn : document.path(),
-                                            currentExceptionAsString()),
+                wxMessageBox(wxString::Format(
+                                 _("Failed to save file %s: %s"),
+                                 saveAs ? sfn.c_str() : document.path().c_str(),
+                                 currentExceptionAsString().c_str()),
                              "HexBed", wxOK | wxICON_ERROR);
             } catch (...) {
             }
@@ -276,9 +281,9 @@ void HexBedMainFrame::FileReload(size_t i) {
         if (!editor->document().filed()) return;
         if (editor->document().unsaved()) {
             tabs_->ChangeSelection(i);
-            std::string txt = stringFormatWx(
+            wxString txt = wxString::Format(
                 _("'%s' has unsaved changes. Discard them and reload?"),
-                tabs_->GetPageText(i).c_str());
+                tabs_->GetPageText(i));
             wxMessageDialog dial(this, txt, "HexBed",
                                  wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
             switch (dial.ShowModal()) {
@@ -296,9 +301,10 @@ void HexBedMainFrame::FileReload(size_t i) {
                 return;
             } catch (...) {
                 try {
-                    std::string txt = stringFormatWx(
-                        _("Failed to load from file %s:\n%s"),
-                        editor->document().path(), currentExceptionAsString());
+                    wxString txt =
+                        wxString::Format(_("Failed to load from file %s:\n%s"),
+                                         editor->document().path().c_str(),
+                                         currentExceptionAsString().c_str());
                     wxMessageDialog dial(
                         this, txt, "HexBed",
                         wxYES_NO | wxNO_DEFAULT | wxICON_ERROR);
@@ -325,9 +331,9 @@ bool HexBedMainFrame::FileClose(size_t i) {
         hexbed::ui::HexBedEditor* editor = GetEditor(i);
         if (editor->document().unsaved()) {
             tabs_->ChangeSelection(i);
-            std::string txt = stringFormatWx(
+            wxString txt = wxString::Format(
                 _("'%s' has unsaved changes. Do you want to save it?"),
-                tabs_->GetPageText(i).c_str());
+                tabs_->GetPageText(i));
             wxMessageDialog dial(this, txt, "HexBed",
                                  wxYES_NO | wxCANCEL | wxICON_QUESTION);
             switch (dial.ShowModal()) {
@@ -455,13 +461,12 @@ void HexBedMainFrame::AddTab(std::unique_ptr<hexbed::ui::HexBedEditor>&& editor,
 
 void HexBedMainFrame::OnFileNew(wxCommandEvent& event) {
     try {
-        AddTab(MakeEditor(),
-               stringFormatWx(_("New-%s"), std::to_string(++newFileIndex_)),
+        AddTab(MakeEditor(), wxString::Format(_("New-%llu"), ++newFileIndex_),
                "");
     } catch (...) {
         try {
-            wxMessageBox(stringFormatWx(_("Failed to create a new file: %s"),
-                                        currentExceptionAsString()),
+            wxMessageBox(wxString::Format(_("Failed to create a new file: %s"),
+                                          currentExceptionAsString().c_str()),
                          "HexBed", wxOK | wxICON_ERROR);
         } catch (...) {
         }
@@ -483,9 +488,10 @@ void HexBedMainFrame::FileKnock(const std::string& fp, bool readOnly) {
         AddTab(std::move(editor), fn, path);
     } catch (...) {
         try {
-            wxMessageBox(stringFormatWx(_("Failed to open file %s: %s"), fp,
-                                        currentExceptionAsString()),
-                         "HexBed", wxOK | wxICON_ERROR);
+            wxMessageBox(
+                wxString::Format(_("Failed to open file %s: %s"), fp.c_str(),
+                                 currentExceptionAsString().c_str()),
+                "HexBed", wxOK | wxICON_ERROR);
         } catch (...) {
         }
     }
@@ -520,6 +526,11 @@ void HexBedMainFrame::OnFindClose(wxCloseEvent& event) {
     findDialog_ = nullptr;
 }
 
+void HexBedMainFrame::OnBitEditorClose(wxCloseEvent& event) {
+    bitEditorTool_->Destroy();
+    bitEditorTool_ = nullptr;
+}
+
 void HexBedMainFrame::NoMoreResults() {
     wxMessageBox(_("No more results found for this search."), "HexBed",
                  wxOK | wxICON_INFORMATION);
@@ -527,9 +538,9 @@ void HexBedMainFrame::NoMoreResults() {
 
 void HexBedMainFrame::OnReplaceDone(bufsize count) {
     wxMessageBox(
-        stringFormatWx(PLURAL("Found and replaced %lu match.",
-                              "Found and replaced %lu matches.", count),
-                       count),
+        wxString::Format(PLURAL("Found and replaced %llu match.",
+                                "Found and replaced %llu matches.", count),
+                         count),
         "HexBed", wxOK | wxICON_INFORMATION);
 }
 
@@ -559,23 +570,22 @@ bool HexBedMainFrame::DoFindPrevious() {
     }
 }
 
-void HexBedMainFrame::OnSelectChange(wxCommandEvent& event) {
-    AddPendingEvent(event);
+void HexBedMainFrame::OnCaretMoved(hexbed::ui::HexEditorParent& editor) {
     hexbed::ui::HexBedEditor* ed = GetEditor();
-    if (ed) {
-        UpdateMenuEnabledSelect(*ed);
-        context_->announceCursorUpdate(ed->PeekBufferAtCursor());
-    } else {
+    if (!ed)
         context_->announceCursorUpdate(HexBedPeekRegion{});
-    }
+    else if (ed == &editor)
+        context_->announceCursorUpdate(editor.PeekBufferAtCursor());
+}
+
+void HexBedMainFrame::OnSelectChanged(hexbed::ui::HexEditorParent& editor) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    if (ed == &editor) UpdateMenuEnabledSelect(editor);
 }
 
 void HexBedMainFrame::OnSearchFind(wxCommandEvent& event) {
     if (!findDialog_ || findDialog_->IsReplace()) {
-        if (findDialog_) {
-            findDialog_->Close(true);
-            // OnFindClose ...
-        }
+        if (findDialog_) findDialog_->Close(true);  // calls OnFindClose
         findDialog_ =
             std::make_unique<FindDialog>(this, context_.get(), searchDocument_);
         findDialog_->Bind(wxEVT_CLOSE_WINDOW, &HexBedMainFrame::OnFindClose,
@@ -607,6 +617,7 @@ void HexBedMainFrame::OnSearchReplace(wxCommandEvent& event) {
                           this);
     }
     findDialog_->Show(true);
+    findDialog_->Raise();
     findDialog_->SetFocus();
 }
 
@@ -638,6 +649,17 @@ void HexBedMainFrame::OnViewColumnsText(wxCommandEvent& event) {
     currentConfig.values().showColumnTypes = 1;
     GetMenuBar()->Check(hexbed::menu::MenuView_ShowColumnsText, true);
     ApplyConfig();
+}
+
+void HexBedMainFrame::OnViewBitEditor(wxCommandEvent& event) {
+    if (!bitEditorTool_) {
+        bitEditorTool_ = std::make_unique<BitEditorTool>(this, context_);
+        bitEditorTool_->Bind(wxEVT_CLOSE_WINDOW,
+                             &HexBedMainFrame::OnBitEditorClose, this);
+    }
+    bitEditorTool_->Show(true);
+    bitEditorTool_->Raise();
+    bitEditorTool_->SetFocus();
 }
 
 void HexBedMainFrame::OnEditInsertToggle(wxCommandEvent& event) {
@@ -726,8 +748,8 @@ void HexBedMainFrame::DoCopy() {
         try {
             hexbed::clip::CopyBytes(ed->document(), sel, seln, seltext);
         } catch (...) {
-            wxMessageBox(stringFormatWx(_("Failed to copy: %s"),
-                                        currentExceptionAsString()),
+            wxMessageBox(wxString::Format(_("Failed to copy: %s"),
+                                          currentExceptionAsString().c_str()),
                          "HexBed", wxOK | wxICON_ERROR);
             return;
         }
@@ -770,8 +792,8 @@ void HexBedMainFrame::DoPaste() {
                                 SelectFlags().caretAtEnd().highlightCaret());
             }
         } catch (...) {
-            wxMessageBox(stringFormatWx(_("Failed to paste: %s"),
-                                        currentExceptionAsString()),
+            wxMessageBox(wxString::Format(_("Failed to paste: %s"),
+                                          currentExceptionAsString().c_str()),
                          "HexBed", wxOK | wxICON_ERROR);
         }
     }

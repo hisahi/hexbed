@@ -42,6 +42,9 @@ wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
         ->Check(config().showColumnTypes == 1);
     menuView->AppendSubMenu(viewColumns, _("&Columns"),
                             _("Controls which columns to show"));
+    menuView->AppendSeparator();
+    addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
+            _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
     menuBar->Append(menuView, _("&View"));
     return menuView;
 }

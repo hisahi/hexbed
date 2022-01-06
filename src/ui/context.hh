@@ -53,24 +53,34 @@ struct HexBedPeekRegion {
 
 class HexBedViewer {
   public:
-    HexBedViewer(std::shared_ptr<HexBedContextMain> context, bufsize lookahead);
-    HexBedViewer(HexBedViewer& copy) = default;
-    HexBedViewer(HexBedViewer&& move) = default;
-    HexBedViewer& operator=(HexBedViewer& copy) = default;
-    HexBedViewer& operator=(HexBedViewer&& move) = default;
-    virtual ~HexBedViewer();
+    HexBedViewer(bufsize lookahead);
 
     inline bufsize lookahead() const noexcept { return lookahead_; }
 
     /* peek may become invalid! you must copy the data if you need it
        after onUpdateCursor ends */
-    virtual inline void onUpdateCursor(HexBedPeekRegion peek) {}
-
-  protected:
-    std::shared_ptr<HexBedContextMain> ctx_;
+    virtual void onUpdateCursor(HexBedPeekRegion peek);
 
   private:
     bufsize lookahead_;
+};
+
+class HexBedViewerRegistration {
+  public:
+    HexBedViewerRegistration();
+    HexBedViewerRegistration(std::shared_ptr<HexBedContextMain> context,
+                             HexBedViewer* viewer);
+    HexBedViewerRegistration(HexBedViewerRegistration& copy) = default;
+    HexBedViewerRegistration(HexBedViewerRegistration&& move) = default;
+    HexBedViewerRegistration& operator=(HexBedViewerRegistration& copy) =
+        default;
+    HexBedViewerRegistration& operator=(HexBedViewerRegistration&& move) =
+        default;
+    virtual ~HexBedViewerRegistration();
+
+  private:
+    std::shared_ptr<HexBedContextMain> ctx_;
+    HexBedViewer* ptr_;
 };
 
 class HexBedContextMain : public HexBedContext {

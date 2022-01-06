@@ -35,6 +35,7 @@ namespace hexbed {
 namespace ui {
 
 wxDEFINE_EVENT(HEX_EDIT_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(HEX_CARET_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(HEX_SELECT_EVENT, wxCommandEvent);
 
 LongScrollBar::scroll_t LongScrollBar::GetPageSizeLong() const {
@@ -314,9 +315,9 @@ HexBedPeekRegion HexBedEditor::PeekBufferAtCursor() {
     return hexEdit_->PeekBufferAtCursor();
 }
 
-void HexBedEditor::OnSelectChanged() {
-    AddPendingEvent(wxCommandEvent(HEX_SELECT_EVENT));
-}
+void HexBedEditor::OnCaretMoved() { frame_->OnCaretMoved(*this); }
+
+void HexBedEditor::OnSelectChanged() { frame_->OnSelectChanged(*this); }
 
 void HexBedEditor::HintByteChanged(bufsize offset) {
     hexEdit_->HintByteChanged(offset);

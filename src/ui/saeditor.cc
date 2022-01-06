@@ -210,6 +210,10 @@ HexBedPeekRegion HexBedStandaloneEditor::PeekBufferAtCursor() {
     return hexEdit_->PeekBufferAtCursor();
 }
 
+void HexBedStandaloneEditor::OnCaretMoved() {
+    AddPendingEvent(wxCommandEvent(HEX_CARET_EVENT));
+}
+
 void HexBedStandaloneEditor::OnSelectChanged() {
     AddPendingEvent(wxCommandEvent(HEX_SELECT_EVENT));
 }

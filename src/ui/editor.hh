@@ -44,6 +44,7 @@ namespace hexbed {
 namespace ui {
 
 wxDECLARE_EVENT(HEX_EDIT_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(HEX_CARET_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(HEX_SELECT_EVENT, wxCommandEvent);
 
 constexpr int RESIZE_TIMEOUT = 200;
@@ -143,6 +144,7 @@ class HexEditorParent {
     virtual void BringOffsetToScreen(bufsize offset) = 0;
     virtual bool ScrollLine(int dir) = 0;
     virtual bool ScrollPage(int dir) = 0;
+    virtual void OnCaretMoved() = 0;
     virtual void OnSelectChanged() = 0;
     virtual void OnEditorCopy() = 0;
 
@@ -186,6 +188,7 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     void BringOffsetToScreen(bufsize offset) override;
     bool ScrollLine(int dir) override;
     bool ScrollPage(int dir) override;
+    void OnCaretMoved() override;
     void OnSelectChanged() override;
     void OnEditorCopy() override;
 

@@ -28,21 +28,29 @@
 
 #include "app/config.hh"
 #include "ui/editor.hh"
-#include "ui/format.hh"
 #include "ui/hexbed.hh"
 
 namespace hexbed {
 
 wxDEFINE_EVENT(TASK_SUBTHREAD_EVENT, wxThreadEvent);
 
-HexBedViewer::HexBedViewer(std::shared_ptr<HexBedContextMain> context,
-                           bufsize lookahead)
-    : ctx_(context), lookahead_(lookahead) {
-    ctx_->addViewer(this);
+HexBedViewer::HexBedViewer(bufsize lookahead) : lookahead_(lookahead) {}
+
+HexBedViewerRegistration::HexBedViewerRegistration()
+    : ctx_(nullptr), ptr_(nullptr) {}
+
+HexBedViewerRegistration::HexBedViewerRegistration(
+    std::shared_ptr<HexBedContextMain> context, HexBedViewer* viewer)
+    : ctx_(context), ptr_(viewer) {
+    ctx_->addViewer(ptr_);
 }
 
-HexBedViewer::~HexBedViewer() {
-    if (ctx_) ctx_->removeViewer(this);
+HexBedViewerRegistration::~HexBedViewerRegistration() {
+    if (ctx_ && ptr_) ctx_->removeViewer(ptr_);
+}
+
+void HexBedViewer::onUpdateCursor(HexBedPeekRegion peek) {
+    LOG_DEBUG("pure virtual onUpdateCursor");
 }
 
 class HexBedTaskHandlerMain : public HexBedTaskHandler, wxEvtHandler {
@@ -135,7 +143,7 @@ bool HexBedContextMain::shouldBackup() { return config().backupFiles; }
 
 FailureResponse HexBedContextMain::ifBackupFails(const char* message) {
     wxMessageDialog dial(
-        main_, stringFormatWx(_("Backup failed:\n%s"), message), "HexBed",
+        main_, wxString::Format(_("Backup failed:\n%s"), message), "HexBed",
         wxYES_NO | wxCANCEL | wxCANCEL_DEFAULT | wxICON_EXCLAMATION);
     if (dial.SetYesNoCancelLabels(_("&Retry"), _("&Ignore"), _("&Abort")))
         dial.SetMessage(dial.GetMessage() + "\n\n" +
@@ -246,6 +254,9 @@ void HexBedContextMain::updateWindows() {
 
 void HexBedContextMain::addViewer(HexBedViewer* viewer) {
     viewers_.push_back(viewer);
+    byte tmp[MAX_LOOKAHEAD];
+    viewer->onUpdateCursor(
+        makePeekBuffer(lastdoc_, lastoff_, bytespan{tmp, tmp + sizeof(tmp)}));
 }
 
 void HexBedContextMain::removeViewer(HexBedViewer* viewer) noexcept {

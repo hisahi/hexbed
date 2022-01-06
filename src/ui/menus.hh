@@ -51,7 +51,8 @@ enum {
 
     MenuView_ShowColumnsBoth = 0x400,
     MenuView_ShowColumnsHex,
-    MenuView_ShowColumnsText
+    MenuView_ShowColumnsText,
+    MenuView_BitEditor,
 };
 
 // menus.cc

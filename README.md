@@ -11,22 +11,24 @@ A graphical hex editor, still a work in progress.
 * Opening files as read-only
 * Full undo & redo
 * Backup system (backs up files before overwriting)
+* Bit editing
 
 ## Planned features
 * Stability
 * Performance
 * Not losing data
 * Not having bugs
-* Inserting blocks, bitwise operations, etc.
-* Bit editing
+* Inserting blocks
+* Bitwise operations on blocks
+* Data inspector and editor (integers, etc.)
 * Search for text
 * Search for integers, floats, etc.
-* Data inspector and editor (integers, etc.), with plugin support
-* Import/export, with plugin support
+* Import/export data
 * Support for more text encodings
-* Multiple windows/views
 * Bookmarks
+* Multiple windows/views
 * File compare
+* Plugin system for data inspector and import/export
 * Macros
 * Bells and whistles
 
@@ -37,4 +39,4 @@ Tested and developed for Linux, but theoretically cross-platform.
 In modern C++ (C++17 with some C++20). The UI uses wxWidgets.
 
 ## License
-GPL v3. See `COPYING`.
+GPL version 3. See `COPYING`.

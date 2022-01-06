@@ -38,6 +38,7 @@
 #include "ui/context.hh"
 #include "ui/dialogs/find.hh"
 #include "ui/editor-fwd.hh"
+#include "ui/tools/bitedit.hh"
 
 namespace hexbed {
 
@@ -53,6 +54,8 @@ class HexBedMainFrame : public wxFrame {
     void UpdateMenuEnabled(hexbed::ui::HexEditorParent& editor);
     void OnUndoRedo(hexbed::ui::HexEditorParent& editor);
     void OnEditorCopy(hexbed::ui::HexEditorParent& editor);
+    void OnCaretMoved(hexbed::ui::HexEditorParent& editor);
+    void OnSelectChanged(hexbed::ui::HexEditorParent& editor);
 
     hexbed::ui::HexEditorParent* GetCurrentEditor();
     bool DoFindNext();
@@ -64,7 +67,6 @@ class HexBedMainFrame : public wxFrame {
     void OnClose(wxCloseEvent& event);
     void OnTabSwitch(wxAuiNotebookEvent& event);
     void OnTabClose(wxAuiNotebookEvent& event);
-    void OnFindClose(wxCloseEvent& event);
 
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
@@ -100,9 +102,12 @@ class HexBedMainFrame : public wxFrame {
     void OnViewColumnsBoth(wxCommandEvent& event);
     void OnViewColumnsHex(wxCommandEvent& event);
     void OnViewColumnsText(wxCommandEvent& event);
+    void OnViewBitEditor(wxCommandEvent& event);
 
-    void OnSelectChange(wxCommandEvent& event);
     void UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& editor);
+
+    void OnFindClose(wxCloseEvent& event);
+    void OnBitEditorClose(wxCloseEvent& event);
 
     hexbed::ui::HexBedEditor* GetEditor();
     hexbed::ui::HexBedEditor* GetEditor(size_t i);
@@ -136,6 +141,7 @@ class HexBedMainFrame : public wxFrame {
     std::shared_ptr<HexBedDocument> searchDocument_;
     std::shared_ptr<HexBedDocument> replaceDocument_;
     std::unique_ptr<FindDialog> findDialog_;
+    std::unique_ptr<BitEditorTool> bitEditorTool_;
 };
 
 };  // namespace ui

@@ -17,20 +17,43 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/format.hh -- header for string formatting with wx strings
+// ui/tools/bitedit.hh -- header for the bit editor tool
 
-#ifndef HEXBED_UI_FORMAT_HH
-#define HEXBED_UI_FORMAT_HH
+#ifndef HEXBED_UI_TOOLS_BITEDIT_HH
+#define HEXBED_UI_TOOLS_BITEDIT_HH
 
-#include "common/format.hh"
+#include <wx/button.h>
+#include <wx/checkbox.h>
+#include <wx/dialog.h>
+#include <wx/stattext.h>
+
+#include "common/types.hh"
+#include "ui/context.hh"
 
 namespace hexbed {
 
-template <typename... Ts>
-std::string stringFormatWx(const wxString& fmt, const Ts&... args) {
-    return stringFormat(fmt.ToStdString(), args...);
-}
+namespace ui {
+
+class BitEditorTool : public wxDialog, public HexBedViewer {
+  public:
+    BitEditorTool(HexBedMainFrame* parent,
+                  std::shared_ptr<HexBedContextMain> context);
+    void onUpdateCursor(HexBedPeekRegion peek) override;
+
+  private:
+    void OnBitFlip(int bit, bool newState);
+    HexBedDocument* document_;
+    bufsize offset_;
+    wxCheckBox* bitChecks_[8];
+    wxStaticText* bitLabels_[8];
+    wxStaticText* byteLabel_;
+    byte buf_;
+    HexBedViewerRegistration reg_;
+    bool wasAllowed_;
+};
+
+};  // namespace ui
 
 };  // namespace hexbed
 
-#endif /* HEXBED_UI_FORMAT_HH */
+#endif /* HEXBED_UI_TOOLS_BITEDIT_HH */
