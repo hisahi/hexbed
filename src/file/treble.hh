@@ -259,10 +259,14 @@ class Treble {
 
     void replace(bufsize index, bufsize count, byte v);
     void replace(bufsize index, bufsize count, const byte* data);
+    void replace(bufsize index, bufsize count, bufsize scount,
+                 const byte* sdata, bufsize soffset);
     void revert(bufsize index, bufsize count);
 
     void insert(bufsize index, bufsize count, byte v);
     void insert(bufsize index, bufsize count, const byte* data);
+    void insert(bufsize index, bufsize count, bufsize scount, const byte* sdata,
+                bufsize soffset);
     void reinsert(bufsize index, bufsize count, bufsize offset);
     void remove(bufsize index, bufsize count);
 

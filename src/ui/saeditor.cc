@@ -199,6 +199,10 @@ void HexBedStandaloneEditor::SelectBytes(bufsize start, bufsize length,
     hexEdit_->SelectBytes(start, length, flags);
 }
 
+void HexBedStandaloneEditor::SelectAll(SelectFlags flags) {
+    SelectBytes(0, document_->size(), flags);
+}
+
 void HexBedStandaloneEditor::SelectNone() { hexEdit_->SelectNone(); }
 
 void HexBedStandaloneEditor::GetSelection(bufsize& start, bufsize& length,

@@ -91,6 +91,10 @@ class HexBedMainFrame : public wxFrame {
     void OnEditSelectAll(wxCommandEvent& event);
     void OnEditSelectBlock(wxCommandEvent& event);
     void OnEditInsertToggle(wxCommandEvent& event);
+    void OnEditInsertOrReplace(wxCommandEvent& event);
+    void OnEditBitwiseBinaryOp(wxCommandEvent& event);
+    void OnEditBitwiseUnaryOp(wxCommandEvent& event);
+    void OnEditBitwiseShiftOp(wxCommandEvent& event);
     void OnEditPrefs(wxCommandEvent& event);
 
     void OnSearchFind(wxCommandEvent& event);
@@ -140,6 +144,8 @@ class HexBedMainFrame : public wxFrame {
     std::vector<wxToolBarToolBase*> fileOnlyToolItems_;
     std::shared_ptr<HexBedDocument> searchDocument_;
     std::shared_ptr<HexBedDocument> replaceDocument_;
+    std::shared_ptr<HexBedDocument> insertDocument_;
+    std::shared_ptr<HexBedDocument> binaryOpDocument_;
     std::unique_ptr<FindDialog> findDialog_;
     std::unique_ptr<BitEditorTool> bitEditorTool_;
 };

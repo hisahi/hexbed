@@ -504,10 +504,9 @@ HexBedPeekRegion HexEditor::PeekBufferAtCursor() {
 }
 
 void HexEditor::HintByteChanged(bufsize offset) {
-    if (offset >= off_ && offset < off_ + bufn_) {
-        bufsize sub = offset - off_;
-        Buffer(sub, sub + 1, offset);
-    }
+    if (offset < off_ || offset >= off_ + bufn_) return;
+    bufsize sub = offset - off_;
+    Buffer(sub, sub + 1, offset);
     unsigned r = convertRow(offset, off_, rows_, columns_);
     RedrawRow(r);
 }
@@ -520,11 +519,10 @@ void HexEditor::HintBytesChanged(bufsize begin) {
 }
 
 void HexEditor::HintBytesChanged(bufsize begin, bufsize end) {
-    if (!(end < off_ || begin > off_ + bufn_)) {
-        bufsize sub = begin >= off_ ? begin - off_ : 0;
-        bufsize subend = std::min(bufc_, end + 1 - off_);
-        Buffer(sub, subend, off_ + sub);
-    }
+    if (end < off_ || begin > off_ + bufn_) return;
+    bufsize sub = begin >= off_ ? begin - off_ : 0;
+    bufsize subend = std::min(bufc_, end + 1 - off_);
+    Buffer(sub, subend, off_ + sub);
     unsigned r = convertRow(begin, off_, rows_, columns_);
     unsigned r2 = convertRow(end, off_, rows_, columns_);
     for (unsigned i = r; i <= r2; ++i) RedrawRow(i);

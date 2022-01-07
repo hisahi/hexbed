@@ -154,7 +154,7 @@ SearchResult FindDialog::findNext(HexEditorParent* ed) {
             res = doc.searchForwardFull(0, false, search);
         if (res)
             ed->SelectBytes(res.offset, dn,
-                            SelectFlags().caretAtEnd().highlightBegin());
+                            SelectFlags().caretAtEnd().highlightBeginning());
     }
     return res;
 }
@@ -176,7 +176,7 @@ SearchResult FindDialog::findPrevious(HexEditorParent* ed) {
             res = doc.searchBackwardFull(dn - 1, false, search);
         if (res)
             ed->SelectBytes(res.offset, dn,
-                            SelectFlags().caretAtEnd().highlightBegin());
+                            SelectFlags().caretAtEnd().highlightBeginning());
     }
     return res;
 }

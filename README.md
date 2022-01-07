@@ -12,14 +12,14 @@ A graphical hex editor, still a work in progress.
 * Full undo & redo
 * Backup system (backs up files before overwriting)
 * Bit editing
+* Inserting blocks
+* Bitwise operations on blocks
 
 ## Planned features
 * Stability
 * Performance
 * Not losing data
 * Not having bugs
-* Inserting blocks
-* Bitwise operations on blocks
 * Data inspector and editor (integers, etc.)
 * Search for text
 * Search for integers, floats, etc.

@@ -589,7 +589,7 @@ void HexBedDocument::truncateUndo() {
     }
 }
 
-void HexBedDocument::trebleReplaceDiffSize(bufoffset off, bufsize old,
+bool HexBedDocument::trebleReplaceDiffSize(bufoffset off, bufsize old,
                                            bufsize cnt, byte v) {
     if (old < cnt) {
         treble_.replace(off, old, v);
@@ -600,9 +600,10 @@ void HexBedDocument::trebleReplaceDiffSize(bufoffset off, bufsize old,
         treble_.replace(off, cnt, v);
         treble_.remove(off + cnt, old - cnt);
     }
+    return true;
 }
 
-void HexBedDocument::trebleReplaceDiffSize(bufoffset off, bufsize old,
+bool HexBedDocument::trebleReplaceDiffSize(bufoffset off, bufsize old,
                                            bufsize cnt, const byte* data) {
     if (old < cnt) {
         treble_.replace(off, old, data);
@@ -613,10 +614,26 @@ void HexBedDocument::trebleReplaceDiffSize(bufoffset off, bufsize old,
         treble_.replace(off, cnt, data);
         treble_.remove(off + cnt, old - cnt);
     }
+    return true;
 }
 
-void HexBedDocument::impose(bufoffset offset, bufsize size, byte value) {
-    if (readOnly()) return;
+bool HexBedDocument::trebleReplaceDiffSize(bufoffset off, bufsize old,
+                                           bufsize cnt, bufsize sn,
+                                           const byte* sb) {
+    if (old < cnt) {
+        treble_.replace(off, old, sn, sb, 0);
+        treble_.insert(off + old, cnt - old, sn, sb, old % sn);
+    } else if (old == cnt) {
+        treble_.replace(off, cnt, sn, sb, 0);
+    } else {  // old > cnt
+        treble_.replace(off, cnt, sn, sb, 0);
+        treble_.remove(off + cnt, old - cnt);
+    }
+    return true;
+}
+
+bool HexBedDocument::impose(bufoffset offset, bufsize size, byte value) {
+    if (readOnly()) return false;
     bufsize z = HexBedDocument::size();
     if (offset + size > z) {
         grow();
@@ -632,10 +649,62 @@ void HexBedDocument::impose(bufoffset offset, bufsize size, byte value) {
     dirty_ = true;
     context_->announceUndoChange(this);
     context_->announceBytesChanged(this, offset, size);
+    return true;
 }
 
-void HexBedDocument::impose(bufoffset offset, const_bytespan data) {
-    if (readOnly()) return;
+bool HexBedDocument::map(bufoffset offset, bufsize size,
+                         std::function<bool(bufoffset, bytespan)> mapper) {
+    if (readOnly()) return false;
+    bufsize z = HexBedDocument::size();
+    if (offset + size > z) return false;
+    bool ok = true;
+    byte bstack[256];
+    bufsize bs = sizeof(bstack);
+    bufsize bc = std::bit_ceil<bufsize>(std::min<bufsize>(size, 1UL << 20));
+    std::unique_ptr<byte[]> holder;
+    byte* buf = nullptr;
+    byte* b;
+    while (bc > bs && !buf) {
+        buf = new (std::nothrow) byte[bc];
+        bc >>= 1;
+    }
+    if (buf)
+        b = buf, bs = bc, holder = decltype(holder)(buf);
+    else
+        b = bstack;
+    HexBedTask(context_.get(), size, true)
+        .run([this, offset, size, mapper, b, bs, &ok](HexBedTask& task) {
+            bufsize o = offset, n = size;
+            auto token = addUndoReplaceMany(offset, size);
+            while (n && ok) {
+                bufsize r = read(o, bytespan{b, std::min<bufsize>(n, bs)});
+                if (!r) break;
+                try {
+                    ok = mapper(o, bytespan{b, b + r}) && !task.isCancelled();
+                } catch (...) {
+                    ok = false;
+                    break;
+                }
+                treble_.replace(o, r, b);
+                context_->announceBytesChanged(this, o, r);
+                o += r;
+                n -= r;
+                task.progress(task.progress() + r);
+            }
+            token.commit();
+            if (!ok)
+                undo();
+            else {
+                dirty_ = true;
+                context_->announceUndoChange(this);
+                context_->announceBytesChanged(this, offset, size);
+            }
+        });
+    return ok;
+}
+
+bool HexBedDocument::impose(bufoffset offset, const_bytespan data) {
+    if (readOnly()) return false;
     bufsize z = HexBedDocument::size(), ds = data.size();
     if (offset + ds > z) {
         grow();
@@ -651,45 +720,90 @@ void HexBedDocument::impose(bufoffset offset, const_bytespan data) {
     dirty_ = true;
     context_->announceUndoChange(this);
     context_->announceBytesChanged(this, offset, ds);
+    return true;
 }
 
-void HexBedDocument::replace(bufoffset offset, bufsize size, bufsize newsize,
+bool HexBedDocument::impose(bufoffset offset, bufsize nsize, bufsize ssize,
+                            const byte* svalues) {
+    if (readOnly()) return false;
+    bufsize z = HexBedDocument::size();
+    if (offset + nsize > z) {
+        grow();
+        bufsize lo = z - offset;
+        auto token = addUndoReplaceDiffSize(offset, lo, nsize);
+        trebleReplaceDiffSize(offset, lo, nsize, ssize, svalues);
+        token.commit();
+    } else {
+        auto token = addUndoReplaceMany(offset, nsize);
+        treble_.replace(offset, nsize, ssize, svalues, 0);
+        token.commit();
+    }
+    dirty_ = true;
+    context_->announceUndoChange(this);
+    context_->announceBytesChanged(this, offset, nsize);
+    return true;
+}
+
+bool HexBedDocument::replace(bufoffset offset, bufsize size, bufsize newsize,
                              byte v) {
     if (!size) {
-        insert(offset, newsize, v);
+        return insert(offset, newsize, v);
     } else if (!newsize) {
-        remove(offset, size);
+        return remove(offset, size);
     } else if (newsize == size) {
-        impose(offset, size, v);
+        return impose(offset, size, v);
     } else {
         auto token = addUndoReplaceDiffSize(offset, size, newsize);
         trebleReplaceDiffSize(offset, size, newsize, v);
         token.commit();
+        dirty_ = true;
         context_->announceUndoChange(this);
         context_->announceBytesChanged(this, offset);
+        return true;
     }
 }
 
-void HexBedDocument::replace(bufoffset offset, bufsize size,
+bool HexBedDocument::replace(bufoffset offset, bufsize size,
                              const_bytespan data) {
     bufsize newsize = data.size();
     if (!size) {
-        insert(offset, data);
+        return insert(offset, data);
     } else if (!newsize) {
-        remove(offset, size);
+        return remove(offset, size);
     } else if (newsize == size) {
-        impose(offset, data);
+        return impose(offset, data);
     } else {
         auto token = addUndoReplaceDiffSize(offset, size, newsize);
         trebleReplaceDiffSize(offset, size, newsize, data.data());
         token.commit();
+        dirty_ = true;
         context_->announceUndoChange(this);
         context_->announceBytesChanged(this, offset);
+        return true;
     }
 }
 
-void HexBedDocument::insert(bufoffset offset, bufsize size, byte value) {
-    if (readOnly()) return;
+bool HexBedDocument::replace(bufoffset offset, bufsize size, bufsize nsize,
+                             bufsize ssize, const byte* svalues) {
+    if (!size) {
+        return insert(offset, nsize, ssize, svalues);
+    } else if (!nsize) {
+        return remove(offset, size);
+    } else if (nsize == size) {
+        return impose(offset, size, ssize, svalues);
+    } else {
+        auto token = addUndoReplaceDiffSize(offset, size, nsize);
+        trebleReplaceDiffSize(offset, size, nsize, ssize, svalues);
+        token.commit();
+        dirty_ = true;
+        context_->announceUndoChange(this);
+        context_->announceBytesChanged(this, offset);
+        return true;
+    }
+}
+
+bool HexBedDocument::insert(bufoffset offset, bufsize size, byte value) {
+    if (readOnly()) return false;
     grow();
     auto token = addUndoInsert(offset, size);
     treble_.insert(offset, size, value);
@@ -697,10 +811,24 @@ void HexBedDocument::insert(bufoffset offset, bufsize size, byte value) {
     dirty_ = true;
     context_->announceUndoChange(this);
     context_->announceBytesChanged(this, offset);
+    return true;
 }
 
-void HexBedDocument::insert(bufoffset offset, const_bytespan data) {
-    if (readOnly()) return;
+bool HexBedDocument::insert(bufoffset offset, bufsize nsize, bufsize ssize,
+                            const byte* svalues) {
+    if (readOnly()) return false;
+    grow();
+    auto token = addUndoInsert(offset, nsize);
+    treble_.insert(offset, nsize, ssize, svalues, 0);
+    token.commit();
+    dirty_ = true;
+    context_->announceUndoChange(this);
+    context_->announceBytesChanged(this, offset);
+    return true;
+}
+
+bool HexBedDocument::insert(bufoffset offset, const_bytespan data) {
+    if (readOnly()) return false;
     grow();
     auto token = addUndoInsert(offset, data.size());
     treble_.insert(offset, data.size(), data.data());
@@ -708,27 +836,29 @@ void HexBedDocument::insert(bufoffset offset, const_bytespan data) {
     dirty_ = true;
     context_->announceUndoChange(this);
     context_->announceBytesChanged(this, offset);
+    return true;
 }
 
-void HexBedDocument::remove(bufoffset offset, bufsize size) {
-    if (readOnly()) return;
+bool HexBedDocument::remove(bufoffset offset, bufsize size) {
+    if (readOnly()) return false;
     auto token = addUndoRemove(offset, size);
     treble_.remove(offset, size);
     token.commit();
     dirty_ = true;
     context_->announceUndoChange(this);
     context_->announceBytesChanged(this, offset);
+    return true;
 }
 
-void HexBedDocument::impose(bufoffset offset, byte value) {
-    impose(offset, 1, value);
+bool HexBedDocument::impose(bufoffset offset, byte value) {
+    return impose(offset, 1, value);
 }
 
-void HexBedDocument::insert(bufoffset offset, byte value) {
-    insert(offset, 1, value);
+bool HexBedDocument::insert(bufoffset offset, byte value) {
+    return insert(offset, 1, value);
 }
 
-void HexBedDocument::remove(bufoffset offset) { remove(offset, 1); }
+bool HexBedDocument::remove(bufoffset offset) { return remove(offset, 1); }
 
 bufsize HexBedDocument::size() const noexcept { return treble_.size(); }
 

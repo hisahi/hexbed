@@ -523,6 +523,31 @@ struct CopyFeeder {
     }
 };
 
+struct RepeatFeeder {
+    bufsize sn;
+    const byte* sb;
+    bufsize so;
+    template <typename It>
+    void operator()(It begin, It end) {
+        byte* p0 = &*begin;
+        byte* p1 = &*end;
+        bufsize n;
+        // if (p0 >= p1) return;
+        if (so) {
+            bufsize pd = p1 - p0, sd = sn - so;
+            if (pd < sd) {
+                n = memCopy(p0, sb + so, pd);
+                p0 += n;
+                so += n;
+                return;
+            }
+            p0 += memCopy(p0, sb + so, sd);
+        }
+        so = (p1 - p0) % sn;
+        memFillRepeat(p0, sn, sb, p1 - p0);
+    }
+};
+
 template <typename Feeder>
 void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
     if (!count) return;
@@ -580,6 +605,13 @@ void Treble::replace(bufsize index, bufsize count, byte v) {
 
 void Treble::replace(bufsize index, bufsize count, const byte* data) {
     CopyFeeder feeder{data};
+    replace_(index, count, feeder);
+    PRINT_TREBLE();
+}
+
+void Treble::replace(bufsize index, bufsize count, bufsize scount,
+                     const byte* sdata, bufsize soffset) {
+    RepeatFeeder feeder{scount, sdata, soffset};
     replace_(index, count, feeder);
     PRINT_TREBLE();
 }
@@ -665,6 +697,14 @@ void Treble::insert(bufsize index, bufsize count, byte v) {
 
 void Treble::insert(bufsize index, bufsize count, const byte* data) {
     CopyFeeder feeder{data};
+    insert_(index, count, feeder);
+    total_ += count;
+    PRINT_TREBLE();
+}
+
+void Treble::insert(bufsize index, bufsize count, bufsize scount,
+                    const byte* sdata, bufsize soffset) {
+    RepeatFeeder feeder{scount, sdata, soffset};
     insert_(index, count, feeder);
     total_ += count;
     PRINT_TREBLE();

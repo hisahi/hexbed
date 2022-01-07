@@ -17,24 +17,46 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// common/memory.hh -- header for memory utilities
+// ui/dialog/bitopshift.hh -- header for the block shift bit op dialog
 
-#ifndef HEXBED_COMMON_MEMORY_HH
-#define HEXBED_COMMON_MEMORY_HH
+#ifndef HEXBED_UI_DIALOG_BITOPSHIFT_HH
+#define HEXBED_UI_DIALOG_BITOPSHIFT_HH
 
+#include <wx/choice.h>
+#include <wx/dialog.h>
+#include <wx/spinctrl.h>
+
+#include "app/bitop.hh"
 #include "common/types.hh"
+#include "ui/editor-fwd.hh"
+#include "ui/hexbed-fwd.hh"
 
 namespace hexbed {
 
-bufsize memCopy(byte* edi, const byte* esi, bufsize ecx);
-bufsize memCopyBack(byte* edi, const byte* esi, bufsize ecx);
-bufsize memMove(byte* edi, const byte* esi, bufsize ecx);
-bufsize memFill(byte* edi, byte al, bufsize ecx);
-bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx);
-const byte* memFindFirst(const byte* start, const byte* end, byte c);
-const byte* memFindLast(const byte* start, const byte* end, byte c);
-bool memEqual(const byte* a, const byte* b, bufsize n);
+namespace ui {
+
+class BitwiseShiftOpDialog : public wxDialog {
+  public:
+    BitwiseShiftOpDialog(HexBedMainFrame* parent);
+    BitwiseShiftOp GetOperation() const noexcept;
+    int GetShiftCount() const noexcept;
+
+  protected:
+    void OnOK(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+
+  private:
+    void EndDialog(int result);
+
+    HexBedMainFrame* parent_;
+    wxChoice* opChoice_;
+    wxSpinCtrl* spinner_;
+    BitwiseShiftOp choice_{BitwiseShiftOp::ShiftLeft};
+    int shiftCount_{1};
+};
+
+};  // namespace ui
 
 };  // namespace hexbed
 
-#endif /* HEXBED_COMMON_MEMORY_HH */
+#endif /* HEXBED_UI_DIALOG_BITOPSHIFT_HH */

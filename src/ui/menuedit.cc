@@ -53,6 +53,20 @@ wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
         addItem(menuEdit, MenuEdit_SelectRange, _("Select &block..."),
                 _("Selects a block of bytes"), wxACCEL_CTRL, 'E'));
     menuEdit->AppendSeparator();
+    fileOnly.push_back(
+        addItem(menuEdit, MenuEdit_InsertOrReplace, _("Ins&ert or replace..."),
+                _("Inserts or replaces the selection with a block of bytes"),
+                wxACCEL_CTRL, 'I'));
+    fileOnly.push_back(addItem(
+        menuEdit, MenuEdit_BitwiseBinaryOp, _("Bitwise binary operation..."),
+        _("Performs a binary bitwise operation on the selected block")));
+    fileOnly.push_back(addItem(
+        menuEdit, MenuEdit_BitwiseUnaryOp, _("Bitwise unary operation..."),
+        _("Performs a unary bitwise operation on the selected block")));
+    fileOnly.push_back(addItem(
+        menuEdit, MenuEdit_BitwiseShiftOp, _("Bitwise shift operation..."),
+        _("Performs a bitwise shift operation on the selected block")));
+    menuEdit->AppendSeparator();
     addCheckItem(
         menuEdit, MenuEdit_InsertMode, _("&Insert mode"),
         _("Inserts bytes typed in instead of overwriting existing ones"),

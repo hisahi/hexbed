@@ -44,6 +44,10 @@ enum {
     MenuEdit_PasteReplace = 0x200,
     MenuEdit_InsertMode,
     MenuEdit_SelectRange,
+    MenuEdit_InsertOrReplace,
+    MenuEdit_BitwiseBinaryOp,
+    MenuEdit_BitwiseUnaryOp,
+    MenuEdit_BitwiseShiftOp,
 
     MenuSearch_FindNext = 0x300,
     MenuSearch_FindPrevious,

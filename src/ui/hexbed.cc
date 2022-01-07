@@ -36,8 +36,12 @@
 #include "file/task.hh"
 #include "ui/applock.hh"
 #include "ui/clipboard.hh"
+#include "ui/dialogs/bitopbinary.hh"
+#include "ui/dialogs/bitopshift.hh"
+#include "ui/dialogs/bitopunary.hh"
 #include "ui/dialogs/find.hh"
 #include "ui/dialogs/goto.hh"
+#include "ui/dialogs/insert.hh"
 #include "ui/dialogs/replace.hh"
 #include "ui/dialogs/selectblock.hh"
 #include "ui/editor.hh"
@@ -92,6 +96,14 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
     EVT_MENU(wxID_SELECTALL, HexBedMainFrame::OnEditSelectAll)
     EVT_MENU(hexbed::menu::MenuEdit_SelectRange,
              HexBedMainFrame::OnEditSelectBlock)
+    EVT_MENU(hexbed::menu::MenuEdit_InsertOrReplace,
+             HexBedMainFrame::OnEditInsertOrReplace)
+    EVT_MENU(hexbed::menu::MenuEdit_BitwiseBinaryOp,
+             HexBedMainFrame::OnEditBitwiseBinaryOp)
+    EVT_MENU(hexbed::menu::MenuEdit_BitwiseUnaryOp,
+             HexBedMainFrame::OnEditBitwiseUnaryOp)
+    EVT_MENU(hexbed::menu::MenuEdit_BitwiseShiftOp,
+             HexBedMainFrame::OnEditBitwiseShiftOp)
     EVT_MENU(wxID_PREFERENCES, HexBedMainFrame::OnEditPrefs)
 
     EVT_MENU(wxID_FIND, HexBedMainFrame::OnSearchFind)
@@ -200,6 +212,8 @@ HexBedMainFrame::HexBedMainFrame()
     InitPreferences(this);
     searchDocument_ = std::make_shared<HexBedDocument>(context_);
     replaceDocument_ = std::make_shared<HexBedDocument>(context_);
+    insertDocument_ = std::make_shared<HexBedDocument>(context_);
+    binaryOpDocument_ = std::make_shared<HexBedDocument>(context_);
     menuBar->Check(hexbed::menu::MenuEdit_InsertMode, context_->state.insert);
 }
 
@@ -392,12 +406,16 @@ void HexBedMainFrame::InitMenuEnabled() {
 
 void HexBedMainFrame::UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& ed) {
     bufsize sel, seln;
-    bool seltext;
+    bool seltext, selhas;
     ed.GetSelection(sel, seln, seltext);
     wxMenuBar& mbar = *GetMenuBar();
-    mbar.Enable(wxID_CUT, seln > 0);
-    mbar.Enable(wxID_COPY, seln > 0);
-    mbar.Enable(wxID_DELETE, seln > 0);
+    selhas = seln > 0;
+    mbar.Enable(wxID_CUT, selhas);
+    mbar.Enable(wxID_COPY, selhas);
+    mbar.Enable(wxID_DELETE, selhas);
+    mbar.Enable(hexbed::menu::MenuEdit_BitwiseBinaryOp, selhas);
+    mbar.Enable(hexbed::menu::MenuEdit_BitwiseUnaryOp, selhas);
+    mbar.Enable(hexbed::menu::MenuEdit_BitwiseShiftOp, selhas);
 }
 
 void HexBedMainFrame::OnUndoRedo(hexbed::ui::HexEditorParent& ed) {
@@ -621,6 +639,109 @@ void HexBedMainFrame::OnSearchReplace(wxCommandEvent& event) {
     findDialog_->SetFocus();
 }
 
+void HexBedMainFrame::OnEditInsertOrReplace(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    InsertBlockDialog insertDialog(this, context_.get(), insertDocument_, seln);
+    if (ed && insertDialog.ShowModal() == wxID_OK) {
+        bufsize n = insertDialog.GetByteCount();
+        try {
+            bufsize sn = insertDocument_->size();
+            auto sb_ = std::make_unique<byte[]>(sn);
+            byte* sb = sb_.get();
+            bufsize sr = insertDocument_->read(0, bytespan{sb, sb + sn});
+            if (ed->document().replace(sel, seln, n, sr, sb))
+                ed->SelectBytes(
+                    sel, n, SelectFlags().caretAtBeginning().highlightCaret());
+        } catch (...) {
+            try {
+                wxMessageBox(
+                    wxString::Format(_("Insert failed: %s"),
+                                     currentExceptionAsString().c_str()),
+                    "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+        }
+    }
+}
+
+bool doBitwiseBinaryOp(HexBedDocument& document, BitwiseBinaryOp op,
+                       const_bytespan second);
+bool doBitwiseUnaryOp(HexBedDocument& document, BitwiseBinaryOp op);
+bool doBitwiseShiftOp(HexBedDocument& document, BitwiseShiftOp op, unsigned sc);
+
+void HexBedMainFrame::OnEditBitwiseBinaryOp(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    BitwiseBinaryOpDialog dial(this, context_.get(), binaryOpDocument_);
+    if (ed && dial.ShowModal() == wxID_OK) {
+        try {
+            bufsize sn = binaryOpDocument_->size();
+            auto sb_ = std::make_unique<byte[]>(sn);
+            byte* sb = sb_.get();
+            bufsize sr = binaryOpDocument_->read(0, bytespan{sb, sb + sn});
+            if (!sr) return;
+            doBitwiseBinaryOp(ed->document(), sel, seln,
+                              const_bytespan{sb, sb + sr}, dial.GetOperation());
+        } catch (...) {
+            try {
+                wxMessageBox(
+                    wxString::Format(_("Bitwise binary op failed: %s"),
+                                     currentExceptionAsString().c_str()),
+                    "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+        }
+    }
+}
+
+void HexBedMainFrame::OnEditBitwiseUnaryOp(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    BitwiseUnaryOpDialog dial(this);
+    if (ed && dial.ShowModal() == wxID_OK) {
+        try {
+            doBitwiseUnaryOp(ed->document(), sel, seln, dial.GetOperation());
+        } catch (...) {
+            try {
+                wxMessageBox(
+                    wxString::Format(_("Bitwise unary op failed: %s"),
+                                     currentExceptionAsString().c_str()),
+                    "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+        }
+    }
+}
+
+void HexBedMainFrame::OnEditBitwiseShiftOp(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    BitwiseShiftOpDialog dial(this);
+    if (ed && dial.ShowModal() == wxID_OK) {
+        try {
+            doBitwiseShiftOp(ed->document(), sel, seln, dial.GetShiftCount(),
+                             dial.GetOperation());
+        } catch (...) {
+            try {
+                wxMessageBox(
+                    wxString::Format(_("Bitwise shift op failed: %s"),
+                                     currentExceptionAsString().c_str()),
+                    "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+        }
+    }
+}
+
 void HexBedMainFrame::OnSearchGoTo(wxCommandEvent& event) {
     hexbed::ui::HexBedEditor* ed = GetEditor();
     bufsize sel, seln;
@@ -754,9 +875,10 @@ void HexBedMainFrame::DoCopy() {
             return;
         }
         if constexpr (cut) {
-            ed->document().remove(sel, seln);
-            ed->SelectBytes(sel, 0, SelectFlags().highlightCaret());
-            ed->HintBytesChanged(sel);
+            if (ed->document().remove(sel, seln)) {
+                ed->SelectBytes(sel, 0, SelectFlags().highlightCaret());
+                ed->HintBytesChanged(sel);
+            }
         }
     }
 }
@@ -813,8 +935,8 @@ void HexBedMainFrame::OnEditDelete(wxCommandEvent& event) {
     bool seltext;
     ed->GetSelection(sel, seln, seltext);
     if (seln > 0) {
-        ed->document().remove(sel, seln);
-        ed->SelectBytes(sel, 0, SelectFlags().highlightCaret());
+        if (ed->document().remove(sel, seln))
+            ed->SelectBytes(sel, 0, SelectFlags().highlightCaret());
     }
 }
 

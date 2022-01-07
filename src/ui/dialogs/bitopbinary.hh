@@ -17,24 +17,50 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// common/memory.hh -- header for memory utilities
+// ui/dialog/bitopbinary.hh -- header for the block binary bit op dialog
 
-#ifndef HEXBED_COMMON_MEMORY_HH
-#define HEXBED_COMMON_MEMORY_HH
+#ifndef HEXBED_UI_DIALOG_BITOPBINARY_HH
+#define HEXBED_UI_DIALOG_BITOPBINARY_HH
 
+#include <wx/choice.h>
+#include <wx/dialog.h>
+
+#include "app/bitop.hh"
 #include "common/types.hh"
+#include "ui/editor-fwd.hh"
+#include "ui/hexbed-fwd.hh"
+#include "ui/saeditor.hh"
 
 namespace hexbed {
 
-bufsize memCopy(byte* edi, const byte* esi, bufsize ecx);
-bufsize memCopyBack(byte* edi, const byte* esi, bufsize ecx);
-bufsize memMove(byte* edi, const byte* esi, bufsize ecx);
-bufsize memFill(byte* edi, byte al, bufsize ecx);
-bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx);
-const byte* memFindFirst(const byte* start, const byte* end, byte c);
-const byte* memFindLast(const byte* start, const byte* end, byte c);
-bool memEqual(const byte* a, const byte* b, bufsize n);
+namespace ui {
+
+class BitwiseBinaryOpDialog : public wxDialog {
+  public:
+    BitwiseBinaryOpDialog(HexBedMainFrame* parent, HexBedContextMain* context,
+                          std::shared_ptr<HexBedDocument> document);
+    BitwiseBinaryOp GetOperation() const noexcept;
+
+  protected:
+    void OnOK(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+
+  private:
+    void EndDialog(int result);
+    bool CheckInput();
+    void OnChangedInput(wxCommandEvent& event);
+
+    HexBedMainFrame* parent_;
+    HexBedContextMain* context_;
+    std::shared_ptr<HexBedDocument> document_;
+    HexBedStandaloneEditor* editor_;
+    wxChoice* opChoice_;
+    wxButton* okButton_;
+    BitwiseBinaryOp choice_{BitwiseBinaryOp::Add};
+};
+
+};  // namespace ui
 
 };  // namespace hexbed
 
-#endif /* HEXBED_COMMON_MEMORY_HH */
+#endif /* HEXBED_UI_DIALOG_BITOPBINARY_HH */

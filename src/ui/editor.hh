@@ -68,10 +68,10 @@ struct SelectFlags {
         if (isCaretAtEnd())
             highlightEnd();
         else
-            highlightBegin();
+            highlightBeginning();
         return *this;
     }
-    constexpr SelectFlags& highlightBegin() noexcept {
+    constexpr SelectFlags& highlightBeginning() noexcept {
         value &= ~6;
         value |= 2;
         return *this;

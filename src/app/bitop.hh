@@ -17,24 +17,35 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// common/memory.hh -- header for memory utilities
+// app/bitop.hh -- header for bit operations
 
-#ifndef HEXBED_COMMON_MEMORY_HH
-#define HEXBED_COMMON_MEMORY_HH
+#ifndef HEXBED_APP_BITOP_HH
+#define HEXBED_APP_BITOP_HH
 
 #include "common/types.hh"
+#include "file/document.hh"
 
 namespace hexbed {
 
-bufsize memCopy(byte* edi, const byte* esi, bufsize ecx);
-bufsize memCopyBack(byte* edi, const byte* esi, bufsize ecx);
-bufsize memMove(byte* edi, const byte* esi, bufsize ecx);
-bufsize memFill(byte* edi, byte al, bufsize ecx);
-bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx);
-const byte* memFindFirst(const byte* start, const byte* end, byte c);
-const byte* memFindLast(const byte* start, const byte* end, byte c);
-bool memEqual(const byte* a, const byte* b, bufsize n);
+enum class BitwiseBinaryOp { Add, And, Or, Xor };
+
+enum class BitwiseShiftOp {
+    ShiftLeft,
+    ShiftRight,
+    ShiftRightArithmetic,
+    RotateLeft,
+    RotateRight
+};
+
+enum class BitwiseUnaryOp { Not };
+
+bool doBitwiseBinaryOp(HexBedDocument& document, bufsize offset, bufsize count,
+                       const_bytespan second, BitwiseBinaryOp op);
+bool doBitwiseUnaryOp(HexBedDocument& document, bufsize offset, bufsize count,
+                      BitwiseUnaryOp op);
+bool doBitwiseShiftOp(HexBedDocument& document, bufsize offset, bufsize count,
+                      unsigned sc, BitwiseShiftOp op);
 
 };  // namespace hexbed
 
-#endif /* HEXBED_COMMON_MEMORY_HH */
+#endif /* HEXBED_APP_BITOP_HH */

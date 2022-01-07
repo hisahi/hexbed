@@ -176,16 +176,25 @@ class HexBedDocument {
 
     bufsize read(bufoffset offset, bytespan data) const;
 
-    void impose(bufoffset offset, byte value);
-    void impose(bufoffset offset, bufsize size, byte value);
-    void impose(bufoffset offset, const_bytespan data);
-    void replace(bufoffset offset, bufsize size, bufsize newsize, byte value);
-    void replace(bufoffset offset, bufsize size, const_bytespan data);
-    void insert(bufoffset offset, byte value);
-    void insert(bufoffset offset, bufsize size, byte value);
-    void insert(bufoffset offset, const_bytespan data);
-    void remove(bufoffset offset);
-    void remove(bufoffset offset, bufsize size);
+    bool impose(bufoffset offset, byte value);
+    bool impose(bufoffset offset, bufsize size, byte value);
+    bool impose(bufoffset offset, bufsize nsize, bufsize ssize,
+                const byte* svalues);
+    bool impose(bufoffset offset, const_bytespan data);
+    bool replace(bufoffset offset, bufsize size, bufsize newsize, byte value);
+    bool replace(bufoffset offset, bufsize size, const_bytespan data);
+    bool replace(bufoffset offset, bufsize size, bufsize nsize, bufsize ssize,
+                 const byte* svalues);
+    bool insert(bufoffset offset, byte value);
+    bool insert(bufoffset offset, bufsize size, byte value);
+    bool insert(bufoffset offset, const_bytespan data);
+    bool insert(bufoffset offset, bufsize nsize, bufsize ssize,
+                const byte* svalues);
+    bool remove(bufoffset offset);
+    bool remove(bufoffset offset, bufsize size);
+
+    bool map(bufoffset offset, bufsize size,
+             std::function<bool(bufoffset, bytespan)> mapper);
 
     SearchResult searchForward(bufoffset start, bufoffset end,
                                const_bytespan data);
@@ -229,10 +238,12 @@ class HexBedDocument {
 
     void grow();
 
-    void trebleReplaceDiffSize(bufoffset offset, bufsize old, bufsize cnt,
+    bool trebleReplaceDiffSize(bufoffset offset, bufsize old, bufsize cnt,
                                byte v);
-    void trebleReplaceDiffSize(bufoffset offset, bufsize old, bufsize cnt,
+    bool trebleReplaceDiffSize(bufoffset offset, bufsize old, bufsize cnt,
                                const byte* data);
+    bool trebleReplaceDiffSize(bufoffset offset, bufsize old, bufsize cnt,
+                               bufsize sn, const byte* sb);
 
     UndoToken addUndo(HexBedUndoEntry&& entry);
     UndoToken addUndoReplaceOne(bufsize off);

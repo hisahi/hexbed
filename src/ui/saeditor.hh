@@ -53,6 +53,7 @@ class HexBedStandaloneEditor : public wxPanel, public HexEditorParent {
     inline void ReloadConfig() override { FullUpdate(); }
     void ReloadFile() override;
     void SelectBytes(bufsize start, bufsize length, SelectFlags flags) override;
+    void SelectAll(SelectFlags flags);
     void SelectNone() override;
     void GetSelection(bufsize& start, bufsize& length, bool& text) override;
     HexBedPeekRegion PeekBufferAtCursor() override;

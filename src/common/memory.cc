@@ -47,6 +47,38 @@ bufsize memFill(byte* edi, byte al, bufsize ecx) {
     return ecx;
 }
 
+static bufsize memFillRepeatNaive(byte* edi, bufsize ebx, const byte* esi,
+                                  bufsize ecx) {
+    bufsize ecx_orig = ecx;
+    while (ecx >= ebx) edi += memCopy(edi, esi, ebx), ecx -= ebx;
+    while (ecx) edi += memCopy(edi, esi, ecx);
+    return ecx_orig;
+}
+
+static bufsize memFillRepeatLog(byte* edi, bufsize ebx, const byte* esi,
+                                bufsize ecx) {
+    // ecx >> (much greater than) ebx
+    bufsize edx = ecx;
+    byte* ebp = edi;
+    edi += memCopy(edi, esi, ebx);
+    ecx -= ebx;
+    while (ecx >= ebx) {
+        edi += memCopy(edi, ebp, ebx);
+        ecx -= ebx;
+        ebx <<= 1;
+    }
+    memCopy(edi, ebp, ecx);
+    return edx;
+}
+
+bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx) {
+    if (ebx <= 1) return memFill(edi, ebx ? *esi : 0, ecx);
+    if (ecx <= ebx) return memCopy(edi, esi, ecx);
+    if (ecx < 256 || ebx >= 32 || (ecx >> 4) < ebx)
+        return memFillRepeatNaive(edi, ebx, esi, ecx);
+    return memFillRepeatLog(edi, ebx, esi, ecx);
+}
+
 const byte* memFindFirst(const byte* start, const byte* end, byte c) {
     const byte* p = std::find(start, end, c);
     return p == end ? nullptr : p;
