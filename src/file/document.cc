@@ -22,6 +22,7 @@
 #include "file/document.hh"
 
 #include <filesystem>
+#include <new>
 
 #include "app/config.hh"
 #include "common/memory.hh"
@@ -652,26 +653,39 @@ bool HexBedDocument::impose(bufoffset offset, bufsize size, byte value) {
     return true;
 }
 
+#if __cpp_lib_hardware_interference_size >= 201603
+static constexpr std::size_t best_align =
+    std::hardware_destructive_interference_size;
+#else
+static constexpr std::size_t best_align =
+    std::max<std::size_t>(64, sizeof(std::max_align_t));
+#endif
+
 bool HexBedDocument::map(bufoffset offset, bufsize size,
-                         std::function<bool(bufoffset, bytespan)> mapper) {
+                         std::function<bool(bufoffset, bytespan)> mapper,
+                         bufsize mul) {
     if (readOnly()) return false;
     bufsize z = HexBedDocument::size();
     if (offset + size > z) return false;
     bool ok = true;
-    byte bstack[256];
+    alignas(std::max_align_t) byte bstack[256];
     bufsize bs = sizeof(bstack);
     bufsize bc = std::bit_ceil<bufsize>(std::min<bufsize>(size, 1UL << 20));
     std::unique_ptr<byte[]> holder;
     byte* buf = nullptr;
     byte* b;
     while (bc > bs && !buf) {
-        buf = new (std::nothrow) byte[bc];
+        buf = new (std::align_val_t(best_align), std::nothrow) byte[bc];
         bc >>= 1;
     }
     if (buf)
         b = buf, bs = bc, holder = decltype(holder)(buf);
     else
         b = bstack;
+    if (mul > 1) {
+        if (mul > bs) return false;
+        bs -= bs % mul;
+    }
     HexBedTask(context_.get(), size, true)
         .run([this, offset, size, mapper, b, bs, &ok](HexBedTask& task) {
             bufsize o = offset, n = size;
@@ -690,6 +704,59 @@ bool HexBedDocument::map(bufoffset offset, bufsize size,
                 o += r;
                 n -= r;
                 task.progress(task.progress() + r);
+            }
+            token.commit();
+            if (!ok)
+                undo();
+            else {
+                dirty_ = true;
+                context_->announceUndoChange(this);
+                context_->announceBytesChanged(this, offset, size);
+            }
+        });
+    return ok;
+}
+
+bool HexBedDocument::reverse(bufoffset offset, bufsize size) {
+    if (readOnly()) return false;
+    bufsize z = HexBedDocument::size();
+    if (offset + size > z) return false;
+    bool ok = true;
+    alignas(std::max_align_t) byte bstack[256];
+    bufsize bs = sizeof(bstack);
+    bufsize bc = std::bit_ceil<bufsize>(std::min<bufsize>(size, 1UL << 20));
+    std::unique_ptr<byte[]> holder;
+    byte* buf = nullptr;
+    byte* b;
+    while (bc > bs && !buf) {
+        buf = new (std::align_val_t(best_align), std::nothrow) byte[bc];
+        bc >>= 1;
+    }
+    if (buf)
+        b = buf, bs = bc, holder = decltype(holder)(buf);
+    else
+        b = bstack;
+    bs &= ~1;
+    HexBedTask(context_.get(), size, true)
+        .run([this, offset, size, b, bs, &ok](HexBedTask& task) {
+            bufsize o = offset, q = offset + size, hc = bs >> 1;
+            auto token = addUndoReplaceMany(offset, size);
+            while (q > o + 1 && ok) {
+                bufsize alloc = std::min<bufsize>(hc, (q - o) >> 1);
+                if (read(o, bytespan{b, alloc}) != alloc) {
+                    ok = false;
+                    break;
+                }
+                q -= alloc;
+                if (read(q, bytespan{b + alloc, alloc}) != alloc) {
+                    ok = false;
+                    break;
+                }
+                memReverse(b, alloc);
+                memReverse(b + alloc, alloc);
+                treble_.replace(q, alloc, b);
+                treble_.replace(o, alloc, b + alloc);
+                o += alloc;
             }
             token.commit();
             if (!ok)

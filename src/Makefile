@@ -10,7 +10,7 @@ RM=rm -f
 ifdef RELEASE
 CFLAGS=-O3 -DNDEBUG
 CXXFLAGS=-O3 -DNDEBUG
-LDFLAGS=-O3
+LDFLAGS=-O3 -flto
 else
 # debug flags:
 CFLAGS=-g3 -O0 -Wall -Wextra -Werror -Wno-unused-parameter

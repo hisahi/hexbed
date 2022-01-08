@@ -79,6 +79,11 @@ bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx) {
     return memFillRepeatLog(edi, ebx, esi, ecx);
 }
 
+bufsize memReverse(byte* edi, bufsize ecx) {
+    std::reverse(edi, edi + ecx);
+    return ecx;
+}
+
 const byte* memFindFirst(const byte* start, const byte* end, byte c) {
     const byte* p = std::find(start, end, c);
     return p == end ? nullptr : p;

@@ -49,12 +49,15 @@ BitwiseUnaryOpDialog::BitwiseUnaryOpDialog(HexBedMainFrame* parent)
     buttons->SetNegativeButton(cancelButton);
     buttons->Realize();
 
-    std::vector<wxString> choiceTexts{_("NOT")};
+    std::vector<wxString> choiceTexts{_("NOT"), _("Swap nibbles"),
+                                      _("Reverse bit order")};
     opChoice_ = new wxChoice(
         this, wxID_ANY, wxDefaultPosition, wxDefaultSize, choiceTexts.size(),
         choiceTexts.data(), 0,
         ChoiceValidator<BitwiseUnaryOp>(
-            &choice_, std::vector<BitwiseUnaryOp>{BitwiseUnaryOp::Not}));
+            &choice_, std::vector<BitwiseUnaryOp>{BitwiseUnaryOp::Not,
+                                                  BitwiseUnaryOp::NibbleSwap,
+                                                  BitwiseUnaryOp::BitReverse}));
 
     top->Add(new wxStaticText(this, wxID_ANY, _("Operation:")));
     top->Add(opChoice_, wxSizerFlags().Expand());
@@ -66,6 +69,7 @@ BitwiseUnaryOpDialog::BitwiseUnaryOpDialog(HexBedMainFrame* parent)
     SetSize(sz.GetWidth(), GetSize().GetHeight());
     FitInside();
     Layout();
+    TransferDataToWindow();
 }
 
 BitwiseUnaryOp BitwiseUnaryOpDialog::GetOperation() const noexcept {
@@ -77,7 +81,9 @@ void BitwiseUnaryOpDialog::EndDialog(int r) {
     if (IsModal()) EndModal(r);
 }
 
-void BitwiseUnaryOpDialog::OnOK(wxCommandEvent& event) { EndDialog(wxID_OK); }
+void BitwiseUnaryOpDialog::OnOK(wxCommandEvent& event) {
+    if (Validate() && TransferDataFromWindow()) EndDialog(wxID_OK);
+}
 
 void BitwiseUnaryOpDialog::OnCancel(wxCommandEvent& event) {
     EndDialog(wxID_CANCEL);

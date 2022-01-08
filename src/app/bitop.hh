@@ -22,6 +22,9 @@
 #ifndef HEXBED_APP_BITOP_HH
 #define HEXBED_APP_BITOP_HH
 
+#define __STDC_LIMIT_MACROS
+#include <cstdint>
+
 #include "common/types.hh"
 #include "file/document.hh"
 
@@ -37,7 +40,7 @@ enum class BitwiseShiftOp {
     RotateRight
 };
 
-enum class BitwiseUnaryOp { Not };
+enum class BitwiseUnaryOp { Not, NibbleSwap, BitReverse };
 
 bool doBitwiseBinaryOp(HexBedDocument& document, bufsize offset, bufsize count,
                        const_bytespan second, BitwiseBinaryOp op);
@@ -45,6 +48,39 @@ bool doBitwiseUnaryOp(HexBedDocument& document, bufsize offset, bufsize count,
                       BitwiseUnaryOp op);
 bool doBitwiseShiftOp(HexBedDocument& document, bufsize offset, bufsize count,
                       unsigned sc, BitwiseShiftOp op);
+bool doByteSwapOpNaive(HexBedDocument& document, bufsize offset, bufsize count,
+                       unsigned wordSize);
+
+#ifdef UINT16_MAX
+bool doByteSwapOpFast2(HexBedDocument& document, bufsize offset, bufsize count);
+#endif
+#ifdef UINT32_MAX
+bool doByteSwapOpFast4(HexBedDocument& document, bufsize offset, bufsize count);
+#endif
+#ifdef UINT64_MAX
+bool doByteSwapOpFast8(HexBedDocument& document, bufsize offset, bufsize count);
+bool doByteSwapOpFast16(HexBedDocument& document, bufsize offset,
+                        bufsize count);
+#endif
+
+template <unsigned wordSize>
+bool doByteSwapOp(HexBedDocument& document, bufsize offset, bufsize count) {
+#ifdef UINT16_MAX
+    if constexpr (wordSize == 2)
+        return doByteSwapOpFast2(document, offset, count);
+#endif
+#ifdef UINT32_MAX
+    if constexpr (wordSize == 4)
+        return doByteSwapOpFast4(document, offset, count);
+#endif
+#ifdef UINT64_MAX
+    if constexpr (wordSize == 8)
+        return doByteSwapOpFast8(document, offset, count);
+    if constexpr (wordSize == 16)
+        return doByteSwapOpFast16(document, offset, count);
+#endif
+    return doByteSwapOpNaive(document, offset, count, wordSize);
+}
 
 };  // namespace hexbed
 

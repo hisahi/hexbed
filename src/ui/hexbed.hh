@@ -95,6 +95,11 @@ class HexBedMainFrame : public wxFrame {
     void OnEditBitwiseBinaryOp(wxCommandEvent& event);
     void OnEditBitwiseUnaryOp(wxCommandEvent& event);
     void OnEditBitwiseShiftOp(wxCommandEvent& event);
+    void OnEditByteSwap2(wxCommandEvent& event);
+    void OnEditByteSwap4(wxCommandEvent& event);
+    void OnEditByteSwap8(wxCommandEvent& event);
+    void OnEditByteSwap16(wxCommandEvent& event);
+    void OnEditReverse(wxCommandEvent& event);
     void OnEditPrefs(wxCommandEvent& event);
 
     void OnSearchFind(wxCommandEvent& event);

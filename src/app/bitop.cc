@@ -21,6 +21,7 @@
 
 #include "app/bitop.hh"
 
+#include <bit>
 #include <functional>
 
 namespace hexbed {
@@ -70,17 +71,55 @@ struct ShiftRightOp {
 
 template <typename T, typename Ts>
 struct ShiftRightArithmOp {
-    T operator()(const T& v, const Ts& s) const noexcept { return v; }
+    T operator()(const T& v, const Ts& s) const noexcept {
+        return v & std::bit_floor<T>(std::numeric_limits<T>::max())
+                   ? ((v >> s) | ~(T(~0) >> s))
+                   : v;
+    }
 };
 
 template <typename T, typename Ts>
 struct RotateLeftOp {
-    T operator()(const T& v, const Ts& s) const noexcept { return v; }
+    T operator()(const T& v, const Ts& s) const noexcept {
+        return std::rotl(v, s);
+    }
 };
 
 template <typename T, typename Ts>
 struct RotateRightOp {
-    T operator()(const T& v, const Ts& s) const noexcept { return v; }
+    T operator()(const T& v, const Ts& s) const noexcept {
+        return std::rotr(v, s);
+    }
+};
+
+template <typename T>
+static constexpr T loNibbleMask;
+
+template <>
+constexpr byte loNibbleMask<byte> = 0x0F;
+
+template <typename T>
+static constexpr T hiNibbleMask = loNibbleMask<T> << 4;
+
+template <typename T>
+struct NibbleSwapOp {
+    T operator()(const T& v) const noexcept {
+        return (v & hiNibbleMask<T>) >> 4 | (v & loNibbleMask<T>) << 4;
+    }
+};
+
+template <typename T>
+struct BitReverseOp {};
+
+template <>
+struct BitReverseOp<byte> {
+    byte operator()(const byte& v_) const noexcept {
+        byte v = v_;
+        v = (v & 0xF0) >> 4 | (v & 0x0F) << 4;
+        v = (v & 0xCC) >> 2 | (v & 0x33) << 2;
+        v = (v & 0xAA) >> 1 | (v & 0x55) << 1;
+        return v;
+    }
 };
 
 bool doBitwiseBinaryOp(HexBedDocument& document, bufsize offset, bufsize count,
@@ -110,6 +149,10 @@ bool doBitwiseUnaryOp(HexBedDocument& document, bufsize offset, bufsize count,
     switch (op) {
     case Not:
         return doBitwiseUnaryOp_(document, offset, count, std::bit_not<byte>());
+    case NibbleSwap:
+        return doBitwiseUnaryOp_(document, offset, count, NibbleSwapOp<byte>());
+    case BitReverse:
+        return doBitwiseUnaryOp_(document, offset, count, BitReverseOp<byte>());
     default:
         return false;
     }
@@ -140,5 +183,159 @@ bool doBitwiseShiftOp(HexBedDocument& document, bufsize offset, bufsize count,
     }
     return true;
 }
+
+static void byteSwap(byte* data, unsigned wordSize) {
+    for (unsigned i = 0, e = wordSize >> 1; i < e; ++i)
+        std::swap(data[i], data[wordSize - i - 1]);
+}
+
+static void byteSwap(byte* data, bufsize size, unsigned wordSize) {
+    byte* end = data + size - (wordSize + 1);
+    while (data < end) {
+        byteSwap(data, wordSize);
+        data += wordSize;
+    }
+}
+
+bool doByteSwapOpNaive(HexBedDocument& document, bufsize offset, bufsize count,
+                       unsigned wordSize) {
+    if (count >= wordSize) {
+        count -= count % wordSize;
+        return document.map(
+            offset, count,
+            [wordSize](bufoffset offset, bytespan span) -> bool {
+                byteSwap(span.data(), span.size(), wordSize);
+                return true;
+            },
+            wordSize);
+    }
+    return false;
+}
+
+template <typename T>
+static constexpr T byteswap(const T&);
+
+#ifdef UINT8_MAX
+template <>
+constexpr std::uint8_t byteswap<std::uint8_t>(const std::uint8_t& v) {
+    return v;
+}
+#endif
+
+#ifdef UINT16_MAX
+template <>
+constexpr std::uint16_t byteswap<std::uint16_t>(const std::uint16_t& vv) {
+    std::uint16_t v = vv;
+    v = (v & 0xFF00U) >> 8 | (v & 0x00FFU) << 8;
+    return v;
+}
+
+static void byteSwapFast2(byte* data, bufsize size) {
+    auto align = reinterpret_cast<std::uint16_t*>(data);
+    size >>= 1;
+    for (bufsize i = 0; i < size; ++i) align[i] = byteswap(align[i]);
+}
+
+bool doByteSwapOpFast2(HexBedDocument& document, bufsize offset,
+                       bufsize count) {
+    count &= ~1;
+    if (count) {
+        return document.map(
+            offset, count,
+            [](bufoffset offset, bytespan span) -> bool {
+                byteSwapFast2(span.data(), span.size());
+                return true;
+            },
+            2);
+    }
+    return false;
+}
+#endif
+#ifdef UINT32_MAX
+template <>
+constexpr std::uint32_t byteswap<std::uint32_t>(const std::uint32_t& vv) {
+    std::uint32_t v = vv;
+    v = (v & 0xFFFF0000UL) >> 16 | (v & 0x0000FFFFUL) << 16;
+    v = (v & 0xFF00FF00UL) >> 8 | (v & 0x00FF00FFUL) << 8;
+    return v;
+}
+
+static void byteSwapFast4(byte* data, bufsize size) {
+    auto align = reinterpret_cast<std::uint32_t*>(data);
+    size >>= 2;
+    for (bufsize i = 0; i < size; ++i) align[i] = byteswap(align[i]);
+}
+
+bool doByteSwapOpFast4(HexBedDocument& document, bufsize offset,
+                       bufsize count) {
+    count &= ~3;
+    if (count) {
+        return document.map(
+            offset, count,
+            [](bufoffset offset, bytespan span) -> bool {
+                byteSwapFast4(span.data(), span.size());
+                return true;
+            },
+            4);
+    }
+    return false;
+}
+#endif
+#ifdef UINT64_MAX
+template <>
+constexpr std::uint64_t byteswap<std::uint64_t>(const std::uint64_t& vv) {
+    std::uint64_t v = vv;
+    v = (v & 0xFFFFFFFF00000000ULL) >> 32 | (v & 0x00000000FFFFFFFFULL) << 32;
+    v = (v & 0xFFFF0000FFFF0000ULL) >> 16 | (v & 0x0000FFFF0000FFFFULL) << 16;
+    v = (v & 0xFF00FF00FF00FF00ULL) >> 8 | (v & 0x00FF00FF00FF00FFULL) << 8;
+    return v;
+}
+
+static void byteSwapFast8(byte* data, bufsize size) {
+    auto align = reinterpret_cast<std::uint64_t*>(data);
+    size >>= 3;
+    for (bufsize i = 0; i < size; ++i) align[i] = byteswap(align[i]);
+}
+
+bool doByteSwapOpFast8(HexBedDocument& document, bufsize offset,
+                       bufsize count) {
+    count &= ~7;
+    if (count) {
+        return document.map(
+            offset, count,
+            [](bufoffset offset, bytespan span) -> bool {
+                byteSwapFast8(span.data(), span.size());
+                return true;
+            },
+            8);
+    }
+    return false;
+}
+
+static void byteSwapFast16(byte* data, bufsize size) {
+    auto align = reinterpret_cast<std::uint64_t*>(data);
+    size >>= 3;
+    for (bufsize i = 0; i < size; i += 2) {
+        std::uint64_t tmp = byteswap(align[i]);
+        align[i] = byteswap(align[i + 1]);
+        align[i + 1] = tmp;
+    }
+}
+
+bool doByteSwapOpFast16(HexBedDocument& document, bufsize offset,
+                        bufsize count) {
+    count &= ~15;
+    if (count) {
+        return document.map(
+            offset, count,
+            [](bufoffset offset, bytespan span) -> bool {
+                byteSwapFast16(span.data(), span.size());
+                return true;
+            },
+            16);
+    }
+    return false;
+}
+#endif
 
 };  // namespace hexbed

@@ -29,6 +29,7 @@
 #include <filesystem>
 #include <thread>
 
+#include "app/bitop.hh"
 #include "app/config.hh"
 #include "common/logger.hh"
 #include "common/version.hh"
@@ -104,6 +105,15 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
              HexBedMainFrame::OnEditBitwiseUnaryOp)
     EVT_MENU(hexbed::menu::MenuEdit_BitwiseShiftOp,
              HexBedMainFrame::OnEditBitwiseShiftOp)
+    EVT_MENU(hexbed::menu::MenuEdit_ByteSwap2,
+             HexBedMainFrame::OnEditByteSwap2)
+    EVT_MENU(hexbed::menu::MenuEdit_ByteSwap4,
+             HexBedMainFrame::OnEditByteSwap4)
+    EVT_MENU(hexbed::menu::MenuEdit_ByteSwap8,
+             HexBedMainFrame::OnEditByteSwap8)
+    EVT_MENU(hexbed::menu::MenuEdit_ByteSwap16,
+             HexBedMainFrame::OnEditByteSwap16)
+    EVT_MENU(hexbed::menu::MenuEdit_Reverse, HexBedMainFrame::OnEditReverse)
     EVT_MENU(wxID_PREFERENCES, HexBedMainFrame::OnEditPrefs)
 
     EVT_MENU(wxID_FIND, HexBedMainFrame::OnSearchFind)
@@ -416,6 +426,10 @@ void HexBedMainFrame::UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& ed) {
     mbar.Enable(hexbed::menu::MenuEdit_BitwiseBinaryOp, selhas);
     mbar.Enable(hexbed::menu::MenuEdit_BitwiseUnaryOp, selhas);
     mbar.Enable(hexbed::menu::MenuEdit_BitwiseShiftOp, selhas);
+    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap2, selhas && !(seln & 1));
+    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap4, selhas && !(seln & 3));
+    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap8, selhas && !(seln & 7));
+    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap16, selhas && !(seln & 15));
 }
 
 void HexBedMainFrame::OnUndoRedo(hexbed::ui::HexEditorParent& ed) {
@@ -667,11 +681,6 @@ void HexBedMainFrame::OnEditInsertOrReplace(wxCommandEvent& event) {
     }
 }
 
-bool doBitwiseBinaryOp(HexBedDocument& document, BitwiseBinaryOp op,
-                       const_bytespan second);
-bool doBitwiseUnaryOp(HexBedDocument& document, BitwiseBinaryOp op);
-bool doBitwiseShiftOp(HexBedDocument& document, BitwiseShiftOp op, unsigned sc);
-
 void HexBedMainFrame::OnEditBitwiseBinaryOp(wxCommandEvent& event) {
     hexbed::ui::HexBedEditor* ed = GetEditor();
     bufsize sel, seln;
@@ -740,6 +749,46 @@ void HexBedMainFrame::OnEditBitwiseShiftOp(wxCommandEvent& event) {
             }
         }
     }
+}
+
+void HexBedMainFrame::OnEditByteSwap2(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    if (seln) doByteSwapOp<2>(ed->document(), sel, seln);
+}
+
+void HexBedMainFrame::OnEditByteSwap4(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    if (seln) doByteSwapOp<4>(ed->document(), sel, seln);
+}
+
+void HexBedMainFrame::OnEditByteSwap8(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    if (seln) doByteSwapOp<8>(ed->document(), sel, seln);
+}
+
+void HexBedMainFrame::OnEditByteSwap16(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    if (seln) doByteSwapOp<16>(ed->document(), sel, seln);
+}
+
+void HexBedMainFrame::OnEditReverse(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    if (seln) ed->document().reverse(sel, seln);
 }
 
 void HexBedMainFrame::OnSearchGoTo(wxCommandEvent& event) {

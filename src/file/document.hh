@@ -194,7 +194,8 @@ class HexBedDocument {
     bool remove(bufoffset offset, bufsize size);
 
     bool map(bufoffset offset, bufsize size,
-             std::function<bool(bufoffset, bytespan)> mapper);
+             std::function<bool(bufoffset, bytespan)> mapper, bufsize mul = 1);
+    bool reverse(bufoffset offset, bufsize size);
 
     SearchResult searchForward(bufoffset start, bufoffset end,
                                const_bytespan data);

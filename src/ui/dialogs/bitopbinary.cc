@@ -83,6 +83,7 @@ BitwiseBinaryOpDialog::BitwiseBinaryOpDialog(
     SetSize(sz.GetWidth(), GetSize().GetHeight());
     FitInside();
     Layout();
+    TransferDataToWindow();
 }
 
 BitwiseBinaryOp BitwiseBinaryOpDialog::GetOperation() const noexcept {
@@ -97,8 +98,8 @@ void BitwiseBinaryOpDialog::EndDialog(int r) {
 bool BitwiseBinaryOpDialog::CheckInput() { return document_->size() > 0; }
 
 void BitwiseBinaryOpDialog::OnOK(wxCommandEvent& event) {
-    if (!CheckInput()) return;
-    EndDialog(wxID_OK);
+    if (CheckInput() && Validate() && TransferDataFromWindow())
+        EndDialog(wxID_OK);
 }
 
 void BitwiseBinaryOpDialog::OnCancel(wxCommandEvent& event) {

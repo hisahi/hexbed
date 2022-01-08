@@ -48,6 +48,11 @@ enum {
     MenuEdit_BitwiseBinaryOp,
     MenuEdit_BitwiseUnaryOp,
     MenuEdit_BitwiseShiftOp,
+    MenuEdit_ByteSwap2,
+    MenuEdit_ByteSwap4,
+    MenuEdit_ByteSwap8,
+    MenuEdit_ByteSwap16,
+    MenuEdit_Reverse,
 
     MenuSearch_FindNext = 0x300,
     MenuSearch_FindPrevious,

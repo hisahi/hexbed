@@ -31,6 +31,7 @@ bufsize memCopyBack(byte* edi, const byte* esi, bufsize ecx);
 bufsize memMove(byte* edi, const byte* esi, bufsize ecx);
 bufsize memFill(byte* edi, byte al, bufsize ecx);
 bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx);
+bufsize memReverse(byte* edi, bufsize ecx);
 const byte* memFindFirst(const byte* start, const byte* end, byte c);
 const byte* memFindLast(const byte* start, const byte* end, byte c);
 bool memEqual(const byte* a, const byte* b, bufsize n);

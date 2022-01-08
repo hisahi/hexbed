@@ -78,6 +78,7 @@ BitwiseShiftOpDialog::BitwiseShiftOpDialog(HexBedMainFrame* parent)
     SetSize(sz.GetWidth(), GetSize().GetHeight());
     FitInside();
     Layout();
+    TransferDataToWindow();
 }
 
 BitwiseShiftOp BitwiseShiftOpDialog::GetOperation() const noexcept {
@@ -91,7 +92,9 @@ void BitwiseShiftOpDialog::EndDialog(int r) {
     if (IsModal()) EndModal(r);
 }
 
-void BitwiseShiftOpDialog::OnOK(wxCommandEvent& event) { EndDialog(wxID_OK); }
+void BitwiseShiftOpDialog::OnOK(wxCommandEvent& event) {
+    if (Validate() && TransferDataFromWindow()) EndDialog(wxID_OK);
+}
 
 void BitwiseShiftOpDialog::OnCancel(wxCommandEvent& event) {
     EndDialog(wxID_CANCEL);

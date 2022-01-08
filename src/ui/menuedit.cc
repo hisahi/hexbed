@@ -57,15 +57,38 @@ wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
         addItem(menuEdit, MenuEdit_InsertOrReplace, _("Ins&ert or replace..."),
                 _("Inserts or replaces the selection with a block of bytes"),
                 wxACCEL_CTRL, 'I'));
+    wxMenu* editOps = new wxMenu;
+    wxMenu* editSwapOps = new wxMenu;
     fileOnly.push_back(addItem(
-        menuEdit, MenuEdit_BitwiseBinaryOp, _("Bitwise binary operation..."),
+        editOps, MenuEdit_BitwiseBinaryOp, _("Bitwise &binary operation..."),
         _("Performs a binary bitwise operation on the selected block")));
     fileOnly.push_back(addItem(
-        menuEdit, MenuEdit_BitwiseUnaryOp, _("Bitwise unary operation..."),
+        editOps, MenuEdit_BitwiseUnaryOp, _("Bitwise &unary operation..."),
         _("Performs a unary bitwise operation on the selected block")));
     fileOnly.push_back(addItem(
-        menuEdit, MenuEdit_BitwiseShiftOp, _("Bitwise shift operation..."),
+        editOps, MenuEdit_BitwiseShiftOp, _("Bitwise &shift operation..."),
         _("Performs a bitwise shift operation on the selected block")));
+    editOps->AppendSeparator();
+    fileOnly.push_back(addItem(
+        editSwapOps, MenuEdit_ByteSwap2, _("Byte swap (&2-byte words)"),
+        _("Swaps the byte order in the selected block of 2-byte words")));
+    fileOnly.push_back(addItem(
+        editSwapOps, MenuEdit_ByteSwap4, _("Byte swap (&4-byte words)"),
+        _("Swaps the byte order in the selected block of 4-byte words")));
+    fileOnly.push_back(addItem(
+        editSwapOps, MenuEdit_ByteSwap8, _("Byte swap (&8-byte words)"),
+        _("Swaps the byte order in the selected block of 8-byte words")));
+    fileOnly.push_back(addItem(
+        editSwapOps, MenuEdit_ByteSwap16, _("Byte swap (1&6-byte words)"),
+        _("Swaps the byte order in the selected block of 16-byte words")));
+    editOps->AppendSubMenu(editSwapOps, _("Byte s&wap"),
+                           _("Performs byte order swaps on the selection"));
+    editOps->AppendSeparator();
+    fileOnly.push_back(
+        addItem(editOps, MenuEdit_Reverse, _("&Reverse"),
+                _("Reverses the order of bytes within the selection")));
+    menuEdit->AppendSubMenu(editOps, _("&Operations"),
+                            _("Performs operations on the selection"));
     menuEdit->AppendSeparator();
     addCheckItem(
         menuEdit, MenuEdit_InsertMode, _("&Insert mode"),

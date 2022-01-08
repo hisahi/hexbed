@@ -564,7 +564,7 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
         if (res.suboffset) {
             splitLeft(node, res.suboffset);
             res.suboffset = 0;
-        } else if (index) {
+        } else if (index && node->length >= count) {
             TrebleNode* pnode = res.it->predecessor();
             if (pnode && pnode->data) {
                 bufsize l = pnode->length;
@@ -575,8 +575,8 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
                 }
                 byte* d = pnode->data.get() + l;
                 pnode->length += count;
-                propagate(pnode, 0, count);
                 f(d, d + count);
+                if (!(node->length -= count)) tryMerge(erase(node));
                 return;
             }
         }
