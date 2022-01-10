@@ -34,19 +34,26 @@ constexpr bufsize INSERT_SUBBLOCK_THRESHOLD = 65536;
 constexpr bufsize COMPACT_MULTIPLICATIVE_THRESHOLD = 3;
 constexpr bufsize COMPACT_ADDITIVE_THRESHOLD = 256;
 
+template <class... Args>
+auto newTrebleNode(Args&&... args) -> TrebleNodePointer {
+    return makeAlignedUniqueOf<TrebleNodePointer>(std::forward<Args>(args)...);
+}
+
 template <bool newRegion>
 static constexpr bufsize roundCapacity(bufsize l) {
-    return newRegion ? std::max<bufsize>(l, sizeof(int)) : l;
+    bufsize ll = newRegion ? std::max<bufsize>(l, sizeof(int)) : l;
+    return (ll + 3) & ~3;
 }
 
 template <class T>
 requires std::unsigned_integral<T>
 static T intsqrt(T v) { return T(std::sqrt(v)); }
 
-static bufsize newCapacity(bufsize l, bufsize add) {
+static bufsize expandCapacity(bufsize l, bufsize add) {
     return roundCapacity<false>(std::max(l + add, l + intsqrt(l)));
 }
 
+/*
 template <typename T>
 static void renew(std::unique_ptr<T[]>& p, size_t n0, size_t n1) {
     auto arr = std::make_unique_for_overwrite<T[]>(n1);
@@ -65,15 +72,43 @@ static bool renewShrink(std::unique_ptr<T[]>& p, size_t n0, size_t n1) {
     }
     return false;
 }
+*/
 
-bool TrebleNode::isRoot() const noexcept { return !parent; }
+static TrebleDataPointer newTrebleData(std::size_t c) {
+    return makeUniqueOf<TrebleDataPointer>(c);
+}
+
+static TrebleDataPointer newTrebleDataNothrow(std::size_t c) {
+    return makeUniqueOfNothrow<TrebleDataPointer>(c);
+}
+
+static void renewTrebleData(TrebleNode& node, std::size_t nc) {
+    auto arr = newTrebleData(nc);
+    memCopy(arr.get(), node.data(), std::min<std::size_t>(nc, node.capacity()));
+    node.data(std::move(arr));
+    node.capacity(nc);
+}
+
+static bool renewShrinkTrebleData(TrebleNode& node, std::size_t nc) {
+    auto arr = newTrebleDataNothrow(nc);
+    if (arr) {
+        memCopy(arr.get(), node.data(),
+                std::min<std::size_t>(nc, node.capacity()));
+        node.data(std::move(arr));
+        node.capacity(nc);
+        return true;
+    }
+    return false;
+}
+
+bool TrebleNode::isRoot() const noexcept { return !parent_; }
 
 bool TrebleNode::isLeftChild() const noexcept {
-    return parent && parent->left() == this;
+    return parent_ && parent_->left() == this;
 }
 
 bool TrebleNode::isRightChild() const noexcept {
-    return parent && parent->right() == this;
+    return parent_ && parent_->right() == this;
 }
 
 const TrebleNode* TrebleNode::minimum() const noexcept {
@@ -94,7 +129,7 @@ const TrebleNode* TrebleNode::predecessor() const noexcept {
     if (left_) return left()->maximum();
     const TrebleNode* n = this;
     const TrebleNode* p;
-    while ((p = n->parent) && p->left() == n) n = p;
+    while ((p = n->parent()) && p->left() == n) n = p;
     return p;
 }
 
@@ -102,12 +137,12 @@ const TrebleNode* TrebleNode::successor() const noexcept {
     if (right_) return right()->minimum();
     const TrebleNode* n = this;
     const TrebleNode* p;
-    while ((p = n->parent) && p->right() == n) n = p;
+    while ((p = n->parent()) && p->right() == n) n = p;
     return p;
 }
 
 Treble::Treble(bufsize size)
-    : root_(std::make_unique<TrebleNode>(nullptr, size)), total_(size) {}
+    : root_(newTrebleNode(nullptr, size)), total_(size) {}
 
 Treble::iterator Treble::root() noexcept { return iterator(root_.get()); }
 
@@ -117,12 +152,12 @@ static void printTreble(TrebleNode* node, unsigned depth = 0) {
     if (!depth) std::cerr << "=========== TREBLE DEBUG ===========\n";
     std::cerr << pref << "| " << node
               << "\tBF=" << static_cast<int>(node->balance())
-              << "\tLL=" << node->leftlen << "\tO=" << !node->data
-              << "\tL=" << node->length << "\tP=" << node->offset << "\n";
+              << "\tLL=" << node->leftlen() << "\tO=" << !node->data()
+              << "\tL=" << node->length() << "\tP=" << node->offset() << "\n";
     std::cerr << pref << "\\ Left";
     if (node->left()) {
         std::cerr << "\n";
-        HEXBED_ASSERT(node->left()->parent == node, "broken parent link");
+        HEXBED_ASSERT(node->left()->parent_ == node, "broken parent link");
         printTreble(node->left(), depth + 2);
     } else
         std::cerr << " ---";
@@ -130,7 +165,7 @@ static void printTreble(TrebleNode* node, unsigned depth = 0) {
     std::cerr << pref << "\\ Right";
     if (node->right()) {
         std::cerr << "\n";
-        HEXBED_ASSERT(node->right()->parent == node, "broken parent link");
+        HEXBED_ASSERT(node->right()->parent_ == node, "broken parent link");
         printTreble(node->right(), depth + 2);
     } else
         std::cerr << " ---";
@@ -142,20 +177,20 @@ static void printTreble(TrebleNode* node, unsigned depth = 0) {
 #endif
 
 void Treble::clear(bufsize size) {
-    root_ = std::make_unique<TrebleNode>(nullptr, size);
+    root_ = newTrebleNode(nullptr, size);
     total_ = size;
 }
 
 TrebleFindResult Treble::find(bufsize index) const noexcept {
     TrebleNode* node = root_.get();
     do {
-        if (index < node->leftlen)
+        if (index < node->leftlen())
             node = node->left();
         else {
-            index -= node->leftlen;
-            if (index < node->length)
+            index -= node->leftlen();
+            if (index < node->length())
                 return TrebleFindResult{iterator(node), index};
-            index -= node->length;
+            index -= node->length();
             node = node->right();
         }
     } while (node);
@@ -163,14 +198,14 @@ TrebleFindResult Treble::find(bufsize index) const noexcept {
 }
 
 bool Treble::isCleanOverlay_(TrebleNode* node, bufsize offset) const noexcept {
-    if (node->leftlen) {
-        HEXBED_ASSERT(node->left_);
+    if (node->leftlen()) {
+        HEXBED_ASSERT(node->left());
         if (!isCleanOverlay_(node->left(), offset)) return false;
-        offset += node->leftlen;
+        offset += node->leftlen();
     }
-    if (!node->data && node->offset != offset) return false;
-    offset += node->length;
-    return !node->right_ || isCleanOverlay_(node->right(), offset);
+    if (!node->data() && node->offset() != offset) return false;
+    offset += node->length();
+    return !node->right() || isCleanOverlay_(node->right(), offset);
 }
 
 bool Treble::isCleanOverlay() const noexcept {
@@ -194,12 +229,11 @@ bool Treble::isRightChild(TrebleNode* parent, TrebleNode* node) {
     return parent->right() == node;
 }
 
-std::unique_ptr<TrebleNode>& Treble::getParentLink(TrebleNode* parent,
-                                                   TrebleNode* node) {
-    HEXBED_ASSERT(node->parent == parent);
+TrebleNodePointer& Treble::getParentLink(TrebleNode* parent, TrebleNode* node) {
+    HEXBED_ASSERT(node->parent() == parent);
     return !parent                      ? root_
-           : isRightChild(parent, node) ? parent->right_
-                                        : parent->left_;
+           : isRightChild(parent, node) ? parent->rightLink()
+                                        : parent->leftLink();
 }
 
 int Treble::swing(TrebleNode* parent, TrebleNode* node) {
@@ -208,31 +242,31 @@ int Treble::swing(TrebleNode* parent, TrebleNode* node) {
 
 TrebleNode* Treble::rotateL(TrebleNode* node) {
     // rotate left. if node is the root, node->right becomes the new root
-    TrebleNode* parent = node->parent;
+    TrebleNode* parent = node->parent();
     TrebleNode* child = node->right();
     TrebleNode* sub = child->left();
-    std::unique_ptr<TrebleNode>& plink = getParentLink(parent, node);
-    rotate3(plink, node->right_, child->left_);
+    TrebleNodePointer& plink = getParentLink(parent, node);
+    rotate3(plink, node->rightLink(), child->leftLink());
     if (sub)
-        rotate3(sub->parent, child->parent, node->parent);
+        rotate3(sub->parentLink(), child->parentLink(), node->parentLink());
     else
-        child->parent = std::exchange(node->parent, child);
-    child->leftlen += node->leftlen + node->length;
+        child->parent(std::exchange(node->parentLink(), child));
+    child->leftlenAdd(node->leftlen() + node->length());
     return child;
 }
 
 TrebleNode* Treble::rotateR(TrebleNode* node) {
     // rotate right. if node is the root, node->left becomes the new root
-    TrebleNode* parent = node->parent;
+    TrebleNode* parent = node->parent();
     TrebleNode* child = node->left();
     TrebleNode* sub = child->right();
-    std::unique_ptr<TrebleNode>& plink = getParentLink(parent, node);
-    rotate3(plink, node->left_, child->right_);
+    TrebleNodePointer& plink = getParentLink(parent, node);
+    rotate3(plink, node->leftLink(), child->rightLink());
     if (sub)
-        rotate3(sub->parent, child->parent, node->parent);
+        rotate3(sub->parentLink(), child->parentLink(), node->parentLink());
     else
-        child->parent = std::exchange(node->parent, child);
-    node->leftlen -= child->leftlen + child->length;
+        child->parent(std::exchange(node->parentLink(), child));
+    node->leftlenSub(child->leftlen() + child->length());
     return child;
 }
 
@@ -309,33 +343,32 @@ void Treble::balance(TrebleNode* node, int swing) {
             break;
         }
         if (!bf) break;
-        parent = node->parent;
+        parent = node->parent();
         if (!parent) break;
         swing = (incr ? 1 : -1) * Treble::swing(parent, node);
         node = parent;
     }
 }
 
-void Treble::insertLeft(TrebleNode* node, std::unique_ptr<TrebleNode>&& child) {
-    HEXBED_ASSERT(!node->left_);
-    HEXBED_ASSERT(child->parent == node);
+void Treble::insertLeft(TrebleNode* node, TrebleNodePointer&& child) {
+    HEXBED_ASSERT(!node->left());
+    HEXBED_ASSERT(child->parent() == node);
     node->left(std::move(child));
     balance<true>(node, -1);
 }
 
-void Treble::insertRight(TrebleNode* node,
-                         std::unique_ptr<TrebleNode>&& child) {
-    HEXBED_ASSERT(!node->right_);
-    HEXBED_ASSERT(child->parent == node);
+void Treble::insertRight(TrebleNode* node, TrebleNodePointer&& child) {
+    HEXBED_ASSERT(!node->right());
+    HEXBED_ASSERT(child->parent() == node);
     node->right(std::move(child));
     balance<true>(node, 1);
 }
 
 void Treble::propagate_(TrebleNode* node, bufdiff d) {
     TrebleNode* p;
-    while ((p = node->parent)) {
+    while ((p = node->parent())) {
         if (isRightChild(p, node)) return;
-        p->leftlen += d;
+        p->leftlenAdd(d);
         node = p;
     }
 }
@@ -346,58 +379,58 @@ void Treble::propagate(TrebleNode* node, bufsize was, bufsize now) {
 
 // returns the successor of the erased node
 TrebleNode* Treble::erase(TrebleNode* node) {
-    TrebleNode* parent = node->parent;
+    TrebleNode* parent = node->parent();
     // node was the left child?
     bool left = parent && !isRightChild(parent, node);
-    std::unique_ptr<TrebleNode>& plink = getParentLink(parent, node);
+    TrebleNodePointer& plink = getParentLink(parent, node);
     // successor
     TrebleNode* succ;
     // temporary pointer holder for removed node
-    std::unique_ptr<TrebleNode> owner;
+    TrebleNodePointer owner;
 
-    if (left && node->length) propagate(parent, node->length, 0);
+    if (left && node->length()) propagate(parent, node->length(), 0);
 
-    if (node->right_) {
+    if (node->right()) {
         TrebleNode* child = node->right();
-        if (node->left_) {
+        if (node->left()) {
             succ = child->minimum();
             if (child == succ) {
                 // succ->parent == child, node->right == child
-                owner = std::exchange(plink, std::move(node->right_));
-                child->parent = parent;
-                if ((child->left_ = std::move(node->left_)))
-                    child->left_->parent = succ;
-                child->leftlen = node->leftlen;
+                owner = std::exchange(plink, std::move(node->rightLink()));
+                child->parent(parent);
+                if ((child->leftLink() = std::move(node->leftLink())))
+                    child->left()->parent(succ);
+                child->leftlen(node->leftlen());
                 child->balance(node->balance());
                 balance<false>(child, -1);
             } else {
-                TrebleNode* sp = succ->parent;
-                propagate(succ, succ->length, 0);
+                TrebleNode* sp = succ->parent();
+                propagate(succ, succ->length(), 0);
                 owner = std::exchange(
                     plink,
-                    std::exchange(
-                        sp->left_,
-                        std::exchange(succ->right_, std::move(node->right_))));
-                if (sp->left_) sp->left_->parent = sp;
-                if ((succ->left_ = std::move(node->left_)))
-                    succ->left_->parent = succ;
-                succ->leftlen = node->leftlen;
-                succ->parent = parent;
+                    std::exchange(sp->leftLink(),
+                                  std::exchange(succ->rightLink(),
+                                                std::move(node->rightLink()))));
+                if (sp->left()) sp->left()->parent(sp);
+                if ((succ->leftLink() = std::move(node->leftLink())))
+                    succ->left()->parent(succ);
+                succ->leftlen(node->leftlen());
+                succ->parent(parent);
                 succ->balance(node->balance());
-                child->parent = succ;
-                child->leftlen -= succ->length;
+                child->parent(succ);
+                child->leftlenSub(succ->length());
                 balance<false>(sp, 1);
             }
         } else {
-            child->parent = parent;
-            owner = std::exchange(plink, std::move(node->right_));
+            child->parent(parent);
+            owner = std::exchange(plink, std::move(node->rightLink()));
             succ = child->minimum();
         }
     } else {
         succ = node->successor();
         TrebleNode* child = node->left();
-        if (child) child->parent = parent;
-        owner = std::exchange(plink, std::move(node->left_));
+        if (child) child->parent(parent);
+        owner = std::exchange(plink, std::move(node->leftLink()));
     }
     if (parent) balance<false>(parent, left ? 1 : -1);
     return succ;
@@ -406,11 +439,12 @@ TrebleNode* Treble::erase(TrebleNode* node) {
 TrebleNode* Treble::tryMerge(TrebleNode* node) {
     if (!node) return nullptr;
     TrebleNode* prec = node->predecessor();
-    if (prec && !node->data && !prec->data &&
-        prec->offset + prec->length == node->offset) {
-        node->offset = prec->offset;
-        propagate(prec, prec->length, 0);
-        node->length += std::exchange(prec->length, 0);
+    if (prec && !node->data() && !prec->data() &&
+        prec->offset() + prec->length() == node->offset()) {
+        node->offset(prec->offset());
+        propagate(prec, prec->length(), 0);
+        node->lengthAdd(prec->length());
+        prec->length(0);
         [[maybe_unused]] TrebleNode* precsucc = erase(prec);
         HEXBED_ASSERT(node == precsucc);
     }
@@ -418,92 +452,93 @@ TrebleNode* Treble::tryMerge(TrebleNode* node) {
 }
 
 bytespan Treble::usurp(TrebleNode* node) {
-    if (node->data) {
-        return bytespan(node->data.get(), node->length);
+    if (node->data()) {
+        return bytespan(node->data(), node->length());
     } else {
-        bufsize zz = roundCapacity<false>(node->length);
-        node->data = std::make_unique<byte[]>(zz);
-        node->capacity = zz;
-        return bytespan(node->data.get(), node->length);
+        bufsize zz = roundCapacity<false>(node->length());
+        node->data(newTrebleData(zz));
+        node->capacity(zz);
+        return bytespan(node->data(), node->length());
     }
 }
 
 bytespan Treble::usurpNew(TrebleNode* node, bufsize z) {
-    HEXBED_ASSERT(!node->data);
+    HEXBED_ASSERT(!node->data());
     bufsize zz = roundCapacity<true>(z);
-    node->data = std::make_unique<byte[]>(zz);
-    node->capacity = zz;
-    if (node->length != z) {
-        propagate(node, node->length, z);
-        node->length = z;
+    node->data(newTrebleData(zz));
+    node->capacity(zz);
+    if (node->length() != z) {
+        propagate(node, node->length(), z);
+        node->length(z);
     }
-    return bytespan(node->data.get(), node->length);
+    return bytespan(node->data(), node->length());
 }
 
 void Treble::splitLeft(TrebleNode* node, bufsize offset) {
-    auto newnode = std::make_unique<TrebleNode>(node, offset);
-    if (node->data) {
-        bufsize l = node->length;
+    auto newnode = newTrebleNode(node, offset);
+    if (node->data()) {
+        bufsize l = node->length();
         bufsize zz = roundCapacity<false>(offset);
-        newnode->data = std::make_unique<byte[]>(zz);
-        newnode->capacity = zz;
-        node->length -= offset;
-        byte* s = node->data.get();
-        byte* d = newnode->data.get();
+        newnode->data(newTrebleData(zz));
+        newnode->capacity(zz);
+        node->lengthSub(offset);
+        byte* s = node->data();
+        byte* d = newnode->data();
         memCopy(d, s, offset);
         memCopy(s, s + offset, l - offset);
         compact(node);
     } else {
-        node->length -= offset;
+        node->lengthSub(offset);
     }
-    newnode->offset = node->offset;
-    node->offset += offset;
-    node->leftlen += newnode->length;
-    if (!node->left_) {
+    newnode->offset(node->offset());
+    node->offsetAdd(offset);
+    node->leftlenAdd(newnode->length());
+    if (!node->left()) {
         insertLeft(node, std::move(newnode));
         return;
     }
     node = node->left()->maximum();
-    newnode->parent = node;
+    newnode->parent(node);
     insertRight(node, std::move(newnode));
 }
 
 void Treble::splitRight(TrebleNode* node, bufsize offset, bool adjust,
                         bool move) {
-    bufsize l = node->length, z = l - offset;
-    auto newnode = std::make_unique<TrebleNode>(node, z);
-    if (node->data) {
+    bufsize l = node->length(), z = l - offset;
+    auto newnode = newTrebleNode(node, z);
+    if (node->data()) {
         if (move && !offset) {
-            newnode->data = std::move(node->data);
-            newnode->capacity = std::exchange(node->capacity, 0);
+            newnode->dataMove(*node);
+            newnode->capacity(node->capacity());
+            node->capacity(0);
         } else {
             bufsize zz = roundCapacity<false>(z);
-            newnode->data = std::make_unique<byte[]>(zz);
-            newnode->capacity = zz;
-            byte* s = node->data.get();
-            memCopy(newnode->data.get(), s + offset, l - offset);
+            newnode->data(newTrebleData(zz));
+            newnode->capacity(zz);
+            byte* s = node->data();
+            memCopy(newnode->data(), s + offset, l - offset);
         }
-        node->length = offset;
+        node->length(offset);
         compact(node);
     } else {
-        node->length = offset;
+        node->length(offset);
     }
-    newnode->offset = adjust ? node->offset + offset : node->offset;
-    if (!node->right_) {
+    newnode->offset(adjust ? node->offset() + offset : node->offset());
+    if (!node->right()) {
         insertRight(node, std::move(newnode));
         return;
     }
     node = node->right()->minimum();
-    propagate(node, 0, newnode->length);
-    newnode->parent = node;
+    propagate(node, 0, newnode->length());
+    newnode->parent(node);
     insertLeft(node, std::move(newnode));
 }
 
 void Treble::compact(TrebleNode* node) {
-    if (node->capacity > node->length * COMPACT_MULTIPLICATIVE_THRESHOLD ||
-        node->capacity > node->length + COMPACT_ADDITIVE_THRESHOLD) {
-        bufsize zz = roundCapacity<false>(node->length);
-        if (renewShrink(node->data, node->capacity, zz)) node->capacity = zz;
+    if (node->capacity() > node->length() * COMPACT_MULTIPLICATIVE_THRESHOLD ||
+        node->capacity() > node->length() + COMPACT_ADDITIVE_THRESHOLD) {
+        bufsize zz = roundCapacity<false>(node->length());
+        if (renewShrinkTrebleData(*node, zz)) node->capacity(zz);
     }
 }
 
@@ -554,36 +589,36 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
     TrebleFindResult res = find(index);
     TrebleNode* node = res.it.get();
     HEXBED_ASSERT(node, "trying to replace beyond file!");
-    if (count == node->length) {
+    if (count == node->length()) {
         /* replace full block */
         bytespan span = usurp(node);
         f(span.begin(), span.end());
         return;
     }
-    if (!node->data) {
+    if (!node->data()) {
         if (res.suboffset) {
             splitLeft(node, res.suboffset);
             res.suboffset = 0;
-        } else if (index && node->length >= count) {
+        } else if (index && node->length() >= count) {
             TrebleNode* pnode = res.it->predecessor();
-            if (pnode && pnode->data) {
-                bufsize l = pnode->length;
-                bufsize nc = newCapacity(l, count);
-                if (pnode->capacity < nc) {
-                    renew(pnode->data, pnode->capacity, nc);
-                    pnode->capacity = nc;
+            if (pnode && pnode->data()) {
+                bufsize l = pnode->length();
+                bufsize nc = expandCapacity(l, count);
+                if (pnode->capacity() < nc) {
+                    renewTrebleData(*pnode, nc);
+                    pnode->capacity(nc);
                 }
-                byte* d = pnode->data.get() + l;
-                pnode->length += count;
+                byte* d = pnode->data() + l;
+                pnode->lengthAdd(count);
                 f(d, d + count);
-                if (!(node->length -= count)) tryMerge(erase(node));
+                if (!(node->lengthSub(count))) tryMerge(erase(node));
                 return;
             }
         }
     }
     while (count) {
-        bufsize l = node->length - res.suboffset;
-        if (count < l && !node->data) {
+        bufsize l = node->length() - res.suboffset;
+        if (count < l && !node->data()) {
             l = res.suboffset + count;
             splitRight(node, l, true);
         }
@@ -625,23 +660,23 @@ void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
     if (index == total_) {
         // inserting new data to the end of the file
         node = root_->maximum();
-        if (!node->data) {
-            auto newnode = std::make_unique<TrebleNode>(node, count);
+        if (!node->data()) {
+            auto newnode = newTrebleNode(node, count);
             bufsize zz = roundCapacity<true>(count);
-            newnode->offset = index;
-            newnode->data = std::make_unique<byte[]>(zz);
-            newnode->capacity = zz;
-            d = newnode->data.get();
+            newnode->offset(index);
+            newnode->data(newTrebleData(zz));
+            newnode->capacity(zz);
+            d = newnode->data();
             insertRight(node, std::move(newnode));
         } else {
-            bufsize l = node->length;
-            bufsize nc = newCapacity(l, count);
-            if (node->capacity < nc) {
-                renew(node->data, node->capacity, nc);
-                node->capacity = nc;
+            bufsize l = node->length();
+            bufsize nc = expandCapacity(l, count);
+            if (node->capacity() < nc) {
+                renewTrebleData(*node, nc);
+                node->capacity(nc);
             }
-            d = node->data.get() + l;
-            node->length += count;
+            d = node->data() + l;
+            node->lengthAdd(count);
         }
         f(d, d + count);
         return;
@@ -650,40 +685,40 @@ void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
     TrebleFindResult res = find(zero ? index : index - 1);
     if (!zero) ++res.suboffset;
     node = res.it.get();
-    if (!node->data && res.suboffset == node->length) {
+    if (!node->data() && res.suboffset == node->length()) {
         TrebleNode* node2 = node->successor();
-        if (node2->data && node2->length < INSERT_SUBBLOCK_THRESHOLD) {
+        if (node2->data() && node2->length() < INSERT_SUBBLOCK_THRESHOLD) {
             node = node2;
         }
     }
-    if (!node->data) {
+    if (!node->data()) {
         if (res.suboffset) splitLeft(node, res.suboffset);
-        if (node->length) splitRight(node, 0, false);
+        if (node->length()) splitRight(node, 0, false);
         bytespan span = usurpNew(node, count);
         f(span.begin(), span.end());
         return;
     }
-    if (node->length - res.suboffset < INSERT_SUBBLOCK_THRESHOLD) {
-        bufsize l = node->length;
-        bufsize nc = newCapacity(l, count);
-        if (node->capacity < nc) {
-            renew(node->data, node->capacity, nc);
-            node->capacity = nc;
+    if (node->length() - res.suboffset < INSERT_SUBBLOCK_THRESHOLD) {
+        bufsize l = node->length();
+        bufsize nc = expandCapacity(l, count);
+        if (node->capacity() < nc) {
+            renewTrebleData(*node, nc);
+            node->capacity(nc);
         }
-        byte* p = node->data.get();
+        byte* p = node->data();
         d = p + res.suboffset;
         memCopyBack(d + count, d, l - res.suboffset);
     } else {
         splitRight(node, res.suboffset, false);
         bufsize l = res.suboffset;
-        bufsize nc = newCapacity(l, count);
-        if (node->capacity < nc) {
-            renew(node->data, node->capacity, nc);
-            node->capacity = nc;
+        bufsize nc = expandCapacity(l, count);
+        if (node->capacity() < nc) {
+            renewTrebleData(*node, nc);
+            node->capacity(nc);
         }
-        d = node->data.get() + l;
+        d = node->data() + l;
     }
-    node->length += count;
+    node->lengthAdd(count);
     propagate(node, 0, count);
     f(d, d + count);
 }
@@ -716,13 +751,13 @@ void Treble::reinsert(bufsize index, bufsize count, bufsize offset) {
         // inserting old data to the end of the file
         TrebleFindResult res = find(index - 1);
         TrebleNode* node = res.it.get();
-        if (!node->data && node->offset + node->length == offset) {
-            node->length += count;
+        if (!node->data() && node->offset() + node->length() == offset) {
+            node->lengthAdd(count);
             return;
         }
         node = root_->maximum();
-        auto newnode = std::make_unique<TrebleNode>(node, count);
-        newnode->offset = offset;
+        auto newnode = newTrebleNode(node, count);
+        newnode->offset(offset);
         insertRight(node, std::move(newnode));
         return;
     }
@@ -730,18 +765,18 @@ void Treble::reinsert(bufsize index, bufsize count, bufsize offset) {
     TrebleFindResult res = find(zero ? index : index - 1);
     if (!zero) ++res.suboffset;
     TrebleNode* node = res.it.get();
-    if (!node->data && node->length == res.suboffset &&
-        offset == node->offset + node->length) {
-        node->length += count;
-    } else if (!res.suboffset && !node->data &&
-               count + offset == node->offset) {
-        node->offset = offset;
-        node->length += count;
+    if (!node->data() && node->length() == res.suboffset &&
+        offset == node->offset() + node->length()) {
+        node->lengthAdd(count);
+    } else if (!res.suboffset && !node->data() &&
+               count + offset == node->offset()) {
+        node->offset(offset);
+        node->lengthAdd(count);
     } else {
         if (res.suboffset) splitLeft(node, res.suboffset);
-        if (node->length) splitRight(node, 0, false, true);
-        node->length = count;
-        node->offset = offset;
+        if (node->length()) splitRight(node, 0, false, true);
+        node->length(count);
+        node->offset(offset);
     }
     propagate(node, 0, count);
     total_ += count;
@@ -756,19 +791,19 @@ void Treble::revert(bufsize index, bufsize count) {
     TrebleNode* node = res.it.get();
     HEXBED_ASSERT(node, "trying to revert beyond file!");
     while (count) {
-        if (!node->data) {
-            bufsize z = node->length - res.suboffset;
+        if (!node->data()) {
+            bufsize z = node->length() - res.suboffset;
             if (count <= z) break;
             count -= z;
         } else {
             if (res.suboffset) splitLeft(node, res.suboffset);
-            bufsize z = node->length;
+            bufsize z = node->length();
             if (count < z) {
                 splitRight(node, count, true);
                 count = 0;
             } else
                 count -= z;
-            node->data = nullptr;
+            node->data(nullptr);
             node = tryMerge(node);
         }
         node = node->successor();
@@ -785,13 +820,13 @@ void Treble::remove(bufsize index, bufsize count) {
     HEXBED_ASSERT(node, "trying to remove beyond file!");
     while (count) {
         if (res.suboffset) splitLeft(node, res.suboffset);
-        bufsize z = node->length;
+        bufsize z = node->length();
         if (count < z) {
-            node->offset += count;
-            node->length -= count;
+            node->offsetAdd(count);
+            node->lengthSub(count);
             removed += count;
-            if (node->data) {
-                byte* p = node->data.get();
+            if (node->data()) {
+                byte* p = node->data();
                 memCopy(p, p + count, z - count);
                 compact(node);
             }

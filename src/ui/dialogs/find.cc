@@ -32,6 +32,8 @@ namespace hexbed {
 
 namespace ui {
 
+wxDEFINE_EVENT(FIND_DOCUMENT_EDIT_EVENT, wxCommandEvent);
+
 FindDocumentControl::FindDocumentControl(
     wxWindow* parent, HexBedContextMain* context,
     std::shared_ptr<HexBedDocument> document, bool isFind)
@@ -40,18 +42,55 @@ FindDocumentControl::FindDocumentControl(
     notebook_ = new wxNotebook(this, wxID_ANY);
     decltype(document) copy = document;
     editor_ = new HexBedStandaloneEditor(notebook_, context, std::move(copy));
+    textInput_ = new HexBedTextInput(
+        notebook_,
+        isFind ? &context->state.searchFindTextString
+               : &context->state.searchReplaceTextString,
+        isFind ? &context->state.searchFindTextEncoding
+               : &context->state.searchReplaceTextEncoding,
+        isFind ? &context->state.searchFindTextCaseInsensitive : nullptr);
     notebook_->AddPage(editor_, _("Hex data"), true);
+    notebook_->AddPage(textInput_, _("Text"), false);
+    notebook_->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED,
+                    &FindDocumentControl::ForwardBookEvent, this);
     editor_->Bind(HEX_EDIT_EVENT, &FindDocumentControl::ForwardEvent, this);
+    textInput_->Bind(wxEVT_TEXT, &FindDocumentControl::ForwardEvent, this);
     top->Add(notebook_, wxSizerFlags().Expand().Proportion(1));
     SetSizer(top);
     context->addWindow(editor_);
 }
 
+bool FindDocumentControl::DoValidate() {
+    switch (notebook_->GetSelection()) {
+    case 0:
+        break;
+    case 1:
+        return textInput_->Commit(document_.get());
+    }
+    return true;
+}
+
+bool FindDocumentControl::NonEmpty() const noexcept {
+    switch (notebook_->GetSelection()) {
+    case 0:
+        return document_->size() > 0;
+    case 1:
+        return textInput_->NonEmpty();
+    }
+    return false;
+}
+
 void FindDocumentControl::Unregister() { context_->removeWindow(editor_); }
 
 void FindDocumentControl::ForwardEvent(wxCommandEvent& event) {
-    AddPendingEvent(event);
+    AddPendingEvent(wxCommandEvent(FIND_DOCUMENT_EDIT_EVENT));
 }
+
+void FindDocumentControl::ForwardBookEvent(wxBookCtrlEvent& event) {
+    AddPendingEvent(wxCommandEvent(FIND_DOCUMENT_EDIT_EVENT));
+}
+
+void FindDocumentControl::UpdateConfig() { textInput_->UpdateConfig(); }
 
 FindDialog::FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
                        std::shared_ptr<HexBedDocument> document,
@@ -84,7 +123,7 @@ FindDialog::FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
     buttons->Add(cancelButton);
 
     control_ = new FindDocumentControl(this, context, document, true);
-    control_->Bind(HEX_EDIT_EVENT, &FindDialog::OnChangedInput, this);
+    control_->Bind(FIND_DOCUMENT_EDIT_EVENT, &FindDialog::OnChangedInput, this);
 
     bool flag = CheckInput();
     findNextButton_->Enable(flag);
@@ -105,26 +144,30 @@ FindDialog::FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
     SetMinSize(GetSize());
 }
 
-void FindDialog::Recommit() {
+bool FindDialog::Recommit() {
+    if (!control_->DoValidate()) return false;
     if (dirty_) {
         dirty_ = false;
         bufsize n = document_->size();
         byte* b = context_->getSearchBuffer(n);
         document_->read(0, bytespan{b, n});
     }
+    return true;
 }
 
 void FindDialog::Unregister() { control_->Unregister(); }
 
-bool FindDialog::CheckInput() { return document_->size() > 0; }
+bool FindDialog::CheckInput() { return control_->NonEmpty(); }
+
+void FindDialog::UpdateConfig() { control_->UpdateConfig(); }
 
 void FindDialog::OnFindNext(wxCommandEvent& event) {
-    Recommit();
+    if (!Recommit()) return;
     parent_->DoFindNext();
 }
 
 void FindDialog::OnFindPrevious(wxCommandEvent& event) {
-    Recommit();
+    if (!Recommit()) return;
     parent_->DoFindPrevious();
 }
 

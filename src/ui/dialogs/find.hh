@@ -35,23 +35,32 @@
 #include "ui/editor-fwd.hh"
 #include "ui/hexbed-fwd.hh"
 #include "ui/saeditor.hh"
+#include "ui/textinput.hh"
 
 namespace hexbed {
 
 namespace ui {
 
+wxDECLARE_EVENT(FIND_DOCUMENT_EDIT_EVENT, wxCommandEvent);
+
 class FindDocumentControl : public wxPanel {
   public:
     FindDocumentControl(wxWindow* parent, HexBedContextMain* context,
                         std::shared_ptr<HexBedDocument> document, bool isFind);
+    bool DoValidate();
     void Unregister();
     void ForwardEvent(wxCommandEvent& event);
+    void ForwardBookEvent(wxBookCtrlEvent& event);
+    void UpdateConfig();
+
+    bool NonEmpty() const noexcept;
 
   private:
     HexBedContextMain* context_;
     std::shared_ptr<HexBedDocument> document_;
     wxNotebook* notebook_;
     HexBedStandaloneEditor* editor_;
+    HexBedTextInput* textInput_;
 };
 
 struct FindDialogNoPrepare {};
@@ -66,7 +75,8 @@ class FindDialog : public wxDialog {
     inline virtual bool IsReplace() const noexcept { return false; }
 
     virtual void Unregister();
-    virtual void Recommit();
+    virtual bool Recommit();
+    virtual void UpdateConfig();
 
     static SearchResult findNext(HexEditorParent* ed);
     static SearchResult findPrevious(HexEditorParent* ed);

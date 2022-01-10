@@ -37,10 +37,10 @@ class SingleByteCharacterSet {
     SingleByteCharacterSet(std::u32string str);
 
     // 0-255 or -1 for not allowed
-    int fromChar(char32_t u);
-    char32_t toChar(byte b);
+    int fromChar(char32_t u) const;
+    char32_t toChar(byte b) const;
     // only give printable characters, or 0 if not printable
-    char32_t toPrintableChar(byte b);
+    char32_t toPrintableChar(byte b) const;
 
   private:
     void initPrint();
@@ -51,6 +51,11 @@ class SingleByteCharacterSet {
 extern SingleByteCharacterSet sbcs;
 
 SingleByteCharacterSet getSbcsByName(const std::string& name);
+
+std::wstring sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
+                           const byte* data);
+bool sbcsToBytes(const SingleByteCharacterSet& sbcs, bufsize& len, byte* data,
+                 const std::wstring& text);
 
 std::wstring sbcsFromBytes(bufsize len, const byte* data);
 bool sbcsToBytes(bufsize& len, byte* data, const std::wstring& text);

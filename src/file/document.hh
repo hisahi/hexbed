@@ -23,6 +23,7 @@
 #define HEXBED_FILE_DOCUMENT_HH
 
 #include <deque>
+#include <functional>
 #include <memory>
 
 #include "common/logger.hh"

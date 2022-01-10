@@ -92,6 +92,13 @@ class ChoiceValidator : public wxValidator {
         return picker->GetSelection() != wxNOT_FOUND;
     }
 
+    void AddItem(const T& value, const wxString& text) {
+        wxItemContainer* picker = dynamic_cast<wxItemContainer*>(GetWindow());
+        values_.reserve(values_.size() + 1);
+        picker->Append(text);
+        values_.push_back(value);
+    }
+
   private:
     T* store_;
     std::vector<T> values_;

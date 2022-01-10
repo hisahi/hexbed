@@ -671,7 +671,10 @@ bool HexBedDocument::map(bufoffset offset, bufsize size,
     alignas(std::max_align_t) byte bstack[256];
     bufsize bs = sizeof(bstack);
     bufsize bc = std::bit_ceil<bufsize>(std::min<bufsize>(size, 1UL << 20));
-    std::unique_ptr<byte[]> holder;
+    auto alignedDeleter = [](byte* ptr) {
+        operator delete(ptr, std::align_val_t(best_align));
+    };
+    std::unique_ptr<byte[], decltype(alignedDeleter)> holder;
     byte* buf = nullptr;
     byte* b;
     while (bc > bs && !buf) {
@@ -679,7 +682,7 @@ bool HexBedDocument::map(bufoffset offset, bufsize size,
         bc >>= 1;
     }
     if (buf)
-        b = buf, bs = bc, holder = decltype(holder)(buf);
+        b = buf, bs = bc, holder = decltype(holder)(buf, alignedDeleter);
     else
         b = bstack;
     if (mul > 1) {
@@ -725,7 +728,10 @@ bool HexBedDocument::reverse(bufoffset offset, bufsize size) {
     alignas(std::max_align_t) byte bstack[256];
     bufsize bs = sizeof(bstack);
     bufsize bc = std::bit_ceil<bufsize>(std::min<bufsize>(size, 1UL << 20));
-    std::unique_ptr<byte[]> holder;
+    auto alignedDeleter = [](byte* ptr) {
+        operator delete(ptr, std::align_val_t(best_align));
+    };
+    std::unique_ptr<byte[], decltype(alignedDeleter)> holder;
     byte* buf = nullptr;
     byte* b;
     while (bc > bs && !buf) {
@@ -733,7 +739,7 @@ bool HexBedDocument::reverse(bufoffset offset, bufsize size) {
         bc >>= 1;
     }
     if (buf)
-        b = buf, bs = bc, holder = decltype(holder)(buf);
+        b = buf, bs = bc, holder = decltype(holder)(buf, alignedDeleter);
     else
         b = bstack;
     bs &= ~1;

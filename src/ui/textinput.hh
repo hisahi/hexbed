@@ -17,55 +17,42 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/dialog/replace.hh -- header for the Replace dialog
+// ui/textinput.hh -- header for the text input class
 
-#ifndef HEXBED_UI_DIALOG_REPLACE_HH
-#define HEXBED_UI_DIALOG_REPLACE_HH
+#ifndef HEXBED_UI_TEXTINPUT_HH
+#define HEXBED_UI_TEXTINPUT_HH
 
-#include "ui/dialogs/find.hh"
+#include <wx/choice.h>
+#include <wx/panel.h>
+#include <wx/string.h>
+#include <wx/textctrl.h>
+#include <wx/window.h>
+
+#include "common/types.hh"
+#include "file/document-fwd.hh"
 
 namespace hexbed {
-
 namespace ui {
 
-class ReplaceDialog : public FindDialog {
+class HexBedTextInput : public wxPanel {
   public:
-    ReplaceDialog(HexBedMainFrame* parent, HexBedContextMain* context,
-                  std::shared_ptr<HexBedDocument> document,
-                  std::shared_ptr<HexBedDocument> repdoc);
+    HexBedTextInput(wxWindow* parent, wxString* string, std::string* encoding,
+                    bool* caseInsensitive);
 
-    inline bool IsReplace() const noexcept { return true; }
-
-    void Unregister();
-    bool Recommit();
     void UpdateConfig();
-
-    static void replaceSelection(HexEditorParent* ed);
-    static bufsize replaceAll(HexEditorParent* ed);
+    bool Commit(HexBedDocument* document);
+    bool NonEmpty() const noexcept;
 
   private:
-    void OnFindNext(wxCommandEvent& event);
-    void OnFindPrevious(wxCommandEvent& event);
-    void OnReplaceNext(wxCommandEvent& event);
-    void OnReplacePrevious(wxCommandEvent& event);
-    void OnReplaceAll(wxCommandEvent& event);
+    std::string* pEncoding_;
+    wxString* pText_;
+    wxTextCtrl* textCtrl_;
+    wxChoice* choice_;
 
-    void OnChangedInput(wxCommandEvent& event);
-    void OnChangedReplaceInput(wxCommandEvent& event);
-    void OnChangedSelection(wxCommandEvent& event);
-
-    std::shared_ptr<HexBedDocument> repdoc_;
-    FindDocumentControl* replace_;
-
-    wxButton* replaceNextButton_;
-    wxButton* replacePrevButton_;
-    wxButton* replaceAllButton_;
-
-    bool dirtyReplace_{false};
+    void ForwardEvent(wxCommandEvent& event);
 };
 
 };  // namespace ui
-
 };  // namespace hexbed
 
-#endif /* HEXBED_UI_DIALOG_REPLACE_HH */
+#endif /* HEXBED_UI_TEXTINPUT_HH */

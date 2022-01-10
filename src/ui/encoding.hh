@@ -17,55 +17,47 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/dialog/replace.hh -- header for the Replace dialog
+// ui/encoding.hh -- header for multibyte encodings and list of text encodings
 
-#ifndef HEXBED_UI_DIALOG_REPLACE_HH
-#define HEXBED_UI_DIALOG_REPLACE_HH
+#ifndef HEXBED_UI_ENCODING_HH
+#define HEXBED_UI_ENCODING_HH
 
-#include "ui/dialogs/find.hh"
+#include <wx/string.h>
+
+#include "common/types.hh"
+#include "file/document.hh"
 
 namespace hexbed {
 
-namespace ui {
+bool textEncode(const std::string& encoding, const wxString& text,
+                bufsize& outp, HexBedDocument* doc);
+bool textDecode(const std::string& encoding, wxString& text,
+                const_bytespan data);
 
-class ReplaceDialog : public FindDialog {
-  public:
-    ReplaceDialog(HexBedMainFrame* parent, HexBedContextMain* context,
-                  std::shared_ptr<HexBedDocument> document,
-                  std::shared_ptr<HexBedDocument> repdoc);
+// clang-format off
 
-    inline bool IsReplace() const noexcept { return true; }
+#define MBCS_ENCODING_KEYS() \
+    "m_utf8",                \
+    "m_utf16le",             \
+    "m_utf16be",             \
+    "m_utf32le",             \
+    "m_utf32be"
+#define MBCS_ENCODING_NAMES()                                                  \
+    _("Unicode, UTF-8"),                                                       \
+    _("Unicode, UTF-16LE (little-endian)"),                                    \
+    _("Unicode, UTF-16BE (big-endian)"),                                       \
+    _("Unicode, UTF-32LE (little-endian)"),                                    \
+    _("Unicode, UTF-32BE (big-endian)")
 
-    void Unregister();
-    bool Recommit();
-    void UpdateConfig();
+#define SBCS_ENCODING_KEYS() \
+    "ascii",                 \
+    "latin1"
+#define SBCS_ENCODING_NAMES()                                                  \
+    _("ASCII"),                                                                \
+    _("Latin-1 (ISO 8859-1)")
 
-    static void replaceSelection(HexEditorParent* ed);
-    static bufsize replaceAll(HexEditorParent* ed);
-
-  private:
-    void OnFindNext(wxCommandEvent& event);
-    void OnFindPrevious(wxCommandEvent& event);
-    void OnReplaceNext(wxCommandEvent& event);
-    void OnReplacePrevious(wxCommandEvent& event);
-    void OnReplaceAll(wxCommandEvent& event);
-
-    void OnChangedInput(wxCommandEvent& event);
-    void OnChangedReplaceInput(wxCommandEvent& event);
-    void OnChangedSelection(wxCommandEvent& event);
-
-    std::shared_ptr<HexBedDocument> repdoc_;
-    FindDocumentControl* replace_;
-
-    wxButton* replaceNextButton_;
-    wxButton* replacePrevButton_;
-    wxButton* replaceAllButton_;
-
-    bool dirtyReplace_{false};
-};
-
-};  // namespace ui
+// clang-format on
 
 };  // namespace hexbed
 
-#endif /* HEXBED_UI_DIALOG_REPLACE_HH */
+#endif /* HEXBED_UI_ENCODING_HH */

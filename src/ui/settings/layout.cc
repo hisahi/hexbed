@@ -22,6 +22,7 @@
 #include "ui/settings/layout.hh"
 
 #include "ui/config.hh"
+#include "ui/encoding.hh"
 #include "ui/settings/controls.hh"
 
 namespace hexbed {
@@ -76,8 +77,7 @@ HexBedPrefsLayout::HexBedPrefsLayout(wxWindow* parent, ConfigurationValues* cfg)
                          {8L, 10L, 16L});
     /// character encodings
     PREFS_SETTING_CHOICE(col, _("Text encoding"), charset, std::string,
-                         {_("ASCII"), _("Latin-1 (ISO 8859-1)")},
-                         {"ascii", "latin1"});
+                         {SBCS_ENCODING_NAMES()}, {SBCS_ENCODING_KEYS()});
     PREFS_FINISHCOLUMN(col);
 }
 

@@ -122,14 +122,15 @@ ReplaceDialog::ReplaceDialog(HexBedMainFrame* parent,
     Layout();
 }
 
-void ReplaceDialog::Recommit() {
-    FindDialog::Recommit();
+bool ReplaceDialog::Recommit() {
+    if (!FindDialog::Recommit()) return false;
     if (dirtyReplace_) {
         dirtyReplace_ = false;
         bufsize n = repdoc_->size();
         byte* b = context_->getReplaceBuffer(n);
         repdoc_->read(0, bytespan{b, n});
     }
+    return true;
 }
 
 void ReplaceDialog::Unregister() {
@@ -137,18 +138,23 @@ void ReplaceDialog::Unregister() {
     control_->Unregister();
 }
 
+void ReplaceDialog::UpdateConfig() {
+    control_->UpdateConfig();
+    replace_->UpdateConfig();
+}
+
 void ReplaceDialog::OnFindNext(wxCommandEvent& event) {
-    Recommit();
+    if (!Recommit()) return;
     parent_->DoFindNext();
 }
 
 void ReplaceDialog::OnFindPrevious(wxCommandEvent& event) {
-    Recommit();
+    if (!Recommit()) return;
     parent_->DoFindPrevious();
 }
 
 void ReplaceDialog::OnReplaceNext(wxCommandEvent& event) {
-    Recommit();
+    if (!Recommit()) return;
     HexEditorParent* ed = parent_->GetCurrentEditor();
     if (ed) {
         replaceSelection(ed);
@@ -157,7 +163,7 @@ void ReplaceDialog::OnReplaceNext(wxCommandEvent& event) {
 }
 
 void ReplaceDialog::OnReplacePrevious(wxCommandEvent& event) {
-    Recommit();
+    if (!Recommit()) return;
     HexEditorParent* ed = parent_->GetCurrentEditor();
     if (ed) {
         replaceSelection(ed);
@@ -166,7 +172,7 @@ void ReplaceDialog::OnReplacePrevious(wxCommandEvent& event) {
 }
 
 void ReplaceDialog::OnReplaceAll(wxCommandEvent& event) {
-    Recommit();
+    if (!Recommit()) return;
     HexEditorParent* ed = parent_->GetCurrentEditor();
     if (ed) parent_->OnReplaceDone(replaceAll(ed));
 }

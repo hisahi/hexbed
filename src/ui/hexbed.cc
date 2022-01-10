@@ -348,6 +348,7 @@ void HexBedMainFrame::ApplyConfig() {
     currentConfig.apply();
     HexEditor::InitConfig();
     context_->updateWindows();
+    if (findDialog_) findDialog_->UpdateConfig();
 }
 
 bool HexBedMainFrame::FileClose(size_t i) {

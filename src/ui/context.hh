@@ -22,6 +22,8 @@
 #ifndef HEXBED_UI_CONTEXT_HH
 #define HEXBED_UI_CONTEXT_HH
 
+#include <wx/string.h>
+
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -40,6 +42,12 @@ constexpr unsigned MAX_LOOKAHEAD = 256;
 struct EditorState {
     bool insert{false};
     bool searchWrapAround{false};
+    bool searchFindTextCaseInsensitive{false};
+
+    wxString searchFindTextString;
+    wxString searchReplaceTextString;
+    std::string searchFindTextEncoding;
+    std::string searchReplaceTextEncoding;
 };
 
 class HexBedContextMain;

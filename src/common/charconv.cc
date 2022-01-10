@@ -60,16 +60,16 @@ void SingleByteCharacterSet::initPrint() {
 }
 
 // 0-255 or -1 for not allowed
-int SingleByteCharacterSet::fromChar(char32_t u) {
+int SingleByteCharacterSet::fromChar(char32_t u) const {
     for (unsigned i = 0; i < 256; ++i)
         if (map_[i] == u) return i;
     return -1;
 }
 
-char32_t SingleByteCharacterSet::toChar(byte b) { return map_[b]; }
+char32_t SingleByteCharacterSet::toChar(byte b) const { return map_[b]; }
 
 // only give printable characters, or 0 if not printable
-char32_t SingleByteCharacterSet::toPrintableChar(byte b) {
+char32_t SingleByteCharacterSet::toPrintableChar(byte b) const {
     return print_[b] ? map_[b] : 0;
 }
 
@@ -118,7 +118,8 @@ SingleByteCharacterSet getSbcsByName(const std::string& name) {
     return SingleByteCharacterSet(s->second);
 }
 
-std::wstring sbcsFromBytes(bufsize len, const byte* data) {
+std::wstring sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
+                           const byte* data) {
     std::vector<wchar_t> chars;
     for (bufsize j = 0; j < len; ++j) {
         char32_t u = sbcs.toChar(data[j]);
@@ -135,7 +136,8 @@ std::wstring sbcsFromBytes(bufsize len, const byte* data) {
     return std::wstring(chars.begin(), chars.end());
 }
 
-bool sbcsToBytes(bufsize& len, byte* data, const std::wstring& text) {
+bool sbcsToBytes(const SingleByteCharacterSet& sbcs, bufsize& len, byte* data,
+                 const std::wstring& text) {
     bufsize l = 0, ll = len;
     for (wchar_t c : text) {
         int v = sbcs.fromChar(c);
@@ -145,6 +147,14 @@ bool sbcsToBytes(bufsize& len, byte* data, const std::wstring& text) {
     }
     len = l;
     return true;
+}
+
+std::wstring sbcsFromBytes(bufsize len, const byte* data) {
+    return sbcsFromBytes(sbcs, len, data);
+}
+
+bool sbcsToBytes(bufsize& len, byte* data, const std::wstring& text) {
+    return sbcsToBytes(sbcs, len, data, text);
 }
 
 };  // namespace hexbed

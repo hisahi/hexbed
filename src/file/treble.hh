@@ -29,46 +29,86 @@
 #include <limits>
 #include <memory>
 
+#include "common/aligneduniqueptr.hh"
 #include "common/logger.hh"
 #include "common/memory.hh"
+#include "common/specs.hh"
 #include "common/types.hh"
 
 namespace hexbed {
 
 //#define TREBLE_DEBUG 1
 
+struct TrebleNode;
 class Treble;
 
-struct TrebleNode {
-    std::unique_ptr<TrebleNode> left_{nullptr};
-    std::unique_ptr<TrebleNode> right_{nullptr};
-    TrebleNode* parent{nullptr};
-    bufsize length{0};
-    bufsize leftlen{0};
-    size_t capacity{0};
-    bufsize offset{0};
-    std::unique_ptr<byte[]> data{nullptr};
+class MockTrebleNode {
+  private:
+    TrebleNode* left_{nullptr};
+    TrebleNode* right_{nullptr};
+    TrebleNode* parent_{nullptr};
+    byte* data_{nullptr};
+    bufsize length_{0};
+    bufsize leftlen_{0};
+    bufsize offset_{0};
+    std::size_t capacity_{0};
 
+    MockTrebleNode();
+};
+
+using TrebleNodePointer =
+    AlignedUniquePtr<TrebleNode,
+                     std::bit_ceil<std::size_t>(sizeof(MockTrebleNode))>;
+using TrebleDataPointer = std::unique_ptr<byte[]>;
+
+struct TrebleNode {
     inline TrebleNode(TrebleNode* parent, bufsize length)
-        : parent(parent), length(length) {}
+        : parent_(parent), length_(length) {}
     inline TrebleNode(TrebleNode* parent, bufsize length, byte value)
-        : parent(parent),
-          length(length),
-          capacity(length),
-          data(std::make_unique<byte[]>(length)) {
-        std::fill(data.get(), data.get() + length, value);
+        : parent_(parent),
+          data_(makeUniqueOf<TrebleDataPointer>(length)),
+          length_(length),
+          capacity_(length) {
+        std::fill(data_.get(), data_.get() + length_, value);
     }
     inline TrebleNode(TrebleNode* parent, bufsize length, const byte* src)
-        : parent(parent),
-          length(length),
-          capacity(length),
-          data(std::make_unique<byte[]>(length)) {
-        std::copy(src, src + length, data.get());
+        : parent_(parent),
+          data_(makeUniqueOf<TrebleDataPointer>(length)),
+          length_(length),
+          capacity_(length) {
+        std::copy(src, src + length, data_.get());
     }
 
-    inline int balance() const noexcept { return balance_; }
+    inline int balance() const noexcept {
+        switch (capacity_ & 3) {
+        case 0:
+            return 0;
+        case 1:
+            return 1;
+        default:
+        case 2:
+            HEXBED_UNREACHABLE();
+            return 0;
+        case 3:
+            return -1;
+        }
+    }
+
     inline void balance(int balance) noexcept {
-        balance_ = static_cast<decltype(balance_)>(balance);
+        HEXBED_ASSERT(balance == -1 || balance == 0 || balance == 1);
+        capacity_ &= ~3;
+        switch (balance) {
+        case 0:
+            break;
+        case 1:
+            capacity_ |= 1;
+            break;
+        case -1:
+            capacity_ |= 3;
+            break;
+        default:
+            HEXBED_UNREACHABLE();
+        }
     }
 
     inline TrebleNode* left() const noexcept { return left_.get(); }
@@ -81,13 +121,48 @@ struct TrebleNode {
         right_ = nullptr;
         return nullptr;
     }
-    inline TrebleNode* left(std::unique_ptr<TrebleNode>&& node) noexcept {
+    inline TrebleNode* left(TrebleNodePointer&& node) noexcept {
         left_ = std::move(node);
         return left_.get();
     }
-    inline TrebleNode* right(std::unique_ptr<TrebleNode>&& node) noexcept {
+    inline TrebleNode* right(TrebleNodePointer&& node) noexcept {
         right_ = std::move(node);
         return right_.get();
+    }
+    inline TrebleNodePointer& leftLink() noexcept { return left_; }
+    inline TrebleNodePointer& rightLink() noexcept { return right_; }
+
+    inline bufsize length() const noexcept { return length_; }
+    inline bufsize length(bufsize n) noexcept { return length_ = n; }
+    inline bufsize lengthAdd(bufsize n) noexcept { return length_ += n; }
+    inline bufsize lengthSub(bufsize n) noexcept { return length_ -= n; }
+
+    inline bufsize leftlen() const noexcept { return leftlen_; }
+    inline bufsize leftlen(bufsize n) noexcept { return leftlen_ = n; }
+    inline bufsize leftlenAdd(bufsize n) noexcept { return leftlen_ += n; }
+    inline bufsize leftlenSub(bufsize n) noexcept { return leftlen_ -= n; }
+
+    inline TrebleNode* parent() const noexcept { return parent_; }
+    inline void parent(TrebleNode* p) noexcept { parent_ = p; }
+    inline TrebleNode*& parentLink() noexcept { return parent_; }
+
+    inline bufsize offset() const noexcept { return offset_; }
+    inline bufsize offset(bufsize n) noexcept { return offset_ = n; }
+    inline bufsize offsetAdd(bufsize n) noexcept { return offset_ += n; }
+    inline bufsize offsetSub(bufsize n) noexcept { return offset_ -= n; }
+
+    inline std::size_t capacity() const noexcept { return capacity_ & ~3; }
+    inline std::size_t capacity(std::size_t n) noexcept {
+        HEXBED_ASSERT(!(n & 3));
+        return capacity_ = n;
+    }
+
+    inline byte* data() const noexcept { return data_.get(); }
+    inline void data(TrebleDataPointer&& ptr) noexcept {
+        data_ = std::move(ptr);
+    }
+    inline void dataMove(TrebleNode& node) noexcept {
+        data_ = std::move(node.data_);
     }
 
     bool isRoot() const noexcept;
@@ -116,11 +191,15 @@ struct TrebleNode {
             const_cast<const TrebleNode*>(this)->successor());
     }
 
-#if !TREBLE_DEBUG
   private:
-#endif
-    signed char balance_{0};
-    friend class Treble;
+    TrebleNodePointer left_{nullptr};
+    TrebleNodePointer right_{nullptr};
+    TrebleNode* parent_{nullptr};
+    TrebleDataPointer data_{nullptr};
+    bufsize length_{0};
+    bufsize leftlen_{0};
+    bufsize offset_{0};
+    std::size_t capacity_{0};
 };
 
 class TrebleIterator {
@@ -276,18 +355,17 @@ class Treble {
     TrebleReadByteResult readByte(T& in, bufsize index) const noexcept {
         TrebleNode* node = root_.get();
         do {
-            if (index < node->leftlen)
+            if (index < node->leftlen())
                 node = node->left();
             else {
-                index -= node->leftlen;
-                if (index < node->length) {
-                    if (node->data)
-                        return TrebleReadByteResult{node->data.get()[index],
-                                                    false};
+                index -= node->leftlen();
+                if (index < node->length()) {
+                    if (node->data())
+                        return TrebleReadByteResult{node->data()[index], false};
                     else
                         return TrebleReadByteResult{in(index), true};
                 }
-                index -= node->length;
+                index -= node->length();
                 node = node->right();
             }
         } while (node);
@@ -299,25 +377,25 @@ class Treble {
     bufsize render(T& out, bufsize off, bufsize n,
                    const TrebleNode* node) const {
         bufsize w = 0, l;
-        if (off < node->leftlen) {
-            HEXBED_ASSERT(node->left_);
+        if (off < node->leftlen()) {
+            HEXBED_ASSERT(node->left());
             l = render(out, off, n, node->left());
             w += l, n -= l;
             if (!n) return w;
             off = 0;
         } else
-            off -= node->leftlen;
-        if (off < node->length) {
-            l = std::min(node->length - off, n);
-            if (node->data)
-                out.raw(l, node->data.get() + off);
+            off -= node->leftlen();
+        if (off < node->length()) {
+            l = std::min(node->length() - off, n);
+            if (node->data())
+                out.raw(l, node->data() + off);
             else
-                out.copy(l, node->offset + off);
+                out.copy(l, node->offset() + off);
             w += l, n -= l;
             if (!n) return w;
             off = 0;
         } else
-            off -= node->length;
+            off -= node->length();
         if (node->right()) {
             l = render(out, off, n, node->right());
             w += l, n -= l;
@@ -348,7 +426,7 @@ class Treble {
     }
 
   private:
-    std::unique_ptr<TrebleNode> root_;
+    TrebleNodePointer root_;
     bufsize total_;
 
     bool isCleanOverlay_(TrebleNode* node, bufsize offset) const noexcept;
@@ -376,12 +454,11 @@ class Treble {
     template <bool incr>
     void balance(TrebleNode* node, int swing);
 
-    void insertLeft(TrebleNode* node, std::unique_ptr<TrebleNode>&& child);
-    void insertRight(TrebleNode* node, std::unique_ptr<TrebleNode>&& child);
+    void insertLeft(TrebleNode* node, TrebleNodePointer&& child);
+    void insertRight(TrebleNode* node, TrebleNodePointer&& child);
 
     bool isRightChild(TrebleNode* parent, TrebleNode* node);
-    std::unique_ptr<TrebleNode>& getParentLink(TrebleNode* parent,
-                                               TrebleNode* node);
+    TrebleNodePointer& getParentLink(TrebleNode* parent, TrebleNode* node);
     int swing(TrebleNode* parent, TrebleNode* node);
 
     TrebleNode* erase(TrebleNode* node);
