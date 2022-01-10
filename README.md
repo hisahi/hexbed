@@ -14,6 +14,7 @@ A graphical hex editor, still a work in progress.
 * Bit editing
 * Inserting blocks
 * Bitwise operations on blocks
+* Search for text
 
 ## Planned features
 * Stability
@@ -21,7 +22,7 @@ A graphical hex editor, still a work in progress.
 * Not losing data
 * Not having bugs
 * Data inspector and editor (integers, etc.)
-* Search for text
+* Search for text with case insensitivity
 * Search for integers, floats, etc.
 * Import/export data
 * Support for more text encodings
