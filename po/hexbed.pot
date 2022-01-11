@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 20:27+0200\n"
+"POT-Creation-Date: 2022-01-12 01:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -431,7 +431,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/context.cc:148 src/ui/hexbed.cc:339
+#: src/ui/context.cc:148 src/ui/hexbed.cc:363
 msgid "&Retry"
 msgstr ""
 
@@ -451,121 +451,137 @@ msgstr ""
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 
-#: src/ui/hexbed.cc:263
+#: src/ui/hexbed.cc:251
+#, c-format
+msgid "[unsaved] %s"
+msgstr ""
+
+#. / main window title bar
+#: src/ui/hexbed.cc:260 src/ui/hexbed.cc:431
+#, c-format
+msgid "%s - %s"
+msgstr ""
+
+#: src/ui/hexbed.cc:282
 msgid "Save a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:264 src/ui/hexbed.cc:869
+#: src/ui/hexbed.cc:283 src/ui/hexbed.cc:915
 msgid "All files (*.*)"
 msgstr ""
 
-#: src/ui/hexbed.cc:290
+#: src/ui/hexbed.cc:309
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:313
+#: src/ui/hexbed.cc:337
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr ""
 
-#: src/ui/hexbed.cc:333
+#: src/ui/hexbed.cc:357
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:339
+#: src/ui/hexbed.cc:363
 msgid "&Cancel"
 msgstr ""
 
-#: src/ui/hexbed.cc:341
+#: src/ui/hexbed.cc:365
 msgid "Retry?"
 msgstr ""
 
-#: src/ui/hexbed.cc:364
+#: src/ui/hexbed.cc:389
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr ""
 
-#: src/ui/hexbed.cc:501
+#: src/ui/hexbed.cc:537
+#, c-format
+msgid "[read-only] %s"
+msgstr ""
+
+#: src/ui/hexbed.cc:547
 #, c-format
 msgid "New-%llu"
 msgstr ""
 
-#: src/ui/hexbed.cc:505
+#: src/ui/hexbed.cc:551
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:529
+#: src/ui/hexbed.cc:575
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:538
+#: src/ui/hexbed.cc:584
 msgid "Read only"
 msgstr ""
 
-#: src/ui/hexbed.cc:577
+#: src/ui/hexbed.cc:623
 msgid "No more results found for this search."
 msgstr ""
 
-#: src/ui/hexbed.cc:583
+#: src/ui/hexbed.cc:629
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/hexbed.cc:685
+#: src/ui/hexbed.cc:731
 #, c-format
 msgid "Insert failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:712
+#: src/ui/hexbed.cc:758
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:733
+#: src/ui/hexbed.cc:779
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:755
+#: src/ui/hexbed.cc:801
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:868
+#: src/ui/hexbed.cc:914
 msgid "Open a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:942
+#: src/ui/hexbed.cc:988
 #, c-format
 msgid "Failed to copy: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:973
+#: src/ui/hexbed.cc:1019
 msgid ""
 "Cannot paste the current clipboard contents, because it contains characters "
 "that the currently selected character encoding cannot represent."
 msgstr ""
 
-#: src/ui/hexbed.cc:976
+#: src/ui/hexbed.cc:1022
 msgid ""
 "Cannot paste the current clipboard contents, because it does not contain "
 "valid hexadecimal data. Text data should be a string of hexadecimal bytes."
 msgstr ""
 
-#: src/ui/hexbed.cc:987
+#: src/ui/hexbed.cc:1033
 #, c-format
 msgid "Failed to paste: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1034
+#: src/ui/hexbed.cc:1080
 msgid "A hex editor."
 msgstr ""
 
@@ -1004,6 +1020,10 @@ msgstr ""
 msgid "uint8 (unsigned 8-bit integer)"
 msgstr ""
 
+#: src/ui/plugins/inspector/int8.cc:38
+msgid "int8 (signed 8-bit integer)"
+msgstr ""
+
 #: src/ui/plugins/inspector/uint16.cc:38
 msgid "uint16 (unsigned 16-bit integer)"
 msgstr ""
@@ -1014,10 +1034,6 @@ msgstr ""
 
 #: src/ui/plugins/inspector/uint64.cc:38
 msgid "uint64 (unsigned 64-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/int8.cc:38
-msgid "int8 (signed 8-bit integer)"
 msgstr ""
 
 #: src/ui/plugins/inspector/int16.cc:38

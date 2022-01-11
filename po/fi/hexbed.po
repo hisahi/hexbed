@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 20:27+0200\n"
+"POT-Creation-Date: 2022-01-12 01:00+0200\n"
 "PO-Revision-Date: 2021-12-23 21:14+0200\n"
 "Last-Translator: Sampo Hippeläinen <sampo.hippelainen@gmail.com>\n"
 "Language-Team: fi\n"
@@ -432,7 +432,7 @@ msgstr ""
 "Varmuuskopiointi epäonnistui:\n"
 "%s"
 
-#: src/ui/context.cc:148 src/ui/hexbed.cc:339
+#: src/ui/context.cc:148 src/ui/hexbed.cc:363
 msgid "&Retry"
 msgstr "&Uudelleen"
 
@@ -456,25 +456,36 @@ msgstr ""
 "Yritetäänkö uudelleen? 'Ei' tallentaa silti ja 'Peruuta' peruuttaa "
 "tallennuksen."
 
-#: src/ui/hexbed.cc:263
+#: src/ui/hexbed.cc:251
+#, c-format
+msgid "[unsaved] %s"
+msgstr "[muokattu] %s"
+
+#. / main window title bar
+#: src/ui/hexbed.cc:260 src/ui/hexbed.cc:431
+#, c-format
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#: src/ui/hexbed.cc:282
 msgid "Save a file"
 msgstr "Tallenna tiedosto"
 
-#: src/ui/hexbed.cc:264 src/ui/hexbed.cc:869
+#: src/ui/hexbed.cc:283 src/ui/hexbed.cc:915
 msgid "All files (*.*)"
 msgstr "Kaikki tiedostot (*.*)"
 
-#: src/ui/hexbed.cc:290
+#: src/ui/hexbed.cc:309
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr "Tiedoston %s tallentaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:313
+#: src/ui/hexbed.cc:337
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Hylätäänkö ne?"
 
-#: src/ui/hexbed.cc:333
+#: src/ui/hexbed.cc:357
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
@@ -483,79 +494,84 @@ msgstr ""
 "Tiedostosta %s ei voitu lukea:\n"
 "%s"
 
-#: src/ui/hexbed.cc:339
+#: src/ui/hexbed.cc:363
 msgid "&Cancel"
 msgstr "&Peruuta"
 
-#: src/ui/hexbed.cc:341
+#: src/ui/hexbed.cc:365
 msgid "Retry?"
 msgstr "Yritetäänkö uudelleen?"
 
-#: src/ui/hexbed.cc:364
+#: src/ui/hexbed.cc:389
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Haluatko tallentaa ne?"
 
-#: src/ui/hexbed.cc:501
+#: src/ui/hexbed.cc:537
+#, c-format
+msgid "[read-only] %s"
+msgstr "[vain luku] %s"
+
+#: src/ui/hexbed.cc:547
 #, c-format
 msgid "New-%llu"
 msgstr "Uusi-%llu"
 
-#: src/ui/hexbed.cc:505
+#: src/ui/hexbed.cc:551
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr "Uuden tiedoston luonti epäonnistui: %s"
 
-#: src/ui/hexbed.cc:529
+#: src/ui/hexbed.cc:575
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr "Tiedoston %s avaaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:538
+#: src/ui/hexbed.cc:584
 msgid "Read only"
 msgstr "Vain luku"
 
-#: src/ui/hexbed.cc:577
+#: src/ui/hexbed.cc:623
 msgid "No more results found for this search."
 msgstr "Tällä haulla ei löytynyt lisää tuloksia."
 
-#: src/ui/hexbed.cc:583
+#: src/ui/hexbed.cc:629
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] "%llu esiintymä korvattiin."
 msgstr[1] "%llu esiintymää korvattiin."
 
-#: src/ui/hexbed.cc:685
+#: src/ui/hexbed.cc:731
 #, c-format
 msgid "Insert failed: %s"
 msgstr "Lisäys epäonnistui: %s"
 
-#: src/ui/hexbed.cc:712
+#: src/ui/hexbed.cc:758
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr "Binäärilaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:733
+#: src/ui/hexbed.cc:779
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr "Unaarilaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:755
+#: src/ui/hexbed.cc:801
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr "Bittisiirtolaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:868
+#: src/ui/hexbed.cc:914
 msgid "Open a file"
 msgstr "Avaa tiedosto"
 
-#: src/ui/hexbed.cc:942
+#: src/ui/hexbed.cc:988
 #, c-format
 msgid "Failed to copy: %s"
 msgstr "Kopiointi epäonnistui: %s"
 
-#: src/ui/hexbed.cc:973
+#: src/ui/hexbed.cc:1019
 msgid ""
 "Cannot paste the current clipboard contents, because it contains characters "
 "that the currently selected character encoding cannot represent."
@@ -563,7 +579,7 @@ msgstr ""
 "Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä on merkkejä, joita "
 "valittu merkistökoodaus ei tue."
 
-#: src/ui/hexbed.cc:976
+#: src/ui/hexbed.cc:1022
 msgid ""
 "Cannot paste the current clipboard contents, because it does not contain "
 "valid hexadecimal data. Text data should be a string of hexadecimal bytes."
@@ -571,12 +587,12 @@ msgstr ""
 "Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä ei ole kelvollista "
 "heksadesimaalimuotoista tietoa. Tekstin tulisi olla heksadesimaalisia tavuja."
 
-#: src/ui/hexbed.cc:987
+#: src/ui/hexbed.cc:1033
 #, c-format
 msgid "Failed to paste: %s"
 msgstr "Liittäminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:1034
+#: src/ui/hexbed.cc:1080
 msgid "A hex editor."
 msgstr "Tavumuokkain."
 
@@ -1019,6 +1035,10 @@ msgstr "Pituus: %s"
 msgid "uint8 (unsigned 8-bit integer)"
 msgstr "uint8 (etumerkitön 8-bittinen kokonaisluku)"
 
+#: src/ui/plugins/inspector/int8.cc:38
+msgid "int8 (signed 8-bit integer)"
+msgstr "int8 (etumerkillinen 8-bittinen kokonaisluku)"
+
 #: src/ui/plugins/inspector/uint16.cc:38
 msgid "uint16 (unsigned 16-bit integer)"
 msgstr "uint16 (etumerkitön 16-bittinen kokonaisluku)"
@@ -1030,10 +1050,6 @@ msgstr "uint32 (etumerkitön 32-bittinen kokonaisluku)"
 #: src/ui/plugins/inspector/uint64.cc:38
 msgid "uint64 (unsigned 64-bit integer)"
 msgstr "uint64 (etumerkitön 64-bittinen kokonaisluku)"
-
-#: src/ui/plugins/inspector/int8.cc:38
-msgid "int8 (signed 8-bit integer)"
-msgstr "int8 (etumerkillinen 8-bittinen kokonaisluku)"
 
 #: src/ui/plugins/inspector/int16.cc:38
 msgid "int16 (signed 16-bit integer)"
@@ -1057,9 +1073,10 @@ msgstr "double (IEEE 754 binary64, liukuluku kaksoistarkkuudella"
 
 #: src/ui/plugins/inspector/float32x.cc:43
 msgid "Hexadecimal float (IEEE 754 binary32 single-precision floating-point)"
-msgstr "Heksadesimaalinen float (IEEE 754 binary32, liukuluku perustarkkuudella"
+msgstr ""
+"Heksadesimaalinen float (IEEE 754 binary32, liukuluku perustarkkuudella"
 
 #: src/ui/plugins/inspector/float64x.cc:43
 msgid "Hexadecimal double (IEEE 754 binary64 double-precision floating-point)"
-msgstr "Heksadesimaalinen double (IEEE 754 binary64, "
-"liukuluku kaksoistarkkuudella"
+msgstr ""
+"Heksadesimaalinen double (IEEE 754 binary64, liukuluku kaksoistarkkuudella"
