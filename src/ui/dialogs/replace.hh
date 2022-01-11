@@ -39,6 +39,7 @@ class ReplaceDialog : public FindDialog {
     void Unregister();
     bool Recommit();
     void UpdateConfig();
+    void AllowReplace(bool flag);
 
     static void replaceSelection(HexEditorParent* ed);
     static bufsize replaceAll(HexEditorParent* ed);

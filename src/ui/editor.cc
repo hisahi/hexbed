@@ -501,6 +501,10 @@ void HexBedEditor::SetStatusBar(wxStatusBar* sbar) {
     hexEdit_->SetStatusBar(sbar);
 }
 
+bool HexBedEditor::DidUnsavedChange(bool unsaved) {
+    return std::exchange(wasUnsaved_, unsaved) != unsaved;
+}
+
 bool HexBedEditor::ScrollLine(int dir) {
     auto old = scroll_->GetThumbPositionLong();
     scroll_->SetThumbPositionLong(scroll_->GetThumbPositionLong() + dir);

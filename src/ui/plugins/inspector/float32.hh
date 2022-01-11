@@ -17,7 +17,7 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/plugins/inspector/float32.hh -- header for builtin float32 inspector
+// ui/plugins/inspector/float32.hh -- header for builtin float inspector
 
 #ifndef HEXBED_UI_PLUGINS_INSPECTOR_FLOAT32_HH
 #define HEXBED_UI_PLUGINS_INSPECTOR_FLOAT32_HH

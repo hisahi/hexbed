@@ -17,7 +17,7 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/plugins/inspector/float64x.hh -- header for builtin float64 hex inspector
+// ui/plugins/inspector/float64x.hh -- header for builtin double hex inspector
 
 #ifndef HEXBED_UI_PLUGINS_INSPECTOR_FLOAT64X_HH
 #define HEXBED_UI_PLUGINS_INSPECTOR_FLOAT64X_HH

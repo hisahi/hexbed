@@ -91,10 +91,10 @@ ReplaceDialog::ReplaceDialog(HexBedMainFrame* parent,
     rbuttons2->Add(cancelButton);
 
     replace_ = new FindDocumentControl(this, context, repdoc, false);
-    replace_->Bind(HEX_EDIT_EVENT, &ReplaceDialog::OnChangedReplaceInput, this);
+    replace_->Bind(FIND_DOCUMENT_EDIT_EVENT, &ReplaceDialog::OnChangedReplaceInput, this);
 
     control_ = new FindDocumentControl(this, context, document, true);
-    control_->Bind(HEX_EDIT_EVENT, &ReplaceDialog::OnChangedInput, this);
+    control_->Bind(FIND_DOCUMENT_EDIT_EVENT, &ReplaceDialog::OnChangedInput, this);
 
     bool flag = CheckInput();
     findNextButton_->Enable(flag);
@@ -143,6 +143,13 @@ void ReplaceDialog::UpdateConfig() {
     replace_->UpdateConfig();
 }
 
+void ReplaceDialog::AllowReplace(bool flag) {
+    if (flag) flag = CheckInput();
+    replaceNextButton_->Enable(flag);
+    replacePrevButton_->Enable(flag);
+    replaceAllButton_->Enable(flag);
+}
+
 void ReplaceDialog::OnFindNext(wxCommandEvent& event) {
     if (!Recommit()) return;
     parent_->DoFindNext();
@@ -182,6 +189,7 @@ void ReplaceDialog::OnChangedInput(wxCommandEvent& event) {
     dirty_ = true;
     findNextButton_->Enable(flag);
     findPrevButton_->Enable(flag);
+    flag &= !parent_->GetCurrentEditor()->document().readOnly();
     replaceNextButton_->Enable(flag);
     replacePrevButton_->Enable(flag);
     replaceAllButton_->Enable(flag);

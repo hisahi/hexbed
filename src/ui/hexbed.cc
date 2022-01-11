@@ -237,11 +237,30 @@ hexbed::ui::HexBedEditor* HexBedMainFrame::GetEditor() {
     return static_cast<hexbed::ui::HexBedEditor*>(tabs_->GetPage(sel));
 }
 
-hexbed::ui::HexBedEditor* HexBedMainFrame::GetEditor(size_t i) {
+hexbed::ui::HexBedEditor* HexBedMainFrame::GetEditor(std::size_t i) {
     return static_cast<hexbed::ui::HexBedEditor*>(tabs_->GetPage(i));
 }
 
-bool HexBedMainFrame::FileSave(size_t i, bool saveAs) {
+void HexBedMainFrame::UpdateTabSymbol(std::size_t i) {
+    hexbed::ui::HexBedEditor& editor = *GetEditor(i);
+    HexBedDocument& document = editor.document();
+    bool unsaved = document.unsaved();
+    if (!editor.DidUnsavedChange(unsaved)) return;
+    if (unsaved) {
+        tabs_->SetPageToolTip(
+            i, wxString::Format(_("[unsaved] %s"), document.path()));
+        const wxString& label = tabs_->GetPageText(i);
+        if (label[0] != '*') tabs_->SetPageText(i, "*" + label);
+    } else {
+        tabs_->SetPageToolTip(i, document.path());
+        const wxString& label = tabs_->GetPageText(i);
+        if (label[0] == '*') tabs_->SetPageText(i, label.Mid(1));
+    }
+    /// main window title bar
+    SetTitle(wxString::Format(_("%s - %s"), tabs_->GetPageText(i), "HexBed"));
+}
+
+bool HexBedMainFrame::FileSave(std::size_t i, bool saveAs) {
     if (i < tabs_->GetPageCount()) {
         hexbed::ui::HexBedEditor* editor = GetEditor(i);
         std::string sfn;
@@ -295,15 +314,20 @@ bool HexBedMainFrame::FileSave(size_t i, bool saveAs) {
             }
             return false;
         }
+        UpdateTabSymbol(i);
     }
     return true;
 }
 
 void HexBedMainFrame::OnEditMenuOpened(wxMenuEvent& event) {
-    if (tabs_->GetPageCount()) UpdateMenuEnabled(*GetEditor());
+    if (tabs_->GetPageCount()) {
+        hexbed::ui::HexBedEditor& ed = *GetEditor();
+        OnEditorCopy(ed);
+        OnUndoRedo(ed);
+    }
 }
 
-void HexBedMainFrame::FileReload(size_t i) {
+void HexBedMainFrame::FileReload(std::size_t i) {
     if (i < tabs_->GetPageCount()) {
         hexbed::ui::HexBedEditor* editor = GetEditor(i);
         if (!editor->document().filed()) return;
@@ -326,7 +350,7 @@ void HexBedMainFrame::FileReload(size_t i) {
             try {
                 editor->document().discard();
                 editor->ReloadFile();
-                return;
+                break;
             } catch (...) {
                 try {
                     wxString txt =
@@ -339,12 +363,13 @@ void HexBedMainFrame::FileReload(size_t i) {
                     if (!dial.SetYesNoLabels(_("&Retry"), _("&Cancel")))
                         dial.SetMessage(dial.GetMessage() + "\n\n" +
                                         _("Retry?"));
-                    if (dial.ShowModal() == wxID_NO) return;
+                    if (dial.ShowModal() == wxID_NO) break;
                 } catch (...) {
-                    return;
+                    break;
                 }
             }
         }
+        UpdateTabSymbol(i);
     }
 }
 
@@ -355,7 +380,7 @@ void HexBedMainFrame::ApplyConfig() {
     if (findDialog_) findDialog_->UpdateConfig();
 }
 
-bool HexBedMainFrame::FileClose(size_t i) {
+bool HexBedMainFrame::FileClose(std::size_t i) {
     if (i < tabs_->GetPageCount()) {
         hexbed::ui::HexBedEditor* editor = GetEditor(i);
         if (editor->document().unsaved()) {
@@ -397,10 +422,13 @@ void HexBedMainFrame::UpdateFileOnly() {
 void HexBedMainFrame::OnTabSwitch(wxAuiNotebookEvent& event) {
     int s = tabs_->GetSelection();
     if (s == wxNOT_FOUND) {
+        SetTitle("HexBed");
         InitMenuEnabled();
         context_->announceCursorUpdate(HexBedPeekRegion{});
         return;
     }
+    /// main window title bar
+    SetTitle(wxString::Format(_("%s - %s"), tabs_->GetPageText(s), "HexBed"));
     hexbed::ui::HexBedEditor* editor = GetEditor(s);
     editor->Selected();
     UpdateMenuEnabled(*editor);
@@ -421,20 +449,22 @@ void HexBedMainFrame::InitMenuEnabled() {
 
 void HexBedMainFrame::UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& ed) {
     bufsize sel, seln;
-    bool seltext, selhas;
+    bool seltext, selhas, selwr;
     ed.GetSelection(sel, seln, seltext);
     wxMenuBar& mbar = *GetMenuBar();
     selhas = seln > 0;
-    mbar.Enable(wxID_CUT, selhas);
+    selwr = selhas && !ed.document().readOnly();
+    mbar.Enable(wxID_CUT, selwr);
     mbar.Enable(wxID_COPY, selhas);
-    mbar.Enable(wxID_DELETE, selhas);
-    mbar.Enable(hexbed::menu::MenuEdit_BitwiseBinaryOp, selhas);
-    mbar.Enable(hexbed::menu::MenuEdit_BitwiseUnaryOp, selhas);
-    mbar.Enable(hexbed::menu::MenuEdit_BitwiseShiftOp, selhas);
-    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap2, selhas && !(seln & 1));
-    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap4, selhas && !(seln & 3));
-    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap8, selhas && !(seln & 7));
-    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap16, selhas && !(seln & 15));
+    mbar.Enable(wxID_DELETE, selwr);
+    mbar.Enable(hexbed::menu::MenuEdit_BitwiseBinaryOp, selwr);
+    mbar.Enable(hexbed::menu::MenuEdit_BitwiseUnaryOp, selwr);
+    mbar.Enable(hexbed::menu::MenuEdit_BitwiseShiftOp, selwr);
+    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap2, selwr && !(seln & 1));
+    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap4, selwr && !(seln & 3));
+    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap8, selwr && !(seln & 7));
+    mbar.Enable(hexbed::menu::MenuEdit_ByteSwap16, selwr && !(seln & 15));
+    mbar.Enable(hexbed::menu::MenuEdit_Reverse, selwr);
 }
 
 void HexBedMainFrame::OnUndoRedo(hexbed::ui::HexEditorParent& ed) {
@@ -445,15 +475,24 @@ void HexBedMainFrame::OnUndoRedo(hexbed::ui::HexEditorParent& ed) {
 
 void HexBedMainFrame::OnEditorCopy(hexbed::ui::HexEditorParent& ed) {
     wxMenuBar& mbar = *GetMenuBar();
-    mbar.Enable(wxID_PASTE, hexbed::clip::HasClipboard());
-    mbar.Enable(hexbed::menu::MenuEdit_PasteReplace,
-                hexbed::clip::HasClipboard());
+    bool hasClip = !ed.document().readOnly() && hexbed::clip::HasClipboard();
+    mbar.Enable(wxID_PASTE, hasClip);
+    mbar.Enable(hexbed::menu::MenuEdit_PasteReplace, hasClip);
 }
 
 void HexBedMainFrame::UpdateMenuEnabled(hexbed::ui::HexEditorParent& ed) {
+    wxMenuBar& mbar = *GetMenuBar();
+    bool writable = !ed.document().readOnly();
+    mbar.Enable(hexbed::menu::MenuEdit_InsertOrReplace, writable);
+    if (findDialog_) findDialog_->AllowReplace(writable);
     UpdateMenuEnabledSelect(ed);
     OnEditorCopy(ed);
     OnUndoRedo(ed);
+}
+
+void HexBedMainFrame::OnDocumentEdit(wxCommandEvent& event) {
+    int sel = tabs_->GetSelection();
+    if (sel != wxNOT_FOUND) UpdateTabSymbol(static_cast<std::size_t>(sel));
 }
 
 void HexBedMainFrame::OnTabClose(wxAuiNotebookEvent& event) {
@@ -463,6 +502,7 @@ void HexBedMainFrame::OnTabClose(wxAuiNotebookEvent& event) {
         event.Veto();
     else {
         if (tabs_->GetPageCount() <= 1) {
+            SetTitle("HexBed");
             InitMenuEnabled();
             hexbed::menu::updateStatusBarNoFile(GetStatusBar(),
                                                 context_->state);
@@ -491,9 +531,15 @@ void HexBedMainFrame::AddTab(std::unique_ptr<hexbed::ui::HexBedEditor>&& editor,
     if (!path.IsEmpty()) tabs_->SetPageToolTip(i, path);
     editor->SetFocus();
     editor->FocusEditor();
+    editor->Bind(HEX_EDIT_EVENT, &HexBedMainFrame::OnDocumentEdit, this);
     context_->addWindow(editor.get());
-    editor.release();
+    if (editor->document().readOnly()) {
+        tabs_->SetPageToolTip(i, wxString::Format(_("[read-only] %s"), path));
+        tabs_->SetPageText(i, wxString::Format("[%s]", tabs_->GetPageText(i)));
+    }
     UpdateFileOnly();
+    UpdateMenuEnabled(*editor);
+    editor.release();
 }
 
 void HexBedMainFrame::OnFileNew(wxCommandEvent& event) {

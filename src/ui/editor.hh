@@ -174,6 +174,7 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     void Selected();
     void UpdateStatusBar();
     void SetStatusBar(wxStatusBar* sbar);
+    bool DidUnsavedChange(bool unsaved);
 
     void FullUpdate();
     bool AutoFitUpdate();
@@ -229,6 +230,7 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     int mouseDelta_{0};
     float charWidth_{0};
     unsigned rowHeight_{0};
+    bool wasUnsaved_{false};
     std::vector<char> offsetBuf_;
     wxTimer timer_;
 };

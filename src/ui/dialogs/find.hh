@@ -77,6 +77,7 @@ class FindDialog : public wxDialog {
     virtual void Unregister();
     virtual bool Recommit();
     virtual void UpdateConfig();
+    virtual inline void AllowReplace(bool flag) {}
 
     static SearchResult findNext(HexEditorParent* ed);
     static SearchResult findPrevious(HexEditorParent* ed);

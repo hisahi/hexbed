@@ -68,6 +68,7 @@ class HexBedMainFrame : public wxFrame {
     void OnClose(wxCloseEvent& event);
     void OnTabSwitch(wxAuiNotebookEvent& event);
     void OnTabClose(wxAuiNotebookEvent& event);
+    void OnDocumentEdit(wxCommandEvent& event);
 
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
@@ -122,7 +123,7 @@ class HexBedMainFrame : public wxFrame {
     void OnDataInspectorClose(wxCloseEvent& event);
 
     hexbed::ui::HexBedEditor* GetEditor();
-    hexbed::ui::HexBedEditor* GetEditor(size_t i);
+    hexbed::ui::HexBedEditor* GetEditor(std::size_t i);
     template <typename... Ts>
     std::unique_ptr<hexbed::ui::HexBedEditor> MakeEditor(Ts&&... args);
     void AddTab(std::unique_ptr<hexbed::ui::HexBedEditor>&& editor,
@@ -133,12 +134,13 @@ class HexBedMainFrame : public wxFrame {
     template <bool insert>
     void DoPaste();
 
-    void FileReload(size_t i);
-    bool FileSave(size_t i, bool saveAs);
-    bool FileClose(size_t i);
+    void FileReload(std::size_t i);
+    bool FileSave(std::size_t i, bool saveAs);
+    bool FileClose(std::size_t i);
     bool FileCloseAll();
     void UpdateFileOnly();
     void InitMenuEnabled();
+    void UpdateTabSymbol(std::size_t i);
 
     static void NoMoreResults();
 
