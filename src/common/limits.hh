@@ -17,39 +17,33 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/menuview.cc -- implementation for the View menu
+// common/limits.hh -- header for integer limits
 
-#include "app/config.hh"
-#include "ui/menus.hh"
+#ifndef HEXBED_COMMON_LIMITS_HH
+#define HEXBED_COMMON_LIMITS_HH
+
+#include <limits>
 
 namespace hexbed {
-namespace menu {
 
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
-    wxMenu* menuView = new wxMenu;
-    wxMenu* viewColumns = new wxMenu;
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsBoth, _("&Hex and text"),
-                          _("Both columns; hex and text data"))
-        ->Check(config().showColumnTypes == 3);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsHex, _("He&x only"),
-                          _("Show hex column only"))
-        ->Check(config().showColumnTypes == 2);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsText, _("&Text only"),
-                          _("Show text column only"))
-        ->Check(config().showColumnTypes == 1);
-    menuView->AppendSubMenu(viewColumns, _("&Columns"),
-                            _("Controls which columns to show"));
-    menuView->AppendSeparator();
-    addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
-            _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
-    addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
-            _("Shows the data inspector"), wxACCEL_CTRL | wxACCEL_SHIFT, 'D');
-    menuBar->Append(menuView, _("&View"));
-    return menuView;
+// clang-format off
+
+template <typename T>
+requires (std::numeric_limits<T>::is_integer
+      && !std::numeric_limits<T>::is_signed)
+constexpr std::size_t maxDecimalDigits() {
+    return 1 + std::numeric_limits<T>::digits10;
 }
 
-};  // namespace menu
+template <typename T>
+requires (std::numeric_limits<T>::is_integer
+       && std::numeric_limits<T>::is_signed)
+constexpr std::size_t maxDecimalDigits() {
+    return maxDecimalDigits<std::make_unsigned_t<T>>();
+}
+
+// clang-format on
+
 };  // namespace hexbed
+
+#endif /* HEXBED_COMMON_LIMITS_HH */

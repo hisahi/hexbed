@@ -62,6 +62,7 @@ enum {
     MenuView_ShowColumnsHex,
     MenuView_ShowColumnsText,
     MenuView_BitEditor,
+    MenuView_DataInspector,
 };
 
 // menus.cc

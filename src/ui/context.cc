@@ -184,7 +184,7 @@ void HexBedContextMain::announceBytesChanged(HexBedDocument* doc,
             makePeekBuffer(doc, lastoff_, bytespan{tmp, tmp + sizeof(tmp)});
         for (HexBedViewer* viewer : viewers_) {
             bufsize la = viewer->lookahead();
-            if (start + la < lastoff_) viewer->onUpdateCursor(peek);
+            if (start < lastoff_ + la) viewer->onUpdateCursor(peek);
         }
     }
 }
@@ -256,13 +256,18 @@ void HexBedContextMain::updateWindows() {
 
 void HexBedContextMain::addViewer(HexBedViewer* viewer) {
     viewers_.push_back(viewer);
-    byte tmp[MAX_LOOKAHEAD];
-    viewer->onUpdateCursor(
-        makePeekBuffer(lastdoc_, lastoff_, bytespan{tmp, tmp + sizeof(tmp)}));
+    pokeViewer(viewer);
 }
 
 void HexBedContextMain::removeViewer(HexBedViewer* viewer) noexcept {
     std::erase(viewers_, viewer);
+}
+
+void HexBedContextMain::pokeViewer(HexBedViewer* viewer) {
+    byte tmp[MAX_LOOKAHEAD];
+    if (lastdoc_)
+        viewer->onUpdateCursor(makePeekBuffer(
+            lastdoc_, lastoff_, bytespan{tmp, tmp + sizeof(tmp)}));
 }
 
 hexbed::ui::HexEditorParent* HexBedContextMain::activeWindow() noexcept {

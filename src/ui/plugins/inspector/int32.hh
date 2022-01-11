@@ -17,39 +17,30 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/menuview.cc -- implementation for the View menu
+// ui/plugins/inspector/int32.hh -- header for builtin int32 inspector
 
-#include "app/config.hh"
-#include "ui/menus.hh"
+#ifndef HEXBED_UI_PLUGINS_INSPECTOR_INT32_HH
+#define HEXBED_UI_PLUGINS_INSPECTOR_INT32_HH
+
+#include "ui/plugins/inspector.hh"
 
 namespace hexbed {
-namespace menu {
 
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
-    wxMenu* menuView = new wxMenu;
-    wxMenu* viewColumns = new wxMenu;
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsBoth, _("&Hex and text"),
-                          _("Both columns; hex and text data"))
-        ->Check(config().showColumnTypes == 3);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsHex, _("He&x only"),
-                          _("Show hex column only"))
-        ->Check(config().showColumnTypes == 2);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsText, _("&Text only"),
-                          _("Show text column only"))
-        ->Check(config().showColumnTypes == 1);
-    menuView->AppendSubMenu(viewColumns, _("&Columns"),
-                            _("Controls which columns to show"));
-    menuView->AppendSeparator();
-    addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
-            _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
-    addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
-            _("Shows the data inspector"), wxACCEL_CTRL | wxACCEL_SHIFT, 'D');
-    menuBar->Append(menuView, _("&View"));
-    return menuView;
-}
+namespace plugins {
 
-};  // namespace menu
+class InspectorPluginInt32 : public DataInspectorPlugin {
+  public:
+    InspectorPluginInt32(pluginid id);
+    bool convertFromBytes(std::size_t outstr_n, char* outstr,
+                          const_bytespan data,
+                          const DataInspectorSettings& settings);
+    bool convertToBytes(std::size_t& outdata_n, byte* outdata,
+                        const char* instr,
+                        const DataInspectorSettings& settings);
+};
+
+};  // namespace plugins
+
 };  // namespace hexbed
+
+#endif /* HEXBED_UI_PLUGINS_INSPECTOR_INT32_HH */

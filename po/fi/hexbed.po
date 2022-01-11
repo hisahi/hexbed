@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-06 19:10+0200\n"
+"POT-Creation-Date: 2022-01-11 20:27+0200\n"
 "PO-Revision-Date: 2021-12-23 21:14+0200\n"
 "Last-Translator: Sampo Hippeläinen <sampo.hippelainen@gmail.com>\n"
 "Language-Team: fi\n"
@@ -102,22 +102,110 @@ msgid "Selects a block of bytes"
 msgstr "Valitsee tavualueen"
 
 #: src/ui/menuedit.cc:57
+msgid "Ins&ert or replace..."
+msgstr "Lisää tai ko&rvaa..."
+
+#: src/ui/menuedit.cc:58
+msgid "Inserts or replaces the selection with a block of bytes"
+msgstr "Lisää tai korvaa valinnan lohkolla tavuja"
+
+#: src/ui/menuedit.cc:63
+msgid "Bitwise &binary operation..."
+msgstr "&Binääribittilaskutoimitus..."
+
+#: src/ui/menuedit.cc:64
+msgid "Performs a binary bitwise operation on the selected block"
+msgstr "Muokkaa valitun alueen tavuja binaarisen laskutoimituksen perusteella"
+
+#: src/ui/menuedit.cc:66
+msgid "Bitwise &unary operation..."
+msgstr "&Unaaribittilaskutoimitus..."
+
+#: src/ui/menuedit.cc:67
+msgid "Performs a unary bitwise operation on the selected block"
+msgstr "Muokkaa valitun alueen tavuja unaarisen laskutoimituksen perusteella"
+
+#: src/ui/menuedit.cc:69
+msgid "Bitwise &shift operation..."
+msgstr "Bittisiirtolaskutoimitus..."
+
+#: src/ui/menuedit.cc:70
+msgid "Performs a bitwise shift operation on the selected block"
+msgstr "Muokkaa valitun alueen tavuja bittisiirtolaskutoimituksen perusteella"
+
+#: src/ui/menuedit.cc:73
+msgid "Byte swap (&2-byte words)"
+msgstr "Tavujärjestyksen kääntö (&2-tavuiset sanat)"
+
+#: src/ui/menuedit.cc:74
+msgid "Swaps the byte order in the selected block of 2-byte words"
+msgstr "Kääntää valittujen 2-tavuisten sanojen tavujärjestyksen"
+
+#: src/ui/menuedit.cc:76
+msgid "Byte swap (&4-byte words)"
+msgstr "Tavujärjestyksen kääntö (&4-tavuiset sanat)"
+
+#: src/ui/menuedit.cc:77
+msgid "Swaps the byte order in the selected block of 4-byte words"
+msgstr "Kääntää valittujen 4-tavuisten sanojen tavujärjestyksen"
+
+#: src/ui/menuedit.cc:79
+msgid "Byte swap (&8-byte words)"
+msgstr "Tavujärjestyksen kääntö (&8-tavuiset sanat)"
+
+#: src/ui/menuedit.cc:80
+msgid "Swaps the byte order in the selected block of 8-byte words"
+msgstr "Kääntää valittujen 8-tavuisten sanojen tavujärjestyksen"
+
+#: src/ui/menuedit.cc:82
+msgid "Byte swap (1&6-byte words)"
+msgstr "Tavujärjestyksen kääntö (1&6-tavuiset sanat)"
+
+#: src/ui/menuedit.cc:83
+msgid "Swaps the byte order in the selected block of 16-byte words"
+msgstr "Kääntää valittujen 16-tavuisten sanojen tavujärjestyksen"
+
+#: src/ui/menuedit.cc:84
+msgid "Byte s&wap"
+msgstr "Tavujärjestyksen käänt&ö"
+
+#: src/ui/menuedit.cc:85
+msgid "Performs byte order swaps on the selection"
+msgstr "Kääntää valinnan tavujärjestystä"
+
+#: src/ui/menuedit.cc:88
+msgid "&Reverse"
+msgstr "K&äännä takaperin"
+
+#: src/ui/menuedit.cc:89
+msgid "Reverses the order of bytes within the selection"
+msgstr "Kääntää koko valinnan tavujen järjestyksen"
+
+#: src/ui/menuedit.cc:90
+msgid "&Operations"
+msgstr "Laskut&oimitukset"
+
+#: src/ui/menuedit.cc:91
+msgid "Performs operations on the selection"
+msgstr "Muuttaa tavuja laskutoimituksen perusteella"
+
+#: src/ui/menuedit.cc:94
 msgid "&Insert mode"
 msgstr "&Lisäystila"
 
-#: src/ui/menuedit.cc:58
+#: src/ui/menuedit.cc:95
 msgid "Inserts bytes typed in instead of overwriting existing ones"
 msgstr "Lisää tavuja väliin korvaamisen sijasta"
 
-#: src/ui/menuedit.cc:61
+#: src/ui/menuedit.cc:98
 msgid "&Options"
 msgstr "&Asetukset"
 
-#: src/ui/menuedit.cc:62
+#: src/ui/menuedit.cc:99
 msgid "Opens the dialog for editing options or preferences"
 msgstr "Avaa ohjelman asetukset"
 
-#: src/ui/menuedit.cc:64
+#: src/ui/menuedit.cc:101
 msgid "&Edit"
 msgstr "&Muokkaa"
 
@@ -213,6 +301,27 @@ msgstr "Tallenna"
 msgid "Exit"
 msgstr "Lopeta"
 
+#: src/ui/textinput.cc:53 src/ui/dialogs/find.cc:53
+msgid "Text"
+msgstr "Teksti"
+
+#: src/ui/textinput.cc:75
+msgid "Encoding"
+msgstr "Koodaus"
+
+#: src/ui/textinput.cc:88
+msgid "Case insensitive"
+msgstr "Aakkoskoosta riippumaton"
+
+#: src/ui/textinput.cc:110
+#, c-format
+msgid "Configured character encoding (%s)"
+msgstr "Asetuksissa määritelty koodaus (%s)"
+
+#: src/ui/textinput.cc:123
+msgid "The entered text cannot be represented in the selected encoding."
+msgstr "Syötettyä tekstiä ei voi esittää valitulla merkistökoodauksella."
+
 #: src/ui/menuview.cc:32
 msgid "&Hex and text"
 msgstr "&Molemmat"
@@ -254,6 +363,14 @@ msgid "Shows the bit editor"
 msgstr "Näyttää bittimuokkaimen"
 
 #: src/ui/menuview.cc:48
+msgid "&Data inspector"
+msgstr "&Tietojenkatselin"
+
+#: src/ui/menuview.cc:49
+msgid "Shows the data inspector"
+msgstr "Näyttää tietojenkatselimen"
+
+#: src/ui/menuview.cc:50
 msgid "&View"
 msgstr "&Näytä"
 
@@ -273,7 +390,7 @@ msgstr "Et&si seuraava"
 msgid "Finds the next match with the same search"
 msgstr "Etsii seuraavan tuloksen viime haulla"
 
-#: src/ui/menusearch.cc:37 src/ui/dialogs/find.cc:75
+#: src/ui/menusearch.cc:37 src/ui/dialogs/find.cc:114
 #: src/ui/dialogs/replace.cc:57
 msgid "Find &previous"
 msgstr "Etsi e&dellinen"
@@ -315,7 +432,7 @@ msgstr ""
 "Varmuuskopiointi epäonnistui:\n"
 "%s"
 
-#: src/ui/context.cc:148 src/ui/hexbed.cc:311
+#: src/ui/context.cc:148 src/ui/hexbed.cc:339
 msgid "&Retry"
 msgstr "&Uudelleen"
 
@@ -336,28 +453,28 @@ msgstr ""
 #: src/ui/context.cc:154
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
-"Yritetäänkö uudelleen? 'Ei' tallentaa silti ja 'Peruuta' "
-"peruuttaa tallennuksen."
+"Yritetäänkö uudelleen? 'Ei' tallentaa silti ja 'Peruuta' peruuttaa "
+"tallennuksen."
 
-#: src/ui/hexbed.cc:235
+#: src/ui/hexbed.cc:263
 msgid "Save a file"
 msgstr "Tallenna tiedosto"
 
-#: src/ui/hexbed.cc:236 src/ui/hexbed.cc:678
+#: src/ui/hexbed.cc:264 src/ui/hexbed.cc:869
 msgid "All files (*.*)"
 msgstr "Kaikki tiedostot (*.*)"
 
-#: src/ui/hexbed.cc:262
+#: src/ui/hexbed.cc:290
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr "Tiedoston %s tallentaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:285
+#: src/ui/hexbed.cc:313
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Hylätäänkö ne?"
 
-#: src/ui/hexbed.cc:305
+#: src/ui/hexbed.cc:333
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
@@ -366,59 +483,79 @@ msgstr ""
 "Tiedostosta %s ei voitu lukea:\n"
 "%s"
 
-#: src/ui/hexbed.cc:311
+#: src/ui/hexbed.cc:339
 msgid "&Cancel"
 msgstr "&Peruuta"
 
-#: src/ui/hexbed.cc:313
+#: src/ui/hexbed.cc:341
 msgid "Retry?"
 msgstr "Yritetäänkö uudelleen?"
 
-#: src/ui/hexbed.cc:335
+#: src/ui/hexbed.cc:364
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Haluatko tallentaa ne?"
 
-#: src/ui/hexbed.cc:464
+#: src/ui/hexbed.cc:501
 #, c-format
 msgid "New-%llu"
 msgstr "Uusi-%llu"
 
-#: src/ui/hexbed.cc:468
+#: src/ui/hexbed.cc:505
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr "Uuden tiedoston luonti epäonnistui: %s"
 
-#: src/ui/hexbed.cc:492
+#: src/ui/hexbed.cc:529
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr "Tiedoston %s avaaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:501
+#: src/ui/hexbed.cc:538
 msgid "Read only"
 msgstr "Vain luku"
 
-#: src/ui/hexbed.cc:535
+#: src/ui/hexbed.cc:577
 msgid "No more results found for this search."
 msgstr "Tällä haulla ei löytynyt lisää tuloksia."
 
-#: src/ui/hexbed.cc:541
+#: src/ui/hexbed.cc:583
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] "%llu esiintymä korvattiin."
 msgstr[1] "%llu esiintymää korvattiin."
 
-#: src/ui/hexbed.cc:677
+#: src/ui/hexbed.cc:685
+#, c-format
+msgid "Insert failed: %s"
+msgstr "Lisäys epäonnistui: %s"
+
+#: src/ui/hexbed.cc:712
+#, c-format
+msgid "Bitwise binary op failed: %s"
+msgstr "Binäärilaskutoimitus epäonnistui: %s"
+
+#: src/ui/hexbed.cc:733
+#, c-format
+msgid "Bitwise unary op failed: %s"
+msgstr "Unaarilaskutoimitus epäonnistui: %s"
+
+#: src/ui/hexbed.cc:755
+#, c-format
+msgid "Bitwise shift op failed: %s"
+msgstr "Bittisiirtolaskutoimitus epäonnistui: %s"
+
+#: src/ui/hexbed.cc:868
 msgid "Open a file"
 msgstr "Avaa tiedosto"
 
-#: src/ui/hexbed.cc:751
+#: src/ui/hexbed.cc:942
 #, c-format
 msgid "Failed to copy: %s"
 msgstr "Kopiointi epäonnistui: %s"
 
-#: src/ui/hexbed.cc:781
+#: src/ui/hexbed.cc:973
 msgid ""
 "Cannot paste the current clipboard contents, because it contains characters "
 "that the currently selected character encoding cannot represent."
@@ -426,7 +563,7 @@ msgstr ""
 "Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä on merkkejä, joita "
 "valittu merkistökoodaus ei tue."
 
-#: src/ui/hexbed.cc:784
+#: src/ui/hexbed.cc:976
 msgid ""
 "Cannot paste the current clipboard contents, because it does not contain "
 "valid hexadecimal data. Text data should be a string of hexadecimal bytes."
@@ -434,18 +571,42 @@ msgstr ""
 "Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä ei ole kelvollista "
 "heksadesimaalimuotoista tietoa. Tekstin tulisi olla heksadesimaalisia tavuja."
 
-#: src/ui/hexbed.cc:795
+#: src/ui/hexbed.cc:987
 #, c-format
 msgid "Failed to paste: %s"
 msgstr "Liittäminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:842
+#: src/ui/hexbed.cc:1034
 msgid "A hex editor."
 msgstr "Tavumuokkain."
 
 #: src/ui/tools/bitedit.cc:36
 msgid "Bit editor"
 msgstr "Bittimuokkain"
+
+#: src/ui/tools/inspector.cc:68
+msgid "Enter data"
+msgstr "Syötä arvo"
+
+#: src/ui/tools/inspector.cc:126
+msgid "The given input is invalid for this data type."
+msgstr "Syöte ei kelpaa valitulle tietotyypille."
+
+#: src/ui/tools/inspector.cc:144
+msgid "Data inspector"
+msgstr "Tietojenkatselin"
+
+#: src/ui/tools/inspector.cc:154
+msgid "Little endian"
+msgstr "Nouseva tavujärjestys"
+
+#: src/ui/tools/inspector.cc:176
+msgid "Type"
+msgstr "Tyyppi"
+
+#: src/ui/tools/inspector.cc:177
+msgid "Value"
+msgstr "Arvo"
 
 #: src/ui/dialogs/goto.cc:34
 msgid "Go to"
@@ -503,23 +664,23 @@ msgstr "Loppu:"
 msgid "Start:"
 msgstr "Alku:"
 
-#: src/ui/dialogs/find.cc:43
+#: src/ui/dialogs/find.cc:52
 msgid "Hex data"
 msgstr "Heksatieto"
 
-#: src/ui/dialogs/find.cc:59
+#: src/ui/dialogs/find.cc:98
 msgid "Find"
 msgstr "Etsi"
 
-#: src/ui/dialogs/find.cc:72 src/ui/dialogs/replace.cc:54
+#: src/ui/dialogs/find.cc:111 src/ui/dialogs/replace.cc:54
 msgid "Find &next"
 msgstr "Etsi &seuraava"
 
-#: src/ui/dialogs/find.cc:93 src/ui/dialogs/replace.cc:106
+#: src/ui/dialogs/find.cc:132 src/ui/dialogs/replace.cc:106
 msgid "Find data"
 msgstr "Haku"
 
-#: src/ui/dialogs/find.cc:97
+#: src/ui/dialogs/find.cc:136
 msgid "&Wrap around"
 msgstr "Kul&je tiedosto ympäri"
 
@@ -550,6 +711,87 @@ msgstr "Kul&je tiedosto ympäri (etsittäessä)"
 #: src/ui/dialogs/replace.cc:115
 msgid "Find and replace"
 msgstr "Etsi ja korvaa"
+
+#: src/ui/dialogs/insert.cc:36
+msgid "Insert or replace"
+msgstr "Lisää tai korvaa"
+
+#: src/ui/dialogs/insert.cc:64
+msgid "Number of bytes:"
+msgstr "Tavujen lukumäärä:"
+
+#: src/ui/dialogs/insert.cc:67 src/ui/dialogs/bitopbinary.cc:73
+msgid "The bytes below will form a repeating pattern."
+msgstr "Alla olevia tavuja toistetaan tarvittaessa."
+
+#: src/ui/dialogs/bitopbinary.cc:36
+msgid "Binary bitwise operation"
+msgstr "Binääribittilaskutoimitus"
+
+#: src/ui/dialogs/bitopbinary.cc:61
+msgid "Sum"
+msgstr "Yhteenlasku"
+
+#: src/ui/dialogs/bitopbinary.cc:61
+msgid "AND"
+msgstr "JA"
+
+#: src/ui/dialogs/bitopbinary.cc:61
+msgid "OR"
+msgstr "TAI"
+
+#: src/ui/dialogs/bitopbinary.cc:61
+msgid "XOR"
+msgstr "Poissulkeva TAI (XOR)"
+
+#: src/ui/dialogs/bitopbinary.cc:70 src/ui/dialogs/bitopshift.cc:69
+#: src/ui/dialogs/bitopunary.cc:62
+msgid "Operation:"
+msgstr "Laskutoimitus:"
+
+#: src/ui/dialogs/bitopshift.cc:34
+msgid "Bitwise shift operation"
+msgstr "Bittisiirtolaskutoimitus"
+
+#: src/ui/dialogs/bitopshift.cc:52
+msgid "Shift left"
+msgstr "Siirto vasemmalle"
+
+#: src/ui/dialogs/bitopshift.cc:52
+msgid "Shift right"
+msgstr "Siirto oikealle"
+
+#: src/ui/dialogs/bitopshift.cc:53
+msgid "Shift right (arithmetic)"
+msgstr "Aritmeettinen siirto oikealle"
+
+#: src/ui/dialogs/bitopshift.cc:54
+msgid "Rotate left"
+msgstr "Kierto vasemmalle"
+
+#: src/ui/dialogs/bitopshift.cc:54
+msgid "Rotate right"
+msgstr "Kierto oikealle"
+
+#: src/ui/dialogs/bitopshift.cc:71
+msgid "Shift count:"
+msgstr "Laskutoimitus:"
+
+#: src/ui/dialogs/bitopunary.cc:34
+msgid "Bitwise unary operation"
+msgstr "Unaaribittilaskutoimitus"
+
+#: src/ui/dialogs/bitopunary.cc:52
+msgid "NOT"
+msgstr "EI"
+
+#: src/ui/dialogs/bitopunary.cc:52
+msgid "Swap nibbles"
+msgstr "Puolitavujen vaihto"
+
+#: src/ui/dialogs/bitopunary.cc:53
+msgid "Reverse bit order"
+msgstr "Bittijärjestyksen vaihto"
 
 #: src/ui/clipboard.cc:46 src/ui/clipboard.cc:84
 msgid "Failed to open the clipboard"
@@ -619,80 +861,72 @@ msgstr "Apukohdistin"
 msgid "Using a non-monospace font is not recommended."
 msgstr "Vaihtuvalevyisen kirjasimen käyttöä ei suositella."
 
-#: src/ui/settings/layout.cc:34
+#: src/ui/settings/layout.cc:35
 msgid "Layout"
 msgstr "Asettelu"
 
-#: src/ui/settings/layout.cc:47
+#: src/ui/settings/layout.cc:48
 msgid "Display"
 msgstr "Näyttö"
 
-#: src/ui/settings/layout.cc:48
+#: src/ui/settings/layout.cc:49
 msgid "Use uppercase hex characters (A-F)"
 msgstr "Käytä isoja kirjaimia heksadesimaaleissa (A-F)"
 
-#: src/ui/settings/layout.cc:58
+#: src/ui/settings/layout.cc:59
 msgid "Fit as many columns as possible"
 msgstr "Mahduta mahdollisimman monta saraketta"
 
-#: src/ui/settings/layout.cc:66
+#: src/ui/settings/layout.cc:67
 msgid "Number of columns"
 msgstr "Sarakkeiden lukumäärä"
 
 #. / group sizes
-#: src/ui/settings/layout.cc:69
+#: src/ui/settings/layout.cc:70
 msgid "Group size"
 msgstr "Ryhmitys"
 
-#: src/ui/settings/layout.cc:70
+#: src/ui/settings/layout.cc:71
 msgid "1 (byte)"
 msgstr "1 (tavu)"
 
-#: src/ui/settings/layout.cc:70
+#: src/ui/settings/layout.cc:71
 msgid "2 (word)"
 msgstr "2 (sana)"
 
-#: src/ui/settings/layout.cc:70
+#: src/ui/settings/layout.cc:71
 msgid "4 (dword)"
 msgstr "4 (kaksoissana)"
 
-#: src/ui/settings/layout.cc:71
+#: src/ui/settings/layout.cc:72
 msgid "8 (qword)"
 msgstr "8 (neloissana)"
 
-#: src/ui/settings/layout.cc:71
+#: src/ui/settings/layout.cc:72
 msgid "16 (oword)"
 msgstr "16 (kahdeksoissana)"
 
 #. / offset radix
-#: src/ui/settings/layout.cc:74
+#: src/ui/settings/layout.cc:75
 msgid "Offset radix"
 msgstr "Osoitteiden kantaluku"
 
-#: src/ui/settings/layout.cc:75
+#: src/ui/settings/layout.cc:76
 msgid "8 (octal)"
 msgstr "8 (oktaali)"
 
-#: src/ui/settings/layout.cc:75
+#: src/ui/settings/layout.cc:76
 msgid "10 (decimal)"
 msgstr "10 (desimaali)"
 
-#: src/ui/settings/layout.cc:75
+#: src/ui/settings/layout.cc:76
 msgid "16 (hex)"
 msgstr "16 (heksadesimaali)"
 
 #. / character encodings
-#: src/ui/settings/layout.cc:78
+#: src/ui/settings/layout.cc:79
 msgid "Text encoding"
 msgstr "Tekstin merkistö"
-
-#: src/ui/settings/layout.cc:79
-msgid "ASCII"
-msgstr "ASCII"
-
-#: src/ui/settings/layout.cc:79
-msgid "Latin-1 (ISO 8859-1)"
-msgstr "Latin-1 (ISO 8859-1)"
 
 #: src/ui/settings/general.cc:42
 msgid "Undo"
@@ -717,6 +951,34 @@ msgstr "Varmuuskopiointi"
 #: src/ui/settings/general.cc:49
 msgid "Back up files (.bak) before overwriting"
 msgstr "Luo varmuuskopio (.bak) ennen korvaamista"
+
+#: src/ui/encoding.hh:46
+msgid "Unicode, UTF-8"
+msgstr "Unicode, UTF-8"
+
+#: src/ui/encoding.hh:47
+msgid "Unicode, UTF-16LE (little-endian)"
+msgstr "Unicode, UTF-16LE (nouseva tavujärjestys)"
+
+#: src/ui/encoding.hh:48
+msgid "Unicode, UTF-16BE (big-endian)"
+msgstr "Unicode, UTF-16BE (laskeva tavujärjestys)"
+
+#: src/ui/encoding.hh:49
+msgid "Unicode, UTF-32LE (little-endian)"
+msgstr "Unicode, UTF-32LE (nouseva tavujärjestys)"
+
+#: src/ui/encoding.hh:50
+msgid "Unicode, UTF-32BE (big-endian)"
+msgstr "Unicode, UTF-32BE (laskeva tavujärjestys)"
+
+#: src/ui/encoding.hh:56
+msgid "ASCII"
+msgstr "ASCII"
+
+#: src/ui/encoding.hh:57
+msgid "Latin-1 (ISO 8859-1)"
+msgstr "Latin-1 (ISO 8859-1)"
 
 #: src/ui/settings.cc:53 src/ui/settings.cc:76
 msgid "Options"
@@ -752,3 +1014,52 @@ msgstr "Lohko: %s"
 #, c-format
 msgid "Length: %s"
 msgstr "Pituus: %s"
+
+#: src/ui/plugins/inspector/uint8.cc:38
+msgid "uint8 (unsigned 8-bit integer)"
+msgstr "uint8 (etumerkitön 8-bittinen kokonaisluku)"
+
+#: src/ui/plugins/inspector/uint16.cc:38
+msgid "uint16 (unsigned 16-bit integer)"
+msgstr "uint16 (etumerkitön 16-bittinen kokonaisluku)"
+
+#: src/ui/plugins/inspector/uint32.cc:38
+msgid "uint32 (unsigned 32-bit integer)"
+msgstr "uint32 (etumerkitön 32-bittinen kokonaisluku)"
+
+#: src/ui/plugins/inspector/uint64.cc:38
+msgid "uint64 (unsigned 64-bit integer)"
+msgstr "uint64 (etumerkitön 64-bittinen kokonaisluku)"
+
+#: src/ui/plugins/inspector/int8.cc:38
+msgid "int8 (signed 8-bit integer)"
+msgstr "int8 (etumerkillinen 8-bittinen kokonaisluku)"
+
+#: src/ui/plugins/inspector/int16.cc:38
+msgid "int16 (signed 16-bit integer)"
+msgstr "int16 (etumerkillinen 16-bittinen kokonaisluku)"
+
+#: src/ui/plugins/inspector/int32.cc:38
+msgid "int32 (signed 32-bit integer)"
+msgstr "int32 (etumerkillinen 32-bittinen kokonaisluku)"
+
+#: src/ui/plugins/inspector/int64.cc:38
+msgid "int64 (signed 64-bit integer)"
+msgstr "int64 (etumerkillinen 64-bittinen kokonaisluku)"
+
+#: src/ui/plugins/inspector/float32.cc:43
+msgid "float (IEEE 754 binary32 single-precision floating-point)"
+msgstr "float (IEEE 754 binary32, liukuluku perustarkkuudella)"
+
+#: src/ui/plugins/inspector/float64.cc:43
+msgid "double (IEEE 754 binary64 double-precision floating-point)"
+msgstr "double (IEEE 754 binary64, liukuluku kaksoistarkkuudella"
+
+#: src/ui/plugins/inspector/float32x.cc:43
+msgid "Hexadecimal float (IEEE 754 binary32 single-precision floating-point)"
+msgstr "Heksadesimaalinen float (IEEE 754 binary32, liukuluku perustarkkuudella"
+
+#: src/ui/plugins/inspector/float64x.cc:43
+msgid "Hexadecimal double (IEEE 754 binary64 double-precision floating-point)"
+msgstr "Heksadesimaalinen double (IEEE 754 binary64, "
+"liukuluku kaksoistarkkuudella"

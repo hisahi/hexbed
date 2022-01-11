@@ -85,11 +85,11 @@ HexBedTextInput::HexBedTextInput(wxWindow* parent, wxString* string,
             control->Enable(false);
             return control;
         };
-        sizer->Add(disable(
-            new wxCheckBox(this, wxID_ANY, _("Case insensitive"),
-                           wxDefaultPosition, wxDefaultSize, wxCHK_2STATE,
-                           wxGenericValidator(caseInsensitive))),
-            wxSizerFlags().Expand());
+        sizer->Add(disable(new wxCheckBox(this, wxID_ANY, _("Case insensitive"),
+                                          wxDefaultPosition, wxDefaultSize,
+                                          wxCHK_2STATE,
+                                          wxGenericValidator(caseInsensitive))),
+                   wxSizerFlags().Expand());
     }
 
     textCtrl_->Bind(wxEVT_TEXT, &HexBedTextInput::ForwardEvent, this);

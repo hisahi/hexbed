@@ -39,6 +39,7 @@
 #include "ui/dialogs/find.hh"
 #include "ui/editor-fwd.hh"
 #include "ui/tools/bitedit.hh"
+#include "ui/tools/inspector.hh"
 
 namespace hexbed {
 
@@ -112,11 +113,13 @@ class HexBedMainFrame : public wxFrame {
     void OnViewColumnsHex(wxCommandEvent& event);
     void OnViewColumnsText(wxCommandEvent& event);
     void OnViewBitEditor(wxCommandEvent& event);
+    void OnViewDataInspector(wxCommandEvent& event);
 
     void UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& editor);
 
     void OnFindClose(wxCloseEvent& event);
     void OnBitEditorClose(wxCloseEvent& event);
+    void OnDataInspectorClose(wxCloseEvent& event);
 
     hexbed::ui::HexBedEditor* GetEditor();
     hexbed::ui::HexBedEditor* GetEditor(size_t i);
@@ -153,6 +156,7 @@ class HexBedMainFrame : public wxFrame {
     std::shared_ptr<HexBedDocument> binaryOpDocument_;
     std::unique_ptr<FindDialog> findDialog_;
     std::unique_ptr<BitEditorTool> bitEditorTool_;
+    std::unique_ptr<DataInspector> dataInspector_;
 };
 
 };  // namespace ui

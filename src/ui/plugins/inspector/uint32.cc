@@ -17,39 +17,50 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/menuview.cc -- implementation for the View menu
+// ui/plugins/inspector/uint32.cc -- impl for builtin uint32 inspector
 
-#include "app/config.hh"
-#include "ui/menus.hh"
+#include "ui/plugins/inspector/uint32.hh"
+
+#include <wx/string.h>
+#include <wx/translation.h>
+
+#include <cstdint>
+
+#include "common/intconv.hh"
+#include "common/limits.hh"
+#include "common/logger.hh"
 
 namespace hexbed {
-namespace menu {
 
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
-    wxMenu* menuView = new wxMenu;
-    wxMenu* viewColumns = new wxMenu;
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsBoth, _("&Hex and text"),
-                          _("Both columns; hex and text data"))
-        ->Check(config().showColumnTypes == 3);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsHex, _("He&x only"),
-                          _("Show hex column only"))
-        ->Check(config().showColumnTypes == 2);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsText, _("&Text only"),
-                          _("Show text column only"))
-        ->Check(config().showColumnTypes == 1);
-    menuView->AppendSubMenu(viewColumns, _("&Columns"),
-                            _("Controls which columns to show"));
-    menuView->AppendSeparator();
-    addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
-            _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
-    addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
-            _("Shows the data inspector"), wxACCEL_CTRL | wxACCEL_SHIFT, 'D');
-    menuBar->Append(menuView, _("&View"));
-    return menuView;
+namespace plugins {
+
+InspectorPluginUInt32::InspectorPluginUInt32(pluginid id)
+    : DataInspectorPlugin(id, _("uint32 (unsigned 32-bit integer)"),
+                          sizeof(std::uint32_t),
+                          1 + maxDecimalDigits<std::uint32_t>()) {}
+
+bool InspectorPluginUInt32::convertFromBytes(
+    std::size_t outstr_n, char* outstr, const_bytespan data,
+    const DataInspectorSettings& settings) {
+    std::uint32_t result = uintFromBytes<std::uint32_t>(
+        data.size(), data.data(), settings.littleEndian);
+    uintToString<std::uint32_t>(outstr_n, outstr, result);
+    return true;
 }
 
-};  // namespace menu
+bool InspectorPluginUInt32::convertToBytes(
+    std::size_t& outdata_n, byte* outdata, const char* instr,
+    const DataInspectorSettings& settings) {
+    std::uint32_t result;
+    HEXBED_ASSERT(outdata_n >= 1);
+    if (uintFromString<std::uint32_t>(result, instr)) {
+        outdata_n = uintToBytes<std::uint32_t>(outdata_n, outdata, result,
+                                               settings.littleEndian);
+        return true;
+    }
+    return false;
+}
+
+};  // namespace plugins
+
 };  // namespace hexbed

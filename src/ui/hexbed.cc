@@ -50,6 +50,7 @@
 #include "ui/hexedit.hh"
 #include "ui/logger.hh"
 #include "ui/menus.hh"
+#include "ui/plugins/plugin.hh"
 #include "ui/settings.hh"
 
 #define PLURAL wxPLURAL
@@ -132,6 +133,8 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
              HexBedMainFrame::OnViewColumnsText)
     EVT_MENU(hexbed::menu::MenuView_BitEditor,
              HexBedMainFrame::OnViewBitEditor)
+    EVT_MENU(hexbed::menu::MenuView_DataInspector,
+             HexBedMainFrame::OnViewDataInspector)
 
     EVT_MENU(wxID_EXIT, HexBedMainFrame::OnExit)
     EVT_MENU(wxID_ABOUT, HexBedMainFrame::OnAbout)
@@ -183,6 +186,7 @@ bool HexBedWxApp::OnInit() {
     if (!trans->AddCatalog("hexbed"))
         LOG_WARN("translation: could not load the hexbed catalog");
     wxTranslations::Set(trans);
+    hexbed::plugins::loadBuiltinPlugins();
     window_ = new HexBedMainFrame();
     window_->Show(true);
     for (const std::string& s : openFiles) window_->FileKnock(s, false);
@@ -564,6 +568,11 @@ void HexBedMainFrame::OnBitEditorClose(wxCloseEvent& event) {
     bitEditorTool_ = nullptr;
 }
 
+void HexBedMainFrame::OnDataInspectorClose(wxCloseEvent& event) {
+    dataInspector_->Destroy();
+    dataInspector_ = nullptr;
+}
+
 void HexBedMainFrame::NoMoreResults() {
     wxMessageBox(_("No more results found for this search."), "HexBed",
                  wxOK | wxICON_INFORMATION);
@@ -831,6 +840,17 @@ void HexBedMainFrame::OnViewBitEditor(wxCommandEvent& event) {
     bitEditorTool_->Show(true);
     bitEditorTool_->Raise();
     bitEditorTool_->SetFocus();
+}
+
+void HexBedMainFrame::OnViewDataInspector(wxCommandEvent& event) {
+    if (!dataInspector_) {
+        dataInspector_ = std::make_unique<DataInspector>(this, context_);
+        dataInspector_->Bind(wxEVT_CLOSE_WINDOW,
+                             &HexBedMainFrame::OnDataInspectorClose, this);
+    }
+    dataInspector_->Show(true);
+    dataInspector_->Raise();
+    dataInspector_->SetFocus();
 }
 
 void HexBedMainFrame::OnEditInsertToggle(wxCommandEvent& event) {

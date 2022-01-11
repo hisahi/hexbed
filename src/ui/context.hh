@@ -112,6 +112,7 @@ class HexBedContextMain : public HexBedContext {
 
     void addViewer(HexBedViewer* viewer);
     void removeViewer(HexBedViewer* viewer) noexcept;
+    void pokeViewer(HexBedViewer* viewer);
 
     byte* getSearchBuffer(bufsize n);
     const_bytespan getSearchString() const noexcept;

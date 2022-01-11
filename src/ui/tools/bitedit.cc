@@ -72,12 +72,13 @@ void BitEditorTool::onUpdateCursor(HexBedPeekRegion peek) {
     offset_ = peek.offset;
     bool allow = document_ && !peek.data.empty();
     if (allow) {
+        bool writable = !document_->readOnly();
         byte b = peek.data[0];
         buf_ = b;
         char buf[3] = "00";
         for (int i = 0; i < 8; ++i) {
             bool set = b & bitMask(i);
-            bitChecks_[i]->Enable(true);
+            bitChecks_[i]->Enable(writable);
             bitChecks_[i]->SetValue(set);
             bitLabels_[i]->SetLabelText(set ? "1" : "0");
         }

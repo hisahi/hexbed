@@ -17,39 +17,37 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/menuview.cc -- implementation for the View menu
+// ui/plugins/plugin.cc -- impl for the generic plugin system
 
-#include "app/config.hh"
-#include "ui/menus.hh"
+#include "ui/plugins/plugin.hh"
+
+#include "ui/plugins/inspector.hh"
 
 namespace hexbed {
-namespace menu {
 
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
-    wxMenu* menuView = new wxMenu;
-    wxMenu* viewColumns = new wxMenu;
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsBoth, _("&Hex and text"),
-                          _("Both columns; hex and text data"))
-        ->Check(config().showColumnTypes == 3);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsHex, _("He&x only"),
-                          _("Show hex column only"))
-        ->Check(config().showColumnTypes == 2);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsText, _("&Text only"),
-                          _("Show text column only"))
-        ->Check(config().showColumnTypes == 1);
-    menuView->AppendSubMenu(viewColumns, _("&Columns"),
-                            _("Controls which columns to show"));
-    menuView->AppendSeparator();
-    addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
-            _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
-    addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
-            _("Shows the data inspector"), wxACCEL_CTRL | wxACCEL_SHIFT, 'D');
-    menuBar->Append(menuView, _("&View"));
-    return menuView;
+namespace plugins {
+
+void loadBuiltinPlugins() {
+    loadBuiltinDataInspectorPlugins();
+    // ...
 }
 
-};  // namespace menu
+pluginid nextPluginId_ = 0;
+pluginid firstPluginIdCustom_ = 0;
+pluginid nextPluginIdCustom_ = 0;
+
+pluginid nextBuiltinPluginId() { return nextPluginId_++; }
+
+void resetExternalPluginIds() { nextPluginIdCustom_ = firstPluginIdCustom_; }
+
+pluginid nextExternalPluginId() {
+    if (firstPluginIdCustom_ < nextPluginId_)
+        firstPluginIdCustom_ = nextPluginId_;
+    if (nextPluginIdCustom_ < firstPluginIdCustom_)
+        nextPluginIdCustom_ = firstPluginIdCustom_;
+    return nextPluginIdCustom_++;
+}
+
+};  // namespace plugins
+
 };  // namespace hexbed

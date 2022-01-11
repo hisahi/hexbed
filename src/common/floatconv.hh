@@ -17,39 +17,25 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/menuview.cc -- implementation for the View menu
+// common/floatconv.hh -- header for integer <-> floating-point conversions
 
-#include "app/config.hh"
-#include "ui/menus.hh"
+#ifndef HEXBED_COMMON_FLOATCONV_HH
+#define HEXBED_COMMON_FLOATCONV_HH
+
+#include <cfloat>
+#include <climits>
+#include <cstdint>
+#include <limits>
+
+#include "common/types.hh"
 
 namespace hexbed {
-namespace menu {
 
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
-    wxMenu* menuView = new wxMenu;
-    wxMenu* viewColumns = new wxMenu;
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsBoth, _("&Hex and text"),
-                          _("Both columns; hex and text data"))
-        ->Check(config().showColumnTypes == 3);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsHex, _("He&x only"),
-                          _("Show hex column only"))
-        ->Check(config().showColumnTypes == 2);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsText, _("&Text only"),
-                          _("Show text column only"))
-        ->Check(config().showColumnTypes == 1);
-    menuView->AppendSubMenu(viewColumns, _("&Columns"),
-                            _("Controls which columns to show"));
-    menuView->AppendSeparator();
-    addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
-            _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
-    addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
-            _("Shows the data inspector"), wxACCEL_CTRL | wxACCEL_SHIFT, 'D');
-    menuBar->Append(menuView, _("&View"));
-    return menuView;
-}
+float int32ToFloat32(std::uint32_t x);
+std::uint32_t float32ToInt32(float x);
+double int64ToFloat64(std::uint64_t x);
+std::uint64_t float64ToInt64(double x);
 
-};  // namespace menu
 };  // namespace hexbed
+
+#endif /* HEXBED_COMMON_FLOATCONV_HH */

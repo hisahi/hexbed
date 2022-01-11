@@ -15,13 +15,13 @@ A graphical hex editor, still a work in progress.
 * Inserting blocks
 * Bitwise operations on blocks
 * Search for text
+* Data inspector and editor (integers, etc.)
 
 ## Planned features
 * Stability
 * Performance
 * Not losing data
 * Not having bugs
-* Data inspector and editor (integers, etc.)
 * Search for text with case insensitivity
 * Search for integers, floats, etc.
 * Import/export data
