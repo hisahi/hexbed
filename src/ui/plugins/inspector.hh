@@ -32,7 +32,9 @@ namespace hexbed {
 namespace plugins {
 
 struct DataInspectorSettings {
-    bool littleEndian{false};
+    bool littleEndian;
+
+    DataInspectorSettings();
 };
 
 class DataInspectorPlugin : public Plugin {
@@ -44,6 +46,7 @@ class DataInspectorPlugin : public Plugin {
     inline std::size_t getRequestedStringBufferSize() const noexcept {
         return maxStrLen_;
     }
+    inline bool isReadOnly() const noexcept { return readOnly_; }
     virtual bool convertFromBytes(std::size_t outstr_n, char* outstr,
                                   const_bytespan data,
                                   const DataInspectorSettings& settings) = 0;
@@ -56,13 +59,38 @@ class DataInspectorPlugin : public Plugin {
                                std::size_t maxDataLen, std::size_t maxStrLen)
         : Plugin(id),
           title_(title),
+          readOnly_(false),
+          maxDataLen_(maxDataLen),
+          maxStrLen_(maxStrLen) {}
+
+    inline DataInspectorPlugin(pluginid id, const wxString& title,
+                               bool readOnly, std::size_t maxDataLen,
+                               std::size_t maxStrLen)
+        : Plugin(id),
+          title_(title),
+          readOnly_(readOnly),
           maxDataLen_(maxDataLen),
           maxStrLen_(maxStrLen) {}
 
   private:
     wxString title_;
+    bool readOnly_;
     std::size_t maxDataLen_;
     std::size_t maxStrLen_;
+};
+
+class ReadOnlyDataInspectorPlugin : public DataInspectorPlugin {
+  public:
+    inline bool convertToBytes(std::size_t&, byte*, const char*,
+                               const DataInspectorSettings&) {
+        return false;
+    }
+
+  protected:
+    inline ReadOnlyDataInspectorPlugin(pluginid id, const wxString& title,
+                                       std::size_t maxDataLen,
+                                       std::size_t maxStrLen)
+        : DataInspectorPlugin(id, title, true, maxDataLen, maxStrLen) {}
 };
 
 void loadBuiltinDataInspectorPlugins();

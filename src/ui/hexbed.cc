@@ -604,7 +604,6 @@ void HexBedMainFrame::OnEditSelectBlock(wxCommandEvent& event) {
 }
 
 void HexBedMainFrame::OnFindClose(wxCloseEvent& event) {
-    findDialog_->Unregister();
     findDialog_->Destroy();
     findDialog_ = nullptr;
 }
@@ -675,7 +674,7 @@ void HexBedMainFrame::OnSearchFind(wxCommandEvent& event) {
     if (!findDialog_ || findDialog_->IsReplace()) {
         if (findDialog_) findDialog_->Close(true);  // calls OnFindClose
         findDialog_ =
-            std::make_unique<FindDialog>(this, context_.get(), searchDocument_);
+            std::make_unique<FindDialog>(this, context_, searchDocument_);
         findDialog_->Bind(wxEVT_CLOSE_WINDOW, &HexBedMainFrame::OnFindClose,
                           this);
     }
@@ -700,7 +699,7 @@ void HexBedMainFrame::OnSearchReplace(wxCommandEvent& event) {
             // OnFindClose ...
         }
         findDialog_ = std::make_unique<ReplaceDialog>(
-            this, context_.get(), searchDocument_, replaceDocument_);
+            this, context_, searchDocument_, replaceDocument_);
         findDialog_->Bind(wxEVT_CLOSE_WINDOW, &HexBedMainFrame::OnFindClose,
                           this);
     }
@@ -714,7 +713,7 @@ void HexBedMainFrame::OnEditInsertOrReplace(wxCommandEvent& event) {
     bufsize sel, seln;
     bool seltext;
     ed->GetSelection(sel, seln, seltext);
-    InsertBlockDialog insertDialog(this, context_.get(), insertDocument_, seln);
+    InsertBlockDialog insertDialog(this, context_, insertDocument_, seln);
     if (ed && insertDialog.ShowModal() == wxID_OK) {
         bufsize n = insertDialog.GetByteCount();
         try {
@@ -742,7 +741,7 @@ void HexBedMainFrame::OnEditBitwiseBinaryOp(wxCommandEvent& event) {
     bufsize sel, seln;
     bool seltext;
     ed->GetSelection(sel, seln, seltext);
-    BitwiseBinaryOpDialog dial(this, context_.get(), binaryOpDocument_);
+    BitwiseBinaryOpDialog dial(this, context_, binaryOpDocument_);
     if (ed && dial.ShowModal() == wxID_OK) {
         try {
             bufsize sn = binaryOpDocument_->size();

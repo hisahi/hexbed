@@ -42,12 +42,18 @@ constexpr unsigned MAX_LOOKAHEAD = 256;
 struct EditorState {
     bool insert{false};
     bool searchWrapAround{false};
+    bool searchFindText{false};
     bool searchFindTextCaseInsensitive{false};
 
     wxString searchFindTextString;
     wxString searchReplaceTextString;
     std::string searchFindTextEncoding;
     std::string searchReplaceTextEncoding;
+
+    wxString searchFindDataValue;
+    wxString searchReplaceDataValue;
+    std::size_t searchFindDataType;
+    std::size_t searchReplaceDataType;
 };
 
 class HexBedContextMain;
@@ -71,6 +77,24 @@ class HexBedViewer {
 
   private:
     bufsize lookahead_;
+};
+
+class HexBedEditorRegistration {
+  public:
+    HexBedEditorRegistration();
+    HexBedEditorRegistration(std::shared_ptr<HexBedContextMain> context,
+                             hexbed::ui::HexEditorParent* editor);
+    HexBedEditorRegistration(HexBedEditorRegistration& copy) = default;
+    HexBedEditorRegistration(HexBedEditorRegistration&& move) = default;
+    HexBedEditorRegistration& operator=(HexBedEditorRegistration& copy) =
+        default;
+    HexBedEditorRegistration& operator=(HexBedEditorRegistration&& move) =
+        default;
+    virtual ~HexBedEditorRegistration();
+
+  private:
+    std::shared_ptr<HexBedContextMain> ctx_;
+    hexbed::ui::HexEditorParent* ptr_;
 };
 
 class HexBedViewerRegistration {

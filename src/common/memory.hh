@@ -34,6 +34,8 @@ bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx);
 bufsize memReverse(byte* edi, bufsize ecx);
 const byte* memFindFirst(const byte* start, const byte* end, byte c);
 const byte* memFindLast(const byte* start, const byte* end, byte c);
+const byte* memFindFirst2(const byte* start, const byte* end, byte c1, byte c2);
+const byte* memFindLast2(const byte* start, const byte* end, byte c1, byte c2);
 bool memEqual(const byte* a, const byte* b, bufsize n);
 
 };  // namespace hexbed

@@ -37,7 +37,8 @@ namespace ui {
 
 class BitwiseBinaryOpDialog : public wxDialog {
   public:
-    BitwiseBinaryOpDialog(HexBedMainFrame* parent, HexBedContextMain* context,
+    BitwiseBinaryOpDialog(HexBedMainFrame* parent,
+                          std::shared_ptr<HexBedContextMain> context,
                           std::shared_ptr<HexBedDocument> document);
     BitwiseBinaryOp GetOperation() const noexcept;
 
@@ -51,11 +52,14 @@ class BitwiseBinaryOpDialog : public wxDialog {
     void OnChangedInput(wxCommandEvent& event);
 
     HexBedMainFrame* parent_;
-    HexBedContextMain* context_;
+    std::shared_ptr<HexBedContextMain> context_;
     std::shared_ptr<HexBedDocument> document_;
+    HexBedEditorRegistration registration_;
+
     HexBedStandaloneEditor* editor_;
     wxChoice* opChoice_;
     wxButton* okButton_;
+
     BitwiseBinaryOp choice_{BitwiseBinaryOp::Add};
 };
 

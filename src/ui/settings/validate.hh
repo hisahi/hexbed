@@ -99,6 +99,14 @@ class ChoiceValidator : public wxValidator {
         values_.push_back(value);
     }
 
+    void TruncateItems(std::size_t size) {
+        wxItemContainer* picker = dynamic_cast<wxItemContainer*>(GetWindow());
+        if (size < values_.size()) values_.resize(size);
+        std::size_t n = picker->GetCount();
+        if (n)
+            for (std::size_t i = n - 1; i >= size; ++i) picker->Delete(i);
+    }
+
   private:
     T* store_;
     std::vector<T> values_;

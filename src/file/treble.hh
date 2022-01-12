@@ -37,8 +37,6 @@
 
 namespace hexbed {
 
-//#define TREBLE_DEBUG 1
-
 struct TrebleNode;
 class Treble;
 

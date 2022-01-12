@@ -22,8 +22,10 @@
 #include "common/charconv.hh"
 
 #include <cctype>
+#include <sstream>
 #include <unordered_map>
 
+#include "common/intconv.hh"
 #include "common/logger.hh"
 #include "common/values.hh"
 
@@ -155,6 +157,260 @@ std::wstring sbcsFromBytes(bufsize len, const byte* data) {
 
 bool sbcsToBytes(bufsize& len, byte* data, const std::wstring& text) {
     return sbcsToBytes(sbcs, len, data, text);
+}
+
+static std::size_t encodeCharUTF8(byte* out, char32_t c) {
+    bufsize i = 0;
+    if (c < 0x80UL) {
+        out[i++] = static_cast<byte>(c & 0x7F);
+    } else if (c < 0x800UL) {
+        out[i++] = static_cast<byte>(0xC0 | ((c >> 6) & 0x1F));
+        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
+    } else if (c < 0x10000UL) {
+        out[i++] = static_cast<byte>(0xE0 | ((c >> 12) & 0x0F));
+        out[i++] = static_cast<byte>(0x80 | ((c >> 6) & 0x3F));
+        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
+    } else if (c < 0x110000UL) {
+        out[i++] = static_cast<byte>(0xF0 | ((c >> 18) & 0x07));
+        out[i++] = static_cast<byte>(0x80 | ((c >> 12) & 0x3F));
+        out[i++] = static_cast<byte>(0x80 | ((c >> 6) & 0x3F));
+        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
+    }
+    return i;
+}
+
+// 0 = OK
+// > 0 = truncated
+// < 0 = invalid
+int decodeCharUTF8(const byte* p, std::size_t n, char32_t& u, std::size_t& rc) {
+    if (!n) return 1;
+    byte c = *p;
+    char32_t t;
+    std::size_t j;
+    if (!(c & 0x80)) {
+        rc = 1;
+        u = c;
+        return 0;
+    } else if ((c & 0xE0) == 0xC0) {
+        t = c & 0x1F;
+        j = 2;
+    } else if ((c & 0xF0) == 0xE0) {
+        t = c & 0x0F;
+        j = 3;
+    } else if ((c & 0xF8) == 0xF0) {
+        t = c & 0x07;
+        j = 4;
+    } else {
+        return -1;
+    }
+    if (j > n) return 1;
+    for (std::size_t i = 1; i < j; ++i) {
+        c = p[i];
+        if ((c & 0xC0) != 0x80) return -1;
+        t = (t << 6) | (c & 0x3F);
+    }
+    rc = j;
+    if (t >= 0x110000UL || (0xD800UL <= t && t <= 0xDFFFUL)) return -1;
+    u = t;
+    return 0;
+}
+
+std::size_t encodeCharMbcsOrSbcs(TextEncoding enc,
+                                 const SingleByteCharacterSet& sbcs, char32_t c,
+                                 std::size_t size, byte* out) {
+    if (!size) return 0;
+    byte outbuf[MBCS_CHAR_MAX];
+    std::size_t outlen = 0;
+    bool little = false;
+    switch (enc) {
+    case TextEncoding::SBCS: {
+        int i = sbcs.fromChar(c);
+        if (i >= 0) outbuf[outlen++] = i;
+        break;
+    }
+    case TextEncoding::UTF8:
+        outlen = encodeCharUTF8(outbuf, c);
+        break;
+    case TextEncoding::UTF16LE:
+        little = true;
+        [[fallthrough]];
+    case TextEncoding::UTF16BE:
+        if (c >= 0x10000UL) {
+            c -= 0x10000UL;
+            outlen += uintToBytes<std::uint16_t>(
+                sizeof(outbuf), outbuf,
+                static_cast<std::uint16_t>(0xD800UL | ((c >> 10) & 0x3FF)),
+                little);
+            outlen += uintToBytes<std::uint16_t>(
+                sizeof(outbuf) - outlen, outbuf + outlen,
+                static_cast<std::uint16_t>(0xDC00UL | (c & 0x3FF)), little);
+        } else
+            outlen = uintToBytes<std::uint16_t>(
+                sizeof(outbuf), outbuf, static_cast<std::uint16_t>(c), little);
+        break;
+    case TextEncoding::UTF32LE:
+        little = true;
+        [[fallthrough]];
+    case TextEncoding::UTF32BE:
+        outlen = uintToBytes<std::uint32_t>(
+            sizeof(outbuf), outbuf, static_cast<std::uint32_t>(c), little);
+        break;
+    default:
+        return 0;
+    }
+    return memCopy(out, outbuf, std::min(outlen, size));
+}
+
+DecodeStatus decodeStringMbcsOrSbcs(TextEncoding enc,
+                                    const SingleByteCharacterSet& sbcs,
+                                    u32ostringstream& out,
+                                    const_bytespan data) {
+    DecodeStatus status{true, 0, 0};
+    std::size_t ds = data.size();
+    bool little = false;
+    switch (enc) {
+    case TextEncoding::SBCS:
+        for (std::size_t i = 0; i < ds; ++i) {
+            char32_t u = sbcs.toChar(data[i]);
+            ++status.readCount;
+            if (!u) {
+                status.ok = false;
+                return status;
+            }
+            ++status.charCount;
+            out << u;
+        }
+        break;
+    case TextEncoding::UTF8: {
+        const byte* p = data.data();
+        const byte* pe = data.data() + ds;
+        char32_t u;
+        std::size_t rc;
+        while (p < pe) {
+            int err = decodeCharUTF8(p, pe - p, u, rc);
+            if (err) {
+                status.ok = err > 0;
+                return status;
+            }
+            status.readCount += rc;
+            p += rc;
+            ++status.charCount;
+            out << u;
+        }
+        break;
+    }
+    case TextEncoding::UTF16LE:
+        little = true;
+        [[fallthrough]];
+    case TextEncoding::UTF16BE: {
+        const byte* p = data.data();
+        --ds;
+        for (std::size_t j = 0; j < ds; j += 2) {
+            std::uint16_t u = uintFromBytes<std::uint16_t>(
+                sizeof(std::uint16_t), &p[j], little);
+            if ((u & 0xDC00) == 0xD800) {
+                j += 2;
+                if (j >= ds) return status;
+                status.readCount += 2;
+                u = (u & 0x3FF) << 10;
+                u += uintFromBytes<std::uint16_t>(sizeof(std::uint16_t), &p[j],
+                                                  little);
+                u += 0x10000UL - 0xDC00UL;
+            } else if ((u & 0xDC00) == 0xDC00) {
+                status.ok = false;
+                return status;
+            }
+            status.readCount += 2;
+            ++status.charCount;
+            out << static_cast<char32_t>(u);
+        }
+        break;
+    }
+    case TextEncoding::UTF32LE:
+        little = true;
+        [[fallthrough]];
+    case TextEncoding::UTF32BE: {
+        const byte* p = data.data();
+        ds -= 3;
+        for (std::size_t j = 0; j < ds; j += 4) {
+            std::uint32_t u = uintFromBytes<std::uint32_t>(
+                sizeof(std::uint32_t), &p[j], little);
+            status.readCount += 4;
+            ++status.charCount;
+            out << static_cast<char32_t>(u);
+        }
+        break;
+    }
+    default:
+        return DecodeStatus{};
+    }
+    return status;
+}
+
+template <std::size_t N>
+static std::u32string wstringToU32string_(const std::wstring& w);
+
+template <>
+[[maybe_unused]] std::u32string wstringToU32string_<2>(const std::wstring& w) {
+    // assume UTF-16
+    std::basic_ostringstream<char32_t> ss;
+    std::size_t sl = w.size();
+    for (std::size_t i = 0; i < sl; ++i) {
+        wchar_t c = w[i];
+        if ((c & 0xDC00UL) == 0xD800UL) {
+            char32_t u = (c & 0x3FFUL) << 10;
+            c = w[++i];
+            if ((c & 0xDC00UL) != 0xDC00UL) continue;
+            u |= (c & 0x3FFUL);
+            ss << (u + 0x10000UL);
+        } else if ((c & 0xDC00UL) != 0xDC00UL)
+            ss << static_cast<char32_t>(c);
+    }
+    return ss.str();
+}
+
+template <>
+[[maybe_unused]] std::u32string wstringToU32string_<4>(const std::wstring& w) {
+    // assume UTF-32
+    std::basic_ostringstream<char32_t> ss;
+    for (wchar_t c : w) ss << static_cast<char32_t>(c);
+    return ss.str();
+}
+
+std::u32string wstringToU32string(const std::wstring& w) {
+    return wstringToU32string_<sizeof(wchar_t)>(w);
+}
+
+template <std::size_t N>
+static std::wstring u32stringToWstring_(const std::u32string& u);
+
+template <>
+[[maybe_unused]] std::wstring u32stringToWstring_<2>(const std::u32string& u) {
+    // assume UTF-16
+    std::wostringstream ss;
+    std::size_t sl = u.size();
+    for (std::size_t i = 0; i < sl; ++i) {
+        char32_t c = u[i];
+        if (c >= 0x10000UL) {
+            c -= 0x10000UL;
+            ss << static_cast<wchar_t>(0xD800UL | ((c >> 10) & 0x3FF));
+            ss << static_cast<wchar_t>(0xDC00UL | (c & 0x3FF));
+        } else
+            ss << static_cast<wchar_t>(c);
+    }
+    return ss.str();
+}
+
+template <>
+[[maybe_unused]] std::wstring u32stringToWstring_<4>(const std::u32string& u) {
+    // assume UTF-32
+    std::wostringstream ss;
+    for (char32_t c : u) ss << static_cast<wchar_t>(c);
+    return ss.str();
+}
+
+std::wstring u32stringToWstring(const std::u32string& w) {
+    return u32stringToWstring_<sizeof(wchar_t)>(w);
 }
 
 };  // namespace hexbed

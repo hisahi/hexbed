@@ -283,16 +283,6 @@ UndoToken HexBedDocument::addUndoRemove(bufsize off, bufsize cnt) {
                                    .oldStripes = std::move(vecs)});
 }
 
-static bufsize getPreferredSearchBufferSize(bufsize s) {
-    if (s >= (1 << 24)) return s << 1;
-    if (s >= (1 << 20)) return s << 2;
-    if (s >= (1 << 16)) return s << 3;
-    if (s >= (1 << 12)) return s << 4;
-    return (1 << 12) << 4;
-}
-
-static bufsize getMinimalSearchBufferSize(bufsize s) { return s * 2; }
-
 bool HexBedDocument::compareEqual(bufoffset offset, bufoffset size,
                                   const_bytespan data) {
     bufsize z = 64, rr, r, c, o = offset;
@@ -317,7 +307,7 @@ SearchResult HexBedDocument::searchForward(bufoffset start, bufoffset end,
                                            const_bytespan data) {
     bufsize r, rr, o = start, z = data.size(), c, hc;
     if (start >= end) return SearchResult{};
-    if (!z) return SearchResult{SearchResultType::Full, start};
+    if (!z) return SearchResult{SearchResultType::Full, z, start};
     bufsize mins = getMinimalSearchBufferSize(z),
             prefs = getPreferredSearchBufferSize(z);
     byte* bp = new (std::nothrow) byte[(c = prefs)];
@@ -337,11 +327,11 @@ SearchResult HexBedDocument::searchForward(bufoffset start, bufoffset end,
             pres = searchFullForward(hc, flippers[flipindex], r, flip, z, si,
                                      pres.offset);
             if (pres)
-                return SearchResult{SearchResultType::Full, o + pres.offset};
+                return SearchResult{SearchResultType::Full, o + pres.offset, z};
         }
         pres = searchPartialForward(r, flip, z, si, r == hc);
         if (pres.type == SearchResultType::Full)
-            return SearchResult{SearchResultType::Full, o + pres.offset};
+            return SearchResult{SearchResultType::Full, o + pres.offset, z};
         if (pres.type == SearchResultType::Partial) {
             flip = flippers[flipindex];
             flipindex = flipindex ^ 1;
@@ -350,19 +340,6 @@ SearchResult HexBedDocument::searchForward(bufoffset start, bufoffset end,
         o += r;
     }
     return SearchResult{};
-}
-
-SearchResult HexBedDocument::searchForwardFull(bufoffset start, bool wrap,
-                                               const_bytespan data) {
-    bufsize dz = size(), sz = data.size();
-    if (sz > dz) return SearchResult{};
-    SearchResult res = searchForward(start, dz, data);
-    if (!res && wrap) {
-        bufoffset end = start + sz - 1;
-        if (end < start) end = dz;
-        res = searchForward(0, end, data);
-    }
-    return res;
 }
 
 SearchResult HexBedDocument::searchBackward(bufoffset start, bufoffset end,
@@ -392,12 +369,12 @@ SearchResult HexBedDocument::searchBackward(bufoffset start, bufoffset end,
                                       pres.offset);
             if (pres)
                 return SearchResult{SearchResultType::Full,
-                                    o + pres.offset - z + 1};
+                                    o + pres.offset - z + 1, z};
         }
         pres = searchPartialBackward(r, flip, z, si, o > 0);
         if (pres.type == SearchResultType::Full)
-            return SearchResult{SearchResultType::Full,
-                                o + pres.offset - z + 1};
+            return SearchResult{SearchResultType::Full, o + pres.offset - z + 1,
+                                z};
         if (pres.type == SearchResultType::Partial) {
             flip = flippers[flipindex];
             flipindex = flipindex ^ 1;
@@ -406,11 +383,24 @@ SearchResult HexBedDocument::searchBackward(bufoffset start, bufoffset end,
     return SearchResult{};
 }
 
+SearchResult HexBedDocument::searchForwardFull(bufoffset start, bool wrap,
+                                               const_bytespan data) {
+    bufsize dz = size(), sz = data.size();
+    if (sz > dz) return SearchResult{};
+    SearchResult res = searchForward(start, dz, data);
+    if (!res && wrap) {
+        bufoffset end = start + sz - 1;
+        if (end < start) end = dz;
+        res = searchForward(0, end, data);
+    }
+    return res;
+}
+
 SearchResult HexBedDocument::searchBackwardFull(bufoffset start, bool wrap,
                                                 const_bytespan data) {
     bufsize dz = size(), sz = data.size();
     if (sz > dz) return SearchResult{};
-    bufoffset end = start + sz - 1;
+    bufoffset end = start + sz;
     if (end < start) end = dz;
     SearchResult res = searchBackward(0, end, data);
     if (!res && wrap) res = searchBackward(start + 1, dz, data);

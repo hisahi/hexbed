@@ -58,20 +58,18 @@ class SelectBlockDialog : public wxDialog {
     void ConvertBase(unsigned base);
     void ConvertNewSub(bool sub);
 
+    wxTextCtrl* text_;
+    wxTextCtrl* text2_;
+    RadixPicker* radix_;
+    wxButton* okButton_;
+    wxRadioButton* off0_;
+    wxRadioButton* off1_;
+
     bufsize cur_;
     bufsize len_;
     bufsize end_;
     unsigned base_{16};
     bool sub_{false};
-
-    wxTextCtrl* text_;
-    wxTextCtrl* text2_;
-    RadixPicker* radix_;
-
-    wxButton* okButton_;
-
-    wxRadioButton* off0_;
-    wxRadioButton* off1_;
 };
 
 };  // namespace ui

@@ -51,7 +51,7 @@ static bufsize memFillRepeatNaive(byte* edi, bufsize ebx, const byte* esi,
                                   bufsize ecx) {
     bufsize ecx_orig = ecx;
     while (ecx >= ebx) edi += memCopy(edi, esi, ebx), ecx -= ebx;
-    while (ecx) edi += memCopy(edi, esi, ecx);
+    if (ecx) edi += memCopy(edi, esi, ecx);
     return ecx_orig;
 }
 
@@ -84,15 +84,64 @@ bufsize memReverse(byte* edi, bufsize ecx) {
     return ecx;
 }
 
+// first match in [start, end) or null
 const byte* memFindFirst(const byte* start, const byte* end, byte c) {
-    const byte* p = std::find(start, end, c);
-    return p == end ? nullptr : p;
+    return reinterpret_cast<const byte*>(std::memchr(start, c, end - start));
 }
 
+static const void* memrchr(const void* ptr, int ch, std::size_t count) {
+    const unsigned char* esi = reinterpret_cast<const unsigned char*>(ptr);
+    unsigned char al = static_cast<unsigned char>(ch);
+    esi += count;
+    while (count--)
+        if (*--esi == al) return esi;
+    return nullptr;
+}
+
+// final match in [start, end) or null
 const byte* memFindLast(const byte* start, const byte* end, byte c) {
-    using ptr = std::reverse_iterator<const byte*>;
-    ptr p = std::find(ptr(end), ptr(start), c);
-    return p.base() == start ? nullptr : p.base();
+    return reinterpret_cast<const byte*>(memrchr(start, c, end - start));
+}
+
+static constexpr bufsize alternateSize = 1024;
+
+const byte* memFindFirst2(const byte* start, const byte* end, byte c1,
+                          byte c2) {
+    bufsize z = end - start;
+    const byte* p = start;
+    while (z > alternateSize) {
+        const byte* pt = p + alternateSize;
+        const byte* p1 = memFindFirst(p, pt, c1);
+        const byte* p2 = memFindFirst(p, p1 ? p1 : pt, c2);
+        if (p1) {
+            return p2 ? std::min(p1, p2) : p1;
+        } else if (p2)
+            return p2;
+        p = pt;
+        z -= alternateSize;
+    }
+    const byte* p1 = memFindFirst(p, end, c1);
+    const byte* p2 = memFindFirst(p, p1 ? p1 : end, c2);
+    return p1 ? (p2 ? std::min(p1, p2) : p1) : p2;
+}
+
+const byte* memFindLast2(const byte* start, const byte* end, byte c1, byte c2) {
+    bufsize z = end - start;
+    const byte* p = end;
+    while (z > alternateSize) {
+        const byte* pt = p - alternateSize;
+        const byte* p1 = memFindLast(pt, p, c1);
+        const byte* p2 = memFindLast(p1 ? p1 : pt, p, c2);
+        if (p1) {
+            return p2 ? std::max(p1, p2) : p1;
+        } else if (p2)
+            return p2;
+        p = pt;
+        z -= alternateSize;
+    }
+    const byte* p1 = memFindLast(start, p, c1);
+    const byte* p2 = memFindLast(p1 ? p1 : start, p, c2);
+    return p1 ? (p2 ? std::max(p1, p2) : p1) : p2;
 }
 
 bool memEqual(const byte* a, const byte* b, bufsize n) {

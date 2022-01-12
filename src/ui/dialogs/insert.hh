@@ -36,7 +36,8 @@ namespace ui {
 
 class InsertBlockDialog : public wxDialog {
   public:
-    InsertBlockDialog(HexBedMainFrame* parent, HexBedContextMain* context,
+    InsertBlockDialog(HexBedMainFrame* parent,
+                      std::shared_ptr<HexBedContextMain> context,
                       std::shared_ptr<HexBedDocument> document, bufsize seln);
     bufsize GetByteCount() const noexcept;
 
@@ -50,8 +51,11 @@ class InsertBlockDialog : public wxDialog {
     void OnChangedInput(wxCommandEvent& event);
 
     HexBedMainFrame* parent_;
-    HexBedContextMain* context_;
+
+    std::shared_ptr<HexBedContextMain> context_;
     std::shared_ptr<HexBedDocument> document_;
+    HexBedEditorRegistration registration_;
+
     HexBedStandaloneEditor* editor_;
     wxSpinCtrl* spinner_;
     wxButton* okButton_;

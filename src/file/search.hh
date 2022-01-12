@@ -22,6 +22,7 @@
 #ifndef HEXBED_FILE_SEARCH_HH
 #define HEXBED_FILE_SEARCH_HH
 
+#include "common/charconv.hh"
 #include "common/types.hh"
 
 namespace hexbed {
@@ -31,6 +32,18 @@ enum class SearchResultType { None, Full, Partial };
 struct SearchResult {
     SearchResultType type{SearchResultType::None};
     bufoffset offset{0};
+    bufoffset length{0};
+
+    inline operator bool() const noexcept {
+        return type != SearchResultType::None;
+    }
+};
+
+struct SearchResult2 {
+    SearchResultType type{SearchResultType::None};
+    bufoffset offset{0};
+    bufoffset length{0};
+    bool secondary{false};
 
     inline operator bool() const noexcept {
         return type != SearchResultType::None;
@@ -49,6 +62,29 @@ SearchResult searchPartialBackward(bufsize slen, const byte* sdata,
 SearchResult searchFullBackward(bufsize alen, const byte* adata, bufsize blen,
                                 const byte* bdata, bufsize nlen,
                                 const byte* ndata, bufsize off);
+
+SearchResult2 searchPartialForward2(bufsize slen, const byte* sdata,
+                                    bufsize nlen, const byte* ndata,
+                                    bufsize mlen, const byte* mdata,
+                                    bool allowPartial);
+SearchResult2 searchFullForward2(bufsize alen, const byte* adata, bufsize blen,
+                                 const byte* bdata, bufsize nlen,
+                                 const byte* ndata, bufsize mlen,
+                                 const byte* mdata, bufsize off,
+                                 bool secondary);
+
+SearchResult2 searchPartialBackward2(bufsize slen, const byte* sdata,
+                                     bufsize nlen, const byte* ndata,
+                                     bufsize mlen, const byte* mdata,
+                                     bool allowPartial);
+SearchResult2 searchFullBackward2(bufsize alen, const byte* adata, bufsize blen,
+                                  const byte* bdata, bufsize nlen,
+                                  const byte* ndata, bufsize mlen,
+                                  const byte* mdata, bufsize off,
+                                  bool secondary);
+
+bufsize getMinimalSearchBufferSize(bufsize s);
+bufsize getPreferredSearchBufferSize(bufsize s);
 
 };  // namespace hexbed
 

@@ -17,56 +17,37 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/dialog/replace.hh -- header for the Replace dialog
+// file/cisearch.hh -- header for case-insensitive search
 
-#ifndef HEXBED_UI_DIALOG_REPLACE_HH
-#define HEXBED_UI_DIALOG_REPLACE_HH
+#ifndef HEXBED_FILE_CISEARCH_HH
+#define HEXBED_FILE_CISEARCH_HH
 
-#include "ui/dialogs/find.hh"
+#include "common/charconv.hh"
+#include "file/document-fwd.hh"
+#include "file/search.hh"
 
 namespace hexbed {
 
-namespace ui {
+struct CaseInsensitivePattern {
+    CaseInsensitivePattern(const std::string& encoding,
+                           const std::wstring& text);
 
-class ReplaceDialog : public FindDialog {
-  public:
-    ReplaceDialog(HexBedMainFrame* parent,
-                  std::shared_ptr<HexBedContextMain> context,
-                  std::shared_ptr<HexBedDocument> document,
-                  std::shared_ptr<HexBedDocument> repdoc);
-
-    inline bool IsReplace() const noexcept { return true; }
-
-    bool Recommit();
-    void UpdateConfig();
-    void AllowReplace(bool flag);
-
-    static void replaceSelection(HexEditorParent* ed);
-    static bufsize replaceAll(HexEditorParent* ed);
-
-  private:
-    void OnFindNext(wxCommandEvent& event);
-    void OnFindPrevious(wxCommandEvent& event);
-    void OnReplaceNext(wxCommandEvent& event);
-    void OnReplacePrevious(wxCommandEvent& event);
-    void OnReplaceAll(wxCommandEvent& event);
-
-    void OnChangedInput(wxCommandEvent& event);
-    void OnChangedReplaceInput(wxCommandEvent& event);
-    void OnChangedSelection(wxCommandEvent& event);
-
-    std::shared_ptr<HexBedDocument> repdoc_;
-    FindDocumentControl* replace_;
-
-    wxButton* replaceNextButton_;
-    wxButton* replacePrevButton_;
-    wxButton* replaceAllButton_;
-
-    bool dirtyReplace_{false};
+    TextEncoding encoding;
+    SingleByteCharacterSet sbcs;
+    std::u32string pattern;
+    bufsize headLowerLen;
+    byte headLower[MBCS_CHAR_MAX];
+    bufsize headUpperLen;
+    byte headUpper[MBCS_CHAR_MAX];
 };
 
-};  // namespace ui
+SearchResult searchForwardCaseless(const HexBedDocument& document,
+                                   bufsize start, bufsize end,
+                                   CaseInsensitivePattern& pattern);
+SearchResult searchBackwardCaseless(const HexBedDocument& document,
+                                    bufsize start, bufsize end,
+                                    CaseInsensitivePattern& pattern);
 
 };  // namespace hexbed
 
-#endif /* HEXBED_UI_DIALOG_REPLACE_HH */
+#endif /* HEXBED_FILE_SEARCH_HH */

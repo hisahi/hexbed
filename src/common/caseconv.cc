@@ -17,56 +17,45 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/dialog/replace.hh -- header for the Replace dialog
+// common/caseconv.cc -- base impl for text case conversions
 
-#ifndef HEXBED_UI_DIALOG_REPLACE_HH
-#define HEXBED_UI_DIALOG_REPLACE_HH
+#include "common/caseconv.hh"
 
-#include "ui/dialogs/find.hh"
+// in the standard HexBed wxWidgets setup, this is not compiled in,
+// because ui/caseconv.cc replaces it
+
+#include <string>
 
 namespace hexbed {
 
-namespace ui {
+static char32_t charUpper(char32_t c) {
+    if (U'a' <= c && c <= U'z') return c - U'a' + U'A';
+    return c;
+}
 
-class ReplaceDialog : public FindDialog {
-  public:
-    ReplaceDialog(HexBedMainFrame* parent,
-                  std::shared_ptr<HexBedContextMain> context,
-                  std::shared_ptr<HexBedDocument> document,
-                  std::shared_ptr<HexBedDocument> repdoc);
+static char32_t charLower(char32_t c) {
+    if (U'A' <= c && c <= U'Z') return c - U'A' + U'a';
+    return c;
+}
 
-    inline bool IsReplace() const noexcept { return true; }
+std::u32string textCaseFold(const std::u32string& text) {
+    return textCaseUpper(text);
+}
 
-    bool Recommit();
-    void UpdateConfig();
-    void AllowReplace(bool flag);
+std::u32string textCaseUpper(const std::u32string& text) {
+    std::size_t n = text.size();
+    std::u32string result(n, U' ');
+    char32_t* p = result.data();
+    for (std::size_t i = 0; i < n; ++i) p[i] = charUpper(text[i]);
+    return result;
+}
 
-    static void replaceSelection(HexEditorParent* ed);
-    static bufsize replaceAll(HexEditorParent* ed);
-
-  private:
-    void OnFindNext(wxCommandEvent& event);
-    void OnFindPrevious(wxCommandEvent& event);
-    void OnReplaceNext(wxCommandEvent& event);
-    void OnReplacePrevious(wxCommandEvent& event);
-    void OnReplaceAll(wxCommandEvent& event);
-
-    void OnChangedInput(wxCommandEvent& event);
-    void OnChangedReplaceInput(wxCommandEvent& event);
-    void OnChangedSelection(wxCommandEvent& event);
-
-    std::shared_ptr<HexBedDocument> repdoc_;
-    FindDocumentControl* replace_;
-
-    wxButton* replaceNextButton_;
-    wxButton* replacePrevButton_;
-    wxButton* replaceAllButton_;
-
-    bool dirtyReplace_{false};
-};
-
-};  // namespace ui
+std::u32string textCaseLower(const std::u32string& text) {
+    std::size_t n = text.size();
+    std::u32string result(n, U' ');
+    char32_t* p = result.data();
+    for (std::size_t i = 0; i < n; ++i) p[i] = charLower(text[i]);
+    return result;
+}
 
 };  // namespace hexbed
-
-#endif /* HEXBED_UI_DIALOG_REPLACE_HH */

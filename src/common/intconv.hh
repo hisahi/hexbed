@@ -78,7 +78,7 @@ template <typename T>
 requires (std::numeric_limits<T>::is_integer
       && !std::numeric_limits<T>::is_signed
       && isUnpaddedType<T>)
-T uintToBytes(bufsize outdata_n, byte* outdata, T result, bool littleEndian) {
+std::size_t uintToBytes(bufsize outdata_n, byte* outdata, T result, bool littleEndian) {
     std::size_t n = sizeof(T);
     HEXBED_ASSERT(outdata_n >= n);
     for (std::size_t i = 0; i < n; ++i)
@@ -91,7 +91,7 @@ template <typename T>
 requires (std::numeric_limits<T>::is_integer
       && std::numeric_limits<T>::is_signed
       && isUnpaddedType<T>)
-T intToBytes(bufsize outdata_n, byte* outdata, T result, bool littleEndian) {
+std::size_t intToBytes(bufsize outdata_n, byte* outdata, T result, bool littleEndian) {
     return uintToBytes<std::make_unsigned_t<T>>(outdata_n, outdata,
            static_cast<std::make_unsigned_t<T>>(result), littleEndian);
 };

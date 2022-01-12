@@ -17,49 +17,43 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/textinput.cc -- impl for the text input class
+// ui/valueinput.cc -- impl for the value input class
 
-#include "ui/textinput.hh"
+#include "ui/valueinput.hh"
 
-#include <wx/checkbox.h>
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/valtext.h>
 
+#include <bit>
+
 #include "app/config.hh"
 #include "common/logger.hh"
 #include "file/document.hh"
-#include "ui/encoding.hh"
+#include "ui/plugins/inspector.hh"
 #include "ui/settings/validate.hh"
 
 namespace hexbed {
 namespace ui {
 
-static std::initializer_list<std::string> mbcsKeys_{MBCS_ENCODING_KEYS()};
-static std::initializer_list<wxString> mbcsNames_{MBCS_ENCODING_NAMES()};
-static std::initializer_list<std::string> sbcsKeys_{SBCS_ENCODING_KEYS()};
-static std::initializer_list<wxString> sbcsNames_{SBCS_ENCODING_NAMES()};
-
-HexBedTextInput::HexBedTextInput(wxWindow* parent, wxString* string,
-                                 std::string* encoding, bool* caseInsensitive)
-    : wxPanel(parent, wxID_ANY), pEncoding_(encoding), pText_(string) {
+HexBedValueInput::HexBedValueInput(wxWindow* parent, wxString* string,
+                                   std::size_t* type)
+    : wxPanel(parent, wxID_ANY), pType_(type), pText_(string) {
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(sizer);
     textCtrl_ = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
                                wxDefaultSize, 0,
                                wxTextValidator(wxFILTER_NONE, string));
 
-    sizer->Add(new wxStaticText(this, wxID_ANY, _("Text"), wxDefaultPosition,
+    sizer->Add(new wxStaticText(this, wxID_ANY, _("Value"), wxDefaultPosition,
                                 wxDefaultSize, wxST_ELLIPSIZE_END),
                wxSizerFlags().Expand());
     sizer->Add(textCtrl_, wxSizerFlags().Expand());
 
-    wxString choices = "Configured character encoding ()";
-
     choice_ = new wxChoice(
-        this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 1, &choices, 0,
-        ChoiceValidator<std::string>(encoding, std::vector<std::string>{""}));
+        this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr, 0,
+        ChoiceValidator<std::size_t>(type, std::vector<std::size_t>{}));
 
     wxStaticText* label =
         new wxStaticText(this, wxID_ANY, _("Encoding"), wxDefaultPosition,
@@ -70,62 +64,56 @@ HexBedTextInput::HexBedTextInput(wxWindow* parent, wxString* string,
     row->Add(choice_);
     sizer->Add(row, wxSizerFlags().Expand());
 
-    if (caseInsensitive) {
-        sizer->Add(
-            new wxCheckBox(this, wxID_ANY, _("Case insensitive"),
-                           wxDefaultPosition, wxDefaultSize, wxCHK_2STATE,
-                           wxGenericValidator(caseInsensitive)),
-            wxSizerFlags().Expand());
-    }
+    littleEndian_ =
+        new wxCheckBox(this, wxID_ANY, _("Little endian"), wxDefaultPosition,
+                       wxDefaultSize, wxCHK_2STATE);
+    littleEndian_->SetValue(std::endian::native == std::endian::little);
+    sizer->Add(littleEndian_, wxSizerFlags().Expand());
 
-    textCtrl_->Bind(wxEVT_TEXT, &HexBedTextInput::ForwardEvent, this);
+    textCtrl_->Bind(wxEVT_TEXT, &HexBedValueInput::ForwardEvent, this);
     Layout();
     UpdateConfig();
 }
 
-void HexBedTextInput::UpdateConfig() {
-    ChoiceValidator<std::string>* validate =
-        wxDynamicCast(choice_->GetValidator(), ChoiceValidator<std::string>);
-
-    HEXBED_ASSERT(mbcsKeys_.size() == mbcsNames_.size());
-    HEXBED_ASSERT(sbcsKeys_.size() == sbcsNames_.size());
-
-    validate->TruncateItems(1);
-    for (std::size_t i = 0; i < mbcsKeys_.size(); ++i)
-        validate->AddItem(mbcsKeys_.begin()[i], mbcsNames_.begin()[i]);
-    for (std::size_t i = 0; i < sbcsKeys_.size(); ++i)
-        validate->AddItem(sbcsKeys_.begin()[i], sbcsNames_.begin()[i]);
-
-    std::size_t n = sbcsKeys_.size();
-    std::size_t i = 0;
-    const std::string& encoding = config().charset;
-    for (i = 0; i < n; ++i) {
-        if (encoding == sbcsKeys_.begin()[i]) break;
+void HexBedValueInput::UpdateConfig() {
+    ChoiceValidator<std::size_t>* validate =
+        wxDynamicCast(choice_->GetValidator(), ChoiceValidator<std::size_t>);
+    validate->TruncateItems(0);
+    for (std::size_t i = 0, e = hexbed::plugins::dataInspectorPluginCount();
+         i < e; ++i) {
+        hexbed::plugins::DataInspectorPlugin& plugin =
+            hexbed::plugins::dataInspectorPluginByIndex(i);
+        if (!plugin.isReadOnly()) validate->AddItem(i, plugin.getTitle());
     }
-    if (i < n)
-        choice_->SetString(
-            0, wxString::Format(_("Configured character encoding (%s)"),
-                                sbcsNames_.begin()[i]));
     TransferDataToWindow();
 }
 
-void HexBedTextInput::ForwardEvent(wxCommandEvent& event) {
+void HexBedValueInput::ForwardEvent(wxCommandEvent& event) {
     AddPendingEvent(event);
 }
 
-bool HexBedTextInput::Commit(HexBedDocument* document) {
+bool HexBedValueInput::Commit(HexBedDocument* document) {
     if (!Validate() || !TransferDataFromWindow()) return false;
-    bufsize bs;
-    bool ok = textEncode(*pEncoding_, *pText_, bs, document);
-    if (!ok) {
-        wxMessageBox(_("The entered text cannot be represented in the selected "
-                       "encoding."),
+    hexbed::plugins::DataInspectorPlugin& plugin =
+        hexbed::plugins::dataInspectorPluginByIndex(*pType_);
+    hexbed::plugins::DataInspectorSettings settings;
+    settings.littleEndian = littleEndian_->GetValue();
+    std::size_t bs = plugin.getRequestedDataBufferSize();
+    auto buf = std::make_unique<byte[]>(bs);
+    bool ok = plugin.convertToBytes(bs, buf.get(), pText_->c_str(), settings);
+    if (ok) {
+        if (document)
+            document->replace(0, document->size(),
+                              const_bytespan{buf.get(), bs});
+    } else {
+        wxMessageBox(_("The entered value cannot be represented with the "
+                       "specified data type."),
                      "HexBed", wxOK | wxICON_ERROR);
     }
     return ok;
 }
 
-bool HexBedTextInput::NonEmpty() const noexcept {
+bool HexBedValueInput::NonEmpty() const noexcept {
     return !textCtrl_->IsEmpty();
 }
 

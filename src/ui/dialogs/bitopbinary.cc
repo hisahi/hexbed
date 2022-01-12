@@ -31,7 +31,7 @@ namespace hexbed {
 namespace ui {
 
 BitwiseBinaryOpDialog::BitwiseBinaryOpDialog(
-    HexBedMainFrame* parent, HexBedContextMain* context,
+    HexBedMainFrame* parent, std::shared_ptr<HexBedContextMain> context,
     std::shared_ptr<HexBedDocument> document)
     : wxDialog(parent, wxID_ANY, _("Binary bitwise operation"),
                wxDefaultPosition, wxSize(300, 250),
@@ -54,9 +54,9 @@ BitwiseBinaryOpDialog::BitwiseBinaryOpDialog(
     buttons->Realize();
 
     decltype(document) copy = document;
-    editor_ = new HexBedStandaloneEditor(this, context, std::move(copy));
+    editor_ = new HexBedStandaloneEditor(this, context.get(), std::move(copy));
     editor_->Bind(HEX_EDIT_EVENT, &BitwiseBinaryOpDialog::OnChangedInput, this);
-    context->addWindow(editor_);
+    registration_ = HexBedEditorRegistration(context, editor_);
 
     std::vector<wxString> choiceTexts{_("Sum"), _("AND"), _("OR"), _("XOR")};
     opChoice_ = new wxChoice(
@@ -71,18 +71,15 @@ BitwiseBinaryOpDialog::BitwiseBinaryOpDialog(
     top->Add(opChoice_, wxSizerFlags().Expand());
     top->Add(new wxStaticText(
         this, wxID_ANY, _("The bytes below will form a repeating pattern.")));
-    top->Add(editor_, wxSizerFlags().Expand());
+    top->Add(editor_, wxSizerFlags().Expand().Proportion(1));
     top->Add(buttons, wxSizerFlags().Expand());
     editor_->SetFocus();
     editor_->SelectAll(SelectFlags().caretAtBeginning().highlightCaret());
     okButton_->Enable(CheckInput());
 
     SetSizer(top);
-    wxSize sz = GetSize();
     Fit();
-    SetSize(sz.GetWidth(), GetSize().GetHeight());
-    FitInside();
-    Layout();
+    SetSizeHints(GetSize().GetWidth(), GetSize().GetHeight(), -1, -1);
     TransferDataToWindow();
 }
 

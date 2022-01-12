@@ -30,7 +30,7 @@ namespace hexbed {
 namespace ui {
 
 InsertBlockDialog::InsertBlockDialog(HexBedMainFrame* parent,
-                                     HexBedContextMain* context,
+                                     std::shared_ptr<HexBedContextMain> context,
                                      std::shared_ptr<HexBedDocument> document,
                                      bufsize seln)
     : wxDialog(parent, wxID_ANY, _("Insert or replace"), wxDefaultPosition,
@@ -53,9 +53,9 @@ InsertBlockDialog::InsertBlockDialog(HexBedMainFrame* parent,
     buttons->Realize();
 
     decltype(document) copy = document;
-    editor_ = new HexBedStandaloneEditor(this, context, std::move(copy));
+    editor_ = new HexBedStandaloneEditor(this, context.get(), std::move(copy));
     editor_->Bind(HEX_EDIT_EVENT, &InsertBlockDialog::OnChangedInput, this);
-    context->addWindow(editor_);
+    registration_ = HexBedEditorRegistration(context, editor_);
 
     spinner_ = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
                               wxDefaultSize, wxSP_ARROW_KEYS, 0,
@@ -65,17 +65,13 @@ InsertBlockDialog::InsertBlockDialog(HexBedMainFrame* parent,
     top->Add(spinner_, wxSizerFlags().Expand());
     top->Add(new wxStaticText(
         this, wxID_ANY, _("The bytes below will form a repeating pattern.")));
-    top->Add(editor_, wxSizerFlags().Expand());
+    top->Add(editor_, wxSizerFlags().Expand().Proportion(1));
     top->Add(buttons, wxSizerFlags().Expand());
     editor_->SetFocus();
     editor_->SelectAll(SelectFlags().caretAtBeginning().highlightCaret());
     okButton_->Enable(CheckInput());
 
     SetSizer(top);
-    wxSize sz = GetSize();
-    Fit();
-    SetSize(sz.GetWidth(), GetSize().GetHeight());
-    FitInside();
     Layout();
 }
 

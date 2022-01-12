@@ -57,19 +57,17 @@ class GoToDialog : public wxDialog {
     bool CheckInput();
     void ConvertBase(unsigned base);
 
+    wxTextCtrl* text_;
+    RadixPicker* radix_;
+    wxButton* okButton_;
+    wxRadioButton* base0_;
+    wxRadioButton* base1_;
+    wxRadioButton* base2_;
+
     bufsize cur_;
     bufsize end_;
     SeekBase seek_{SeekBase::Begin};
     unsigned base_{16};
-
-    wxTextCtrl* text_;
-    RadixPicker* radix_;
-
-    wxButton* okButton_;
-
-    wxRadioButton* base0_;
-    wxRadioButton* base1_;
-    wxRadioButton* base2_;
 };
 
 };  // namespace ui

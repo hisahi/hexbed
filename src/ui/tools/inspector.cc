@@ -22,6 +22,7 @@
 #include "ui/tools/inspector.hh"
 
 #include <wx/msgdlg.h>
+#include <wx/settings.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/valgen.h>
@@ -191,7 +192,7 @@ void DataInspector::OnDoubleClick(wxListEvent& event) {
     long index = event.GetIndex();
     auto plugin = static_cast<hexbed::plugins::DataInspectorPlugin*>(
         reinterpret_cast<void*>(event.GetData()));
-    if (plugin) {
+    if (plugin && !plugin->isReadOnly()) {
         if (offset_ + plugin->getRequestedDataBufferSize() > document_->size())
             return;
         DataEntryDialog dialog(this, plugin, listView_->GetItemText(index, 0),
@@ -199,6 +200,12 @@ void DataInspector::OnDoubleClick(wxListEvent& event) {
         if (dialog.ShowModal() == wxID_OK)
             document_->impose(offset_, dialog.GetValue());
     }
+}
+
+static void EnableListItem(wxListCtrl* listView, long i, bool flag) {
+    listView->SetItemTextColour(
+        i, flag ? listView->GetTextColour()
+                : wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
 }
 
 void DataInspector::UpdateValues(const_bytespan data) {
@@ -211,6 +218,7 @@ void DataInspector::UpdateValues(const_bytespan data) {
                 std::min(plugin->getRequestedDataBufferSize(), data.size());
             if (ds < plugin->getRequestedDataBufferSize()) {
                 listView_->SetItem(index, 1, "<<not enough data>>");
+                EnableListItem(listView_, index, false);
                 continue;
             }
             if (alloc_ < strbufsize) {
@@ -224,6 +232,7 @@ void DataInspector::UpdateValues(const_bytespan data) {
                 listView_->SetItem(index, 1, wxString(strBuf_.data()));
             else
                 listView_->SetItem(index, 1, "<<invalid>>");
+            EnableListItem(listView_, index, ok);
         } else {
             listView_->SetItem(index, 1, wxEmptyString);
         }

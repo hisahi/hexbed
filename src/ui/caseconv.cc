@@ -17,56 +17,28 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/dialog/replace.hh -- header for the Replace dialog
+// ui/caseconv.cc -- wxWidgets impl for text case conversions
 
-#ifndef HEXBED_UI_DIALOG_REPLACE_HH
-#define HEXBED_UI_DIALOG_REPLACE_HH
+#include "common/caseconv.hh"
 
-#include "ui/dialogs/find.hh"
+#include <wx/string.h>
+
+#include "common/charconv.hh"
 
 namespace hexbed {
 
-namespace ui {
+std::u32string textCaseFold(const std::u32string& text) {
+    return textCaseUpper(text);
+}
 
-class ReplaceDialog : public FindDialog {
-  public:
-    ReplaceDialog(HexBedMainFrame* parent,
-                  std::shared_ptr<HexBedContextMain> context,
-                  std::shared_ptr<HexBedDocument> document,
-                  std::shared_ptr<HexBedDocument> repdoc);
+std::u32string textCaseUpper(const std::u32string& text) {
+    return wstringToU32string(
+        wxString(u32stringToWstring(text)).MakeUpper().ToStdWstring());
+}
 
-    inline bool IsReplace() const noexcept { return true; }
-
-    bool Recommit();
-    void UpdateConfig();
-    void AllowReplace(bool flag);
-
-    static void replaceSelection(HexEditorParent* ed);
-    static bufsize replaceAll(HexEditorParent* ed);
-
-  private:
-    void OnFindNext(wxCommandEvent& event);
-    void OnFindPrevious(wxCommandEvent& event);
-    void OnReplaceNext(wxCommandEvent& event);
-    void OnReplacePrevious(wxCommandEvent& event);
-    void OnReplaceAll(wxCommandEvent& event);
-
-    void OnChangedInput(wxCommandEvent& event);
-    void OnChangedReplaceInput(wxCommandEvent& event);
-    void OnChangedSelection(wxCommandEvent& event);
-
-    std::shared_ptr<HexBedDocument> repdoc_;
-    FindDocumentControl* replace_;
-
-    wxButton* replaceNextButton_;
-    wxButton* replacePrevButton_;
-    wxButton* replaceAllButton_;
-
-    bool dirtyReplace_{false};
-};
-
-};  // namespace ui
+std::u32string textCaseLower(const std::u32string& text) {
+    return wstringToU32string(
+        wxString(u32stringToWstring(text)).MakeLower().ToStdWstring());
+}
 
 };  // namespace hexbed
-
-#endif /* HEXBED_UI_DIALOG_REPLACE_HH */

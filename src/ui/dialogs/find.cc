@@ -26,6 +26,8 @@
 #include <wx/sizer.h>
 #include <wx/valgen.h>
 
+#include "app/config.hh"
+#include "file/cisearch.hh"
 #include "ui/hexbed.hh"
 
 namespace hexbed {
@@ -35,13 +37,14 @@ namespace ui {
 wxDEFINE_EVENT(FIND_DOCUMENT_EDIT_EVENT, wxCommandEvent);
 
 FindDocumentControl::FindDocumentControl(
-    wxWindow* parent, HexBedContextMain* context,
+    wxWindow* parent, std::shared_ptr<HexBedContextMain> context,
     std::shared_ptr<HexBedDocument> document, bool isFind)
     : wxPanel(parent), context_(context), document_(document) {
     wxBoxSizer* top = new wxBoxSizer(wxVERTICAL);
     notebook_ = new wxNotebook(this, wxID_ANY);
     decltype(document) copy = document;
-    editor_ = new HexBedStandaloneEditor(notebook_, context, std::move(copy));
+    editor_ =
+        new HexBedStandaloneEditor(notebook_, context.get(), std::move(copy));
     textInput_ = new HexBedTextInput(
         notebook_,
         isFind ? &context->state.searchFindTextString
@@ -49,15 +52,23 @@ FindDocumentControl::FindDocumentControl(
         isFind ? &context->state.searchFindTextEncoding
                : &context->state.searchReplaceTextEncoding,
         isFind ? &context->state.searchFindTextCaseInsensitive : nullptr);
+    valueInput_ =
+        new HexBedValueInput(notebook_,
+                             isFind ? &context->state.searchFindDataValue
+                                    : &context->state.searchReplaceDataValue,
+                             isFind ? &context->state.searchFindDataType
+                                    : &context->state.searchReplaceDataType);
     notebook_->AddPage(editor_, _("Hex data"), true);
     notebook_->AddPage(textInput_, _("Text"), false);
+    notebook_->AddPage(valueInput_, _("Data value"), false);
     notebook_->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED,
                     &FindDocumentControl::ForwardBookEvent, this);
     editor_->Bind(HEX_EDIT_EVENT, &FindDocumentControl::ForwardEvent, this);
     textInput_->Bind(wxEVT_TEXT, &FindDocumentControl::ForwardEvent, this);
+    valueInput_->Bind(wxEVT_TEXT, &FindDocumentControl::ForwardEvent, this);
     top->Add(notebook_, wxSizerFlags().Expand().Proportion(1));
+    registration_ = HexBedEditorRegistration(context, editor_);
     SetSizer(top);
-    context->addWindow(editor_);
 }
 
 bool FindDocumentControl::DoValidate() {
@@ -66,6 +77,8 @@ bool FindDocumentControl::DoValidate() {
         break;
     case 1:
         return textInput_->Commit(document_.get());
+    case 2:
+        return valueInput_->Commit(document_.get());
     }
     return true;
 }
@@ -76,11 +89,15 @@ bool FindDocumentControl::NonEmpty() const noexcept {
         return document_->size() > 0;
     case 1:
         return textInput_->NonEmpty();
+    case 2:
+        return valueInput_->NonEmpty();
     }
     return false;
 }
 
-void FindDocumentControl::Unregister() { context_->removeWindow(editor_); }
+bool FindDocumentControl::IsFindingText() const noexcept {
+    return notebook_->GetSelection() == 1;
+}
 
 void FindDocumentControl::ForwardEvent(wxCommandEvent& event) {
     AddPendingEvent(wxCommandEvent(FIND_DOCUMENT_EDIT_EVENT));
@@ -90,9 +107,13 @@ void FindDocumentControl::ForwardBookEvent(wxBookCtrlEvent& event) {
     AddPendingEvent(wxCommandEvent(FIND_DOCUMENT_EDIT_EVENT));
 }
 
-void FindDocumentControl::UpdateConfig() { textInput_->UpdateConfig(); }
+void FindDocumentControl::UpdateConfig() {
+    textInput_->UpdateConfig();
+    valueInput_->UpdateConfig();
+}
 
-FindDialog::FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
+FindDialog::FindDialog(HexBedMainFrame* parent,
+                       std::shared_ptr<HexBedContextMain> context,
                        std::shared_ptr<HexBedDocument> document,
                        FindDialogNoPrepare)
     : wxDialog(parent, wxID_ANY, _("Find"), wxDefaultPosition, wxSize(300, 200),
@@ -101,7 +122,8 @@ FindDialog::FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
       context_(context),
       document_(document) {}
 
-FindDialog::FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
+FindDialog::FindDialog(HexBedMainFrame* parent,
+                       std::shared_ptr<HexBedContextMain> context,
                        std::shared_ptr<HexBedDocument> document)
     : FindDialog(parent, context, document, FindDialogNoPrepare{}) {
     wxBoxSizer* top = new wxBoxSizer(wxVERTICAL);
@@ -146,6 +168,7 @@ FindDialog::FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
 
 bool FindDialog::Recommit() {
     if (!control_->DoValidate()) return false;
+    context_->state.searchFindText = control_->IsFindingText();
     if (dirty_) {
         dirty_ = false;
         bufsize n = document_->size();
@@ -154,8 +177,6 @@ bool FindDialog::Recommit() {
     }
     return true;
 }
-
-void FindDialog::Unregister() { control_->Unregister(); }
 
 bool FindDialog::CheckInput() { return control_->NonEmpty(); }
 
@@ -180,23 +201,65 @@ void FindDialog::OnChangedInput(wxCommandEvent& event) {
     findPrevButton_->Enable(flag);
 }
 
+static SearchResult findNextCaseInsensitive(const HexBedDocument& document,
+                                            const HexBedContextMain& context,
+                                            bufsize dn, bufsize sel,
+                                            bool wrapAround) {
+    CaseInsensitivePattern pattern{
+        !context.state.searchFindTextEncoding.empty()
+            ? context.state.searchFindTextEncoding
+            : config().charset,
+        context.state.searchFindTextString.ToStdWstring()};
+    SearchResult res = searchForwardCaseless(document, sel, dn, pattern);
+    if (!res && wrapAround)
+        res = searchForwardCaseless(document, 0, sel, pattern);
+    return res;
+}
+
+static SearchResult findPrevCaseInsensitive(const HexBedDocument& document,
+                                            const HexBedContextMain& context,
+                                            bufsize dn, bufsize sel,
+                                            bool wrapAround) {
+    CaseInsensitivePattern pattern{
+        !context.state.searchFindTextEncoding.empty()
+            ? context.state.searchFindTextEncoding
+            : config().charset,
+        context.state.searchFindTextString.ToStdWstring()};
+    SearchResult res;
+    bufsize osel = sel;
+    for (;;) {
+        res = searchBackwardCaseless(document, 0, sel, pattern);
+        if (!res || res.offset + res.length <= osel) break;
+        sel = res.offset;
+    }
+    if (!res && wrapAround)
+        res = searchBackwardCaseless(document, sel + 1, dn, pattern);
+    return res;
+}
+
 SearchResult FindDialog::findNext(HexEditorParent* ed) {
     const HexBedContextMain& context = ed->context();
     bufsize sel, seln;
     bool seltext;
     ed->GetSelection(sel, seln, seltext);
+    bufsize cur = sel + seln;
     const_bytespan search = context.getSearchString();
     bufsize dn = search.size();
     SearchResult res{};
     if (dn) {
         HexBedDocument& doc = ed->document();
-        if (sel < dn)
-            res = doc.searchForwardFull(sel, context.state.searchWrapAround,
+        bufsize sn = doc.size();
+        if (context.state.searchFindText &&
+            context.state.searchFindTextCaseInsensitive)
+            res = findNextCaseInsensitive(doc, context, sn, cur,
+                                          context.state.searchWrapAround);
+        else if (sn - cur >= dn)
+            res = doc.searchForwardFull(cur, context.state.searchWrapAround,
                                         search);
         else if (context.state.searchWrapAround)
             res = doc.searchForwardFull(0, false, search);
         if (res)
-            ed->SelectBytes(res.offset, dn,
+            ed->SelectBytes(res.offset, res.length,
                             SelectFlags().caretAtEnd().highlightBeginning());
     }
     return res;
@@ -207,18 +270,24 @@ SearchResult FindDialog::findPrevious(HexEditorParent* ed) {
     bufsize sel, seln;
     bool seltext;
     ed->GetSelection(sel, seln, seltext);
+    bufsize cur = sel;
     const_bytespan search = context.getSearchString();
     bufsize dn = search.size();
     SearchResult res{};
     if (dn) {
         HexBedDocument& doc = ed->document();
-        if (sel > 0)
-            res = doc.searchBackwardFull(sel, context.state.searchWrapAround,
-                                         search);
+        bufsize sn = doc.size();
+        if (context.state.searchFindText &&
+            context.state.searchFindTextCaseInsensitive)
+            res = findPrevCaseInsensitive(doc, context, sn, cur,
+                                          context.state.searchWrapAround);
+        else if (cur >= dn)
+            res = doc.searchBackwardFull(
+                cur - dn, context.state.searchWrapAround, search);
         else if (context.state.searchWrapAround)
-            res = doc.searchBackwardFull(dn - 1, false, search);
+            res = doc.searchBackwardFull(sn - 1, false, search);
         if (res)
-            ed->SelectBytes(res.offset, dn,
+            ed->SelectBytes(res.offset, res.length,
                             SelectFlags().caretAtEnd().highlightBeginning());
     }
     return res;

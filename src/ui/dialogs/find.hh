@@ -36,6 +36,7 @@
 #include "ui/hexbed-fwd.hh"
 #include "ui/saeditor.hh"
 #include "ui/textinput.hh"
+#include "ui/valueinput.hh"
 
 namespace hexbed {
 
@@ -45,36 +46,41 @@ wxDECLARE_EVENT(FIND_DOCUMENT_EDIT_EVENT, wxCommandEvent);
 
 class FindDocumentControl : public wxPanel {
   public:
-    FindDocumentControl(wxWindow* parent, HexBedContextMain* context,
+    FindDocumentControl(wxWindow* parent,
+                        std::shared_ptr<HexBedContextMain> context,
                         std::shared_ptr<HexBedDocument> document, bool isFind);
     bool DoValidate();
-    void Unregister();
     void ForwardEvent(wxCommandEvent& event);
     void ForwardBookEvent(wxBookCtrlEvent& event);
     void UpdateConfig();
 
     bool NonEmpty() const noexcept;
+    bool IsFindingText() const noexcept;
 
   private:
-    HexBedContextMain* context_;
+    std::shared_ptr<HexBedContextMain> context_;
     std::shared_ptr<HexBedDocument> document_;
+    HexBedEditorRegistration registration_;
+
     wxNotebook* notebook_;
     HexBedStandaloneEditor* editor_;
     HexBedTextInput* textInput_;
+    HexBedValueInput* valueInput_;
 };
 
 struct FindDialogNoPrepare {};
 
 class FindDialog : public wxDialog {
   public:
-    FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
+    FindDialog(HexBedMainFrame* parent,
+               std::shared_ptr<HexBedContextMain> context,
                std::shared_ptr<HexBedDocument> document);
-    FindDialog(HexBedMainFrame* parent, HexBedContextMain* context,
+    FindDialog(HexBedMainFrame* parent,
+               std::shared_ptr<HexBedContextMain> context,
                std::shared_ptr<HexBedDocument> document, FindDialogNoPrepare);
 
     inline virtual bool IsReplace() const noexcept { return false; }
 
-    virtual void Unregister();
     virtual bool Recommit();
     virtual void UpdateConfig();
     virtual inline void AllowReplace(bool flag) {}
@@ -88,16 +94,15 @@ class FindDialog : public wxDialog {
     void OnFindNext(wxCommandEvent& event);
     void OnFindPrevious(wxCommandEvent& event);
 
-    wxButton* findNextButton_;
-    wxButton* findPrevButton_;
-
     bool CheckInput();
 
     HexBedMainFrame* parent_;
-    HexBedContextMain* context_;
+    std::shared_ptr<HexBedContextMain> context_;
     std::shared_ptr<HexBedDocument> document_;
 
     FindDocumentControl* control_;
+    wxButton* findNextButton_;
+    wxButton* findPrevButton_;
 
     bool dirty_{false};
 

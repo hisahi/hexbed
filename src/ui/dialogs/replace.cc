@@ -36,7 +36,7 @@ namespace hexbed {
 namespace ui {
 
 ReplaceDialog::ReplaceDialog(HexBedMainFrame* parent,
-                             HexBedContextMain* context,
+                             std::shared_ptr<HexBedContextMain> context,
                              std::shared_ptr<HexBedDocument> document,
                              std::shared_ptr<HexBedDocument> repdoc)
     : FindDialog(parent, context, document, FindDialogNoPrepare{}),
@@ -91,10 +91,12 @@ ReplaceDialog::ReplaceDialog(HexBedMainFrame* parent,
     rbuttons2->Add(cancelButton);
 
     replace_ = new FindDocumentControl(this, context, repdoc, false);
-    replace_->Bind(FIND_DOCUMENT_EDIT_EVENT, &ReplaceDialog::OnChangedReplaceInput, this);
+    replace_->Bind(FIND_DOCUMENT_EDIT_EVENT,
+                   &ReplaceDialog::OnChangedReplaceInput, this);
 
     control_ = new FindDocumentControl(this, context, document, true);
-    control_->Bind(FIND_DOCUMENT_EDIT_EVENT, &ReplaceDialog::OnChangedInput, this);
+    control_->Bind(FIND_DOCUMENT_EDIT_EVENT, &ReplaceDialog::OnChangedInput,
+                   this);
 
     bool flag = CheckInput();
     findNextButton_->Enable(flag);
@@ -124,6 +126,7 @@ ReplaceDialog::ReplaceDialog(HexBedMainFrame* parent,
 
 bool ReplaceDialog::Recommit() {
     if (!FindDialog::Recommit()) return false;
+    context_->state.searchFindText = control_->IsFindingText();
     if (dirtyReplace_) {
         dirtyReplace_ = false;
         bufsize n = repdoc_->size();
@@ -131,11 +134,6 @@ bool ReplaceDialog::Recommit() {
         repdoc_->read(0, bytespan{b, n});
     }
     return true;
-}
-
-void ReplaceDialog::Unregister() {
-    replace_->Unregister();
-    control_->Unregister();
 }
 
 void ReplaceDialog::UpdateConfig() {

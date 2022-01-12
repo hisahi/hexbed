@@ -50,6 +50,8 @@ class SingleByteCharacterSet {
 
 extern SingleByteCharacterSet sbcs;
 
+enum class TextEncoding { SBCS, UTF8, UTF16LE, UTF16BE, UTF32LE, UTF32BE };
+
 SingleByteCharacterSet getSbcsByName(const std::string& name);
 
 std::wstring sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
@@ -59,6 +61,25 @@ bool sbcsToBytes(const SingleByteCharacterSet& sbcs, bufsize& len, byte* data,
 
 std::wstring sbcsFromBytes(bufsize len, const byte* data);
 bool sbcsToBytes(bufsize& len, byte* data, const std::wstring& text);
+
+struct DecodeStatus {
+    bool ok{false};
+    std::size_t charCount{0};
+    std::size_t readCount{0};
+};
+
+using u32ostringstream = std::basic_ostringstream<char32_t>;
+
+std::size_t encodeCharMbcsOrSbcs(TextEncoding enc,
+                                 const SingleByteCharacterSet& sbcs, char32_t c,
+                                 std::size_t size, byte* out);
+DecodeStatus decodeStringMbcsOrSbcs(TextEncoding enc,
+                                    const SingleByteCharacterSet& sbcs,
+                                    u32ostringstream& out, const_bytespan data);
+std::u32string wstringToU32string(const std::wstring& w);
+std::wstring u32stringToWstring(const std::u32string& w);
+
+constexpr std::size_t MBCS_CHAR_MAX = 4;
 
 };  // namespace hexbed
 

@@ -36,6 +36,20 @@ wxDEFINE_EVENT(TASK_SUBTHREAD_EVENT, wxThreadEvent);
 
 HexBedViewer::HexBedViewer(bufsize lookahead) : lookahead_(lookahead) {}
 
+HexBedEditorRegistration::HexBedEditorRegistration()
+    : ctx_(nullptr), ptr_(nullptr) {}
+
+HexBedEditorRegistration::HexBedEditorRegistration(
+    std::shared_ptr<HexBedContextMain> context,
+    hexbed::ui::HexEditorParent* editor)
+    : ctx_(context), ptr_(editor) {
+    ctx_->addWindow(ptr_);
+}
+
+HexBedEditorRegistration::~HexBedEditorRegistration() {
+    if (ctx_ && ptr_) ctx_->removeWindow(ptr_);
+}
+
 HexBedViewerRegistration::HexBedViewerRegistration()
     : ctx_(nullptr), ptr_(nullptr) {}
 

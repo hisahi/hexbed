@@ -73,11 +73,9 @@ BitwiseShiftOpDialog::BitwiseShiftOpDialog(HexBedMainFrame* parent)
     top->Add(buttons, wxSizerFlags().Expand());
 
     SetSizer(top);
-    wxSize sz = GetSize();
     Fit();
-    SetSize(sz.GetWidth(), GetSize().GetHeight());
-    FitInside();
-    Layout();
+    SetSizeHints(GetSize().GetWidth(), GetSize().GetHeight(), -1,
+                 GetSize().GetHeight());
     TransferDataToWindow();
 }
 

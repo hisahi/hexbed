@@ -21,8 +21,12 @@
 
 #include "file/treble.hh"
 
+//#define TREBLE_CALL_DEBUG 1
+//#define TREBLE_TREE_DEBUG 1
+
 #include <cmath>
-#if TREBLE_DEBUG
+#if TREBLE_CALL_DEBUG || TREBLE_TREE_DEBUG
+#include <iomanip>
 #include <iostream>
 #endif
 
@@ -146,7 +150,7 @@ Treble::Treble(bufsize size)
 
 Treble::iterator Treble::root() noexcept { return iterator(root_.get()); }
 
-#if TREBLE_DEBUG
+#if TREBLE_TREE_DEBUG
 static void printTreble(TrebleNode* node, unsigned depth = 0) {
     std::string pref(depth, ' ');
     if (!depth) std::cerr << "=========== TREBLE DEBUG ===========\n";
@@ -174,6 +178,17 @@ static void printTreble(TrebleNode* node, unsigned depth = 0) {
 #define PRINT_TREBLE() printTreble(root_.get())
 #else
 #define PRINT_TREBLE() HEXBED_NOOP
+#endif
+
+#if TREBLE_CALL_DEBUG
+#define L_HEX(v)                                          \
+    "0x" << std::hex << std::setw(2) << std::setfill('0') \
+         << static_cast<unsigned int>(v) << std::dec
+#define L_PTR(v) reinterpret_cast<const void*>(v)
+#define LOG_TREBLE(...) \
+    std::cerr << "Treble(" << L_PTR(this) << ")->" << __VA_ARGS__ << '\n'
+#else
+#define LOG_TREBLE(...) HEXBED_NOOP
 #endif
 
 void Treble::clear(bufsize size) {
@@ -624,8 +639,11 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
         }
         bytespan span = usurp(node);
         auto p = span.begin() + res.suboffset;
+        if (count <= l) {
+            f(p, p + count);
+            return;
+        }
         f(p, p + l);
-        if (count <= l) return;
         count -= l;
         node = (++res.it).get();
         res.suboffset = 0;
@@ -633,12 +651,15 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
 }
 
 void Treble::replace(bufsize index, bufsize count, byte v) {
+    LOG_TREBLE("replace(" << index << ", " << count << ", " << L_HEX(v) << ")");
     FillFeeder feeder{v};
     replace_(index, count, feeder);
     PRINT_TREBLE();
 }
 
 void Treble::replace(bufsize index, bufsize count, const byte* data) {
+    LOG_TREBLE("replace(" << index << ", " << count << ", " << L_PTR(data)
+                          << ")");
     CopyFeeder feeder{data};
     replace_(index, count, feeder);
     PRINT_TREBLE();
@@ -646,6 +667,8 @@ void Treble::replace(bufsize index, bufsize count, const byte* data) {
 
 void Treble::replace(bufsize index, bufsize count, bufsize scount,
                      const byte* sdata, bufsize soffset) {
+    LOG_TREBLE("replace(" << index << ", " << count << ", " << scount << ", "
+                          << L_PTR(sdata) << ", " << soffset << ")");
     RepeatFeeder feeder{scount, sdata, soffset};
     replace_(index, count, feeder);
     PRINT_TREBLE();
@@ -724,6 +747,7 @@ void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
 }
 
 void Treble::insert(bufsize index, bufsize count, byte v) {
+    LOG_TREBLE("insert(" << index << ", " << count << ", " << L_HEX(v) << ")");
     FillFeeder feeder{v};
     insert_(index, count, feeder);
     total_ += count;
@@ -731,6 +755,8 @@ void Treble::insert(bufsize index, bufsize count, byte v) {
 }
 
 void Treble::insert(bufsize index, bufsize count, const byte* data) {
+    LOG_TREBLE("insert(" << index << ", " << count << ", " << L_PTR(data)
+                         << ")");
     CopyFeeder feeder{data};
     insert_(index, count, feeder);
     total_ += count;
@@ -739,6 +765,8 @@ void Treble::insert(bufsize index, bufsize count, const byte* data) {
 
 void Treble::insert(bufsize index, bufsize count, bufsize scount,
                     const byte* sdata, bufsize soffset) {
+    LOG_TREBLE("insert(" << index << ", " << count << ", " << scount << ", "
+                         << L_PTR(sdata) << ", " << soffset << ")");
     RepeatFeeder feeder{scount, sdata, soffset};
     insert_(index, count, feeder);
     total_ += count;
@@ -747,6 +775,7 @@ void Treble::insert(bufsize index, bufsize count, bufsize scount,
 
 void Treble::reinsert(bufsize index, bufsize count, bufsize offset) {
     if (!count) return;
+    LOG_TREBLE("reinsert(" << index << ", " << count << ", " << offset << ")");
     if (index == total_) {
         // inserting old data to the end of the file
         TrebleFindResult res = find(index - 1);
@@ -787,6 +816,7 @@ void Treble::reinsert(bufsize index, bufsize count, bufsize offset) {
 
 void Treble::revert(bufsize index, bufsize count) {
     if (!count) return;
+    LOG_TREBLE("revert(" << index << ", " << count << ")");
     TrebleFindResult res = find(index);
     TrebleNode* node = res.it.get();
     HEXBED_ASSERT(node, "trying to revert beyond file!");
@@ -814,6 +844,7 @@ void Treble::revert(bufsize index, bufsize count) {
 
 void Treble::remove(bufsize index, bufsize count) {
     if (!count) return;
+    LOG_TREBLE("remove(" << index << ", " << count << ")");
     TrebleFindResult res = find(index);
     TrebleNode* node = res.it.get();
     bufsize removed = 0;

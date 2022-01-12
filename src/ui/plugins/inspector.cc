@@ -21,6 +21,7 @@
 
 #include "ui/plugins/inspector.hh"
 
+#include <bit>
 #include <memory>
 #include <vector>
 
@@ -42,6 +43,9 @@ namespace hexbed {
 namespace plugins {
 
 static std::vector<std::unique_ptr<DataInspectorPlugin>> dataInspectors;
+
+DataInspectorSettings::DataInspectorSettings()
+    : littleEndian(std::endian::native == std::endian::little) {}
 
 void loadBuiltinDataInspectorPlugins() {
     dataInspectors.push_back(

@@ -49,8 +49,10 @@ class BitwiseShiftOpDialog : public wxDialog {
     void EndDialog(int result);
 
     HexBedMainFrame* parent_;
+
     wxChoice* opChoice_;
     wxSpinCtrl* spinner_;
+
     BitwiseShiftOp choice_{BitwiseShiftOp::ShiftLeft};
     int shiftCount_{1};
 };
