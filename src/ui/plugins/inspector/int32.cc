@@ -35,9 +35,9 @@ namespace hexbed {
 namespace plugins {
 
 InspectorPluginInt32::InspectorPluginInt32(pluginid id)
-    : DataInspectorPlugin(id, _("int32 (signed 32-bit integer)"),
-                          sizeof(std::int32_t),
-                          2 + maxDecimalDigits<std::int32_t>()) {}
+    : LocalizableDataInspectorPlugin(id, TAG("int32 (signed 32-bit integer)"),
+                                     sizeof(std::int32_t),
+                                     2 + maxDecimalDigits<std::int32_t>()) {}
 
 bool InspectorPluginInt32::convertFromBytes(
     std::size_t outstr_n, char* outstr, const_bytespan data,

@@ -174,6 +174,13 @@ bool FindDialog::Recommit() {
         bufsize n = document_->size();
         byte* b = context_->getSearchBuffer(n);
         document_->read(0, bytespan{b, n});
+        if (context_->state.searchFindText &&
+            context_->state.searchFindTextCaseInsensitive)
+            context_->state.searchCaseInsensitive = CaseInsensitivePattern{
+                !context_->state.searchFindTextEncoding.empty()
+                    ? context_->state.searchFindTextEncoding
+                    : config().charset,
+                context_->state.searchFindTextString.ToStdWstring()};
     }
     return true;
 }
@@ -201,44 +208,39 @@ void FindDialog::OnChangedInput(wxCommandEvent& event) {
     findPrevButton_->Enable(flag);
 }
 
-static SearchResult findNextCaseInsensitive(const HexBedDocument& document,
-                                            const HexBedContextMain& context,
+static SearchResult findNextCaseInsensitive(HexBedTask& task,
+                                            const HexBedDocument& document,
+                                            HexBedContextMain& context,
                                             bufsize dn, bufsize sel,
                                             bool wrapAround) {
-    CaseInsensitivePattern pattern{
-        !context.state.searchFindTextEncoding.empty()
-            ? context.state.searchFindTextEncoding
-            : config().charset,
-        context.state.searchFindTextString.ToStdWstring()};
-    SearchResult res = searchForwardCaseless(document, sel, dn, pattern);
-    if (!res && wrapAround)
-        res = searchForwardCaseless(document, 0, sel, pattern);
+    CaseInsensitivePattern& pattern = context.state.searchCaseInsensitive;
+    SearchResult res = searchForwardCaseless(task, document, sel, dn, pattern);
+    if (!task.isCancelled() && !res && wrapAround)
+        res = searchForwardCaseless(task, document, 0, sel, pattern);
     return res;
 }
 
-static SearchResult findPrevCaseInsensitive(const HexBedDocument& document,
-                                            const HexBedContextMain& context,
+static SearchResult findPrevCaseInsensitive(HexBedTask& task,
+                                            const HexBedDocument& document,
+                                            HexBedContextMain& context,
                                             bufsize dn, bufsize sel,
                                             bool wrapAround) {
-    CaseInsensitivePattern pattern{
-        !context.state.searchFindTextEncoding.empty()
-            ? context.state.searchFindTextEncoding
-            : config().charset,
-        context.state.searchFindTextString.ToStdWstring()};
     SearchResult res;
     bufsize osel = sel;
+    CaseInsensitivePattern& pattern = context.state.searchCaseInsensitive;
     for (;;) {
-        res = searchBackwardCaseless(document, 0, sel, pattern);
-        if (!res || res.offset + res.length <= osel) break;
+        res = searchBackwardCaseless(task, document, 0, sel, pattern);
+        if (task.isCancelled() || !res || res.offset + res.length <= osel)
+            break;
         sel = res.offset;
     }
-    if (!res && wrapAround)
-        res = searchBackwardCaseless(document, sel + 1, dn, pattern);
+    if (!task.isCancelled() && !res && wrapAround)
+        res = searchBackwardCaseless(task, document, sel + 1, dn, pattern);
     return res;
 }
 
 SearchResult FindDialog::findNext(HexEditorParent* ed) {
-    const HexBedContextMain& context = ed->context();
+    HexBedContextMain& context = ed->context();
     bufsize sel, seln;
     bool seltext;
     ed->GetSelection(sel, seln, seltext);
@@ -249,15 +251,19 @@ SearchResult FindDialog::findNext(HexEditorParent* ed) {
     if (dn) {
         HexBedDocument& doc = ed->document();
         bufsize sn = doc.size();
-        if (context.state.searchFindText &&
-            context.state.searchFindTextCaseInsensitive)
-            res = findNextCaseInsensitive(doc, context, sn, cur,
-                                          context.state.searchWrapAround);
-        else if (sn - cur >= dn)
-            res = doc.searchForwardFull(cur, context.state.searchWrapAround,
-                                        search);
-        else if (context.state.searchWrapAround)
-            res = doc.searchForwardFull(0, false, search);
+        HexBedTask task(&context, 0, true);
+        task.run([&res, &context, &doc, sn, dn, cur, search](HexBedTask& task) {
+            if (context.state.searchFindText &&
+                context.state.searchFindTextCaseInsensitive)
+                res = findNextCaseInsensitive(task, doc, context, sn, cur,
+                                              context.state.searchWrapAround);
+            else if (sn - cur >= dn)
+                res = doc.searchForwardFull(
+                    task, cur, context.state.searchWrapAround, search);
+            else if (context.state.searchWrapAround)
+                res = doc.searchForwardFull(task, 0, false, search);
+        });
+        if (task.isCancelled()) return SearchResult{};
         if (res)
             ed->SelectBytes(res.offset, res.length,
                             SelectFlags().caretAtEnd().highlightBeginning());
@@ -266,7 +272,7 @@ SearchResult FindDialog::findNext(HexEditorParent* ed) {
 }
 
 SearchResult FindDialog::findPrevious(HexEditorParent* ed) {
-    const HexBedContextMain& context = ed->context();
+    HexBedContextMain& context = ed->context();
     bufsize sel, seln;
     bool seltext;
     ed->GetSelection(sel, seln, seltext);
@@ -277,15 +283,19 @@ SearchResult FindDialog::findPrevious(HexEditorParent* ed) {
     if (dn) {
         HexBedDocument& doc = ed->document();
         bufsize sn = doc.size();
-        if (context.state.searchFindText &&
-            context.state.searchFindTextCaseInsensitive)
-            res = findPrevCaseInsensitive(doc, context, sn, cur,
-                                          context.state.searchWrapAround);
-        else if (cur >= dn)
-            res = doc.searchBackwardFull(
-                cur - dn, context.state.searchWrapAround, search);
-        else if (context.state.searchWrapAround)
-            res = doc.searchBackwardFull(sn - 1, false, search);
+        HexBedTask task(&context, 0, true);
+        task.run([&res, &context, &doc, sn, dn, cur, search](HexBedTask& task) {
+            if (context.state.searchFindText &&
+                context.state.searchFindTextCaseInsensitive)
+                res = findPrevCaseInsensitive(task, doc, context, sn, cur,
+                                              context.state.searchWrapAround);
+            else if (cur >= dn)
+                res = doc.searchBackwardFull(
+                    task, cur - dn, context.state.searchWrapAround, search);
+            else if (context.state.searchWrapAround)
+                res = doc.searchBackwardFull(task, sn - 1, false, search);
+        });
+        if (task.isCancelled()) return SearchResult{};
         if (res)
             ed->SelectBytes(res.offset, res.length,
                             SelectFlags().caretAtEnd().highlightBeginning());

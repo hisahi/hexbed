@@ -31,6 +31,13 @@
 
 namespace hexbed {
 
+CaseInsensitivePattern::CaseInsensitivePattern()
+    : encoding(TextEncoding::SBCS),
+      sbcs(getSbcsByName("ascii")),
+      pattern(),
+      headLowerLen(0),
+      headUpperLen(0) {}
+
 CaseInsensitivePattern::CaseInsensitivePattern(const std::string& encname,
                                                const std::wstring& text_) {
     std::u32string text = wstringToU32string(text_);
@@ -96,15 +103,20 @@ static bool equalsCaseInsensitive(const HexBedDocument& document,
     std::size_t expected = pattern.pattern.length();
     std::u32string compareString =
         readU32String(document, offset, expected + 1, length, pattern);
+    if (compareString.size() < expected) return false;
+    if (std::u32string_view(compareString.data(), expected) !=
+        std::u32string_view(pattern.pattern.data(), expected))
+        return false;
+    bufsize leftover = 0;
     for (std::size_t i = expected; i < compareString.size(); ++i)
-        length -= encodeCharMbcsOrSbcs(pattern.encoding, pattern.sbcs,
-                                       compareString[i], sizeof(tmp), tmp);
-    return compareString.size() >= expected &&
-           std::u32string_view(compareString.data(), expected) ==
-               std::u32string_view(pattern.pattern.data(), expected);
+        leftover += encodeCharMbcsOrSbcs(pattern.encoding, pattern.sbcs,
+                                         compareString[i], sizeof(tmp), tmp);
+    length -= leftover;
+    return true;
 }
 
-SearchResult searchForwardCaseless(const HexBedDocument& document,
+SearchResult searchForwardCaseless(HexBedTask& task,
+                                   const HexBedDocument& document,
                                    bufsize start, bufsize end,
                                    CaseInsensitivePattern& pattern) {
     const_bytespan udata{pattern.headUpper, pattern.headUpperLen};
@@ -127,6 +139,7 @@ SearchResult searchForwardCaseless(const HexBedDocument& document,
     SearchResult2 pres{};
     while ((rr = std::min(end - o, hc)),
            (r = document.read(o, bytespan(flip, rr)))) {
+        if (task.isCancelled()) break;
         if (pres.type == SearchResultType::Partial) {
             pres = searchFullForward2(hc, flippers[flipindex], r, flip,
                                       pattern.headLowerLen, pattern.headLower,
@@ -156,7 +169,8 @@ SearchResult searchForwardCaseless(const HexBedDocument& document,
     return SearchResult{};
 }
 
-SearchResult searchBackwardCaseless(const HexBedDocument& document,
+SearchResult searchBackwardCaseless(HexBedTask& task,
+                                    const HexBedDocument& document,
                                     bufsize start, bufsize end,
                                     CaseInsensitivePattern& pattern) {
     const_bytespan udata{pattern.headUpper, pattern.headUpperLen};
@@ -179,6 +193,7 @@ SearchResult searchBackwardCaseless(const HexBedDocument& document,
     SearchResult2 pres{};
     while ((rr = std::min(o - start, hc)) &&
            rr == (r = document.read(o - rr, bytespan(flip, rr)))) {
+        if (task.isCancelled()) break;
         o -= r;
         if (pres.type == SearchResultType::Partial) {
             pres = searchFullBackward2(hc, flippers[flipindex], r, flip,

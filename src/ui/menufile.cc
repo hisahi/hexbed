@@ -24,7 +24,8 @@
 namespace hexbed {
 namespace menu {
 
-wxMenu* createFileMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
+wxMenu* createFileMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                       FileMenus& menus) {
     wxMenu* menuFile = new wxMenu;
     addItem(menuFile, wxID_NEW, _("&New"), _("Creates a new file"),
             wxACCEL_CTRL, 'N');
@@ -45,6 +46,14 @@ wxMenu* createFileMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
                                _("Saves all open files")));
     fileOnly.push_back(addItem(menuFile, MenuFile_CloseAll, _("C&lose all"),
                                _("Closes all open files")));
+    menuFile->AppendSeparator();
+    menus.importMenu = new wxMenu;
+    menuFile->AppendSubMenu(menus.importMenu, _("&Import..."),
+                            _("Imports a block of bytes into a new file"));
+    menus.exportMenu = new wxMenu;
+    menuFile->AppendSubMenu(
+        menus.exportMenu, _("&Export..."),
+        _("Exports a block of bytes from the current file"));
     menuFile->AppendSeparator();
     addItem(menuFile, wxID_EXIT, _("E&xit"), _("Closes the application"),
             wxACCEL_CTRL, 'Q');

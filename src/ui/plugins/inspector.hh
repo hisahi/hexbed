@@ -47,6 +47,7 @@ class DataInspectorPlugin : public Plugin {
         return maxStrLen_;
     }
     inline bool isReadOnly() const noexcept { return readOnly_; }
+    inline bool isLocalizable() const noexcept { return localizable_; }
     virtual bool convertFromBytes(std::size_t outstr_n, char* outstr,
                                   const_bytespan data,
                                   const DataInspectorSettings& settings) = 0;
@@ -57,26 +58,32 @@ class DataInspectorPlugin : public Plugin {
   protected:
     inline DataInspectorPlugin(pluginid id, const wxString& title,
                                std::size_t maxDataLen, std::size_t maxStrLen)
-        : Plugin(id),
-          title_(title),
-          readOnly_(false),
-          maxDataLen_(maxDataLen),
-          maxStrLen_(maxStrLen) {}
+        : DataInspectorPlugin(id, title, false, false, maxDataLen, maxStrLen) {}
 
     inline DataInspectorPlugin(pluginid id, const wxString& title,
-                               bool readOnly, std::size_t maxDataLen,
-                               std::size_t maxStrLen)
+                               bool readOnly, bool localizable,
+                               std::size_t maxDataLen, std::size_t maxStrLen)
         : Plugin(id),
           title_(title),
           readOnly_(readOnly),
+          localizable_(localizable),
           maxDataLen_(maxDataLen),
           maxStrLen_(maxStrLen) {}
 
   private:
     wxString title_;
     bool readOnly_;
+    bool localizable_;
     std::size_t maxDataLen_;
     std::size_t maxStrLen_;
+};
+
+class LocalizableDataInspectorPlugin : public DataInspectorPlugin {
+  protected:
+    inline LocalizableDataInspectorPlugin(pluginid id, const wxString& title,
+                                          std::size_t maxDataLen,
+                                          std::size_t maxStrLen)
+        : DataInspectorPlugin(id, title, false, true, maxDataLen, maxStrLen) {}
 };
 
 class ReadOnlyDataInspectorPlugin : public DataInspectorPlugin {
@@ -90,7 +97,22 @@ class ReadOnlyDataInspectorPlugin : public DataInspectorPlugin {
     inline ReadOnlyDataInspectorPlugin(pluginid id, const wxString& title,
                                        std::size_t maxDataLen,
                                        std::size_t maxStrLen)
-        : DataInspectorPlugin(id, title, true, maxDataLen, maxStrLen) {}
+        : DataInspectorPlugin(id, title, true, false, maxDataLen, maxStrLen) {}
+};
+
+class ReadOnlyLocalizableDataInspectorPlugin : public DataInspectorPlugin {
+  public:
+    inline bool convertToBytes(std::size_t&, byte*, const char*,
+                               const DataInspectorSettings&) {
+        return false;
+    }
+
+  protected:
+    inline ReadOnlyLocalizableDataInspectorPlugin(pluginid id,
+                                                  const wxString& title,
+                                                  std::size_t maxDataLen,
+                                                  std::size_t maxStrLen)
+        : DataInspectorPlugin(id, title, true, true, maxDataLen, maxStrLen) {}
 };
 
 void loadBuiltinDataInspectorPlugins();

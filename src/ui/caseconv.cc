@@ -28,6 +28,7 @@
 namespace hexbed {
 
 std::u32string textCaseFold(const std::u32string& text) {
+    // wxWidgets has no separate case fold function so use upper
     return textCaseUpper(text);
 }
 

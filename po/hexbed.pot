@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-12 01:00+0200\n"
+"POT-Creation-Date: 2022-01-13 22:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -210,79 +210,95 @@ msgstr ""
 msgid "&Edit"
 msgstr ""
 
-#: src/ui/menufile.cc:29
+#: src/ui/menufile.cc:30
 msgid "&New"
 msgstr ""
 
-#: src/ui/menufile.cc:29
+#: src/ui/menufile.cc:30
 msgid "Creates a new file"
 msgstr ""
 
-#: src/ui/menufile.cc:31
+#: src/ui/menufile.cc:32
 msgid "&Open..."
 msgstr ""
 
-#: src/ui/menufile.cc:31
+#: src/ui/menufile.cc:32
 msgid "Opens an existing file"
 msgstr ""
 
-#: src/ui/menufile.cc:33
+#: src/ui/menufile.cc:34
 msgid "&Save"
 msgstr ""
 
-#: src/ui/menufile.cc:34
+#: src/ui/menufile.cc:35
 msgid "Saves the file in the current location"
 msgstr ""
 
-#: src/ui/menufile.cc:36
+#: src/ui/menufile.cc:37
 msgid "Save &As..."
 msgstr ""
 
-#: src/ui/menufile.cc:37
+#: src/ui/menufile.cc:38
 msgid "Saves the file in a new location"
 msgstr ""
 
-#: src/ui/menufile.cc:38
+#: src/ui/menufile.cc:39
 msgid "&Reload"
 msgstr ""
 
-#: src/ui/menufile.cc:39
+#: src/ui/menufile.cc:40
 msgid "Reload the open file and discard changes"
 msgstr ""
 
-#: src/ui/menufile.cc:40
+#: src/ui/menufile.cc:41
 msgid "&Close"
 msgstr ""
 
-#: src/ui/menufile.cc:41
+#: src/ui/menufile.cc:42
 msgid "Closes the current file"
 msgstr ""
 
-#: src/ui/menufile.cc:44
+#: src/ui/menufile.cc:45
 msgid "Sa&ve all"
 msgstr ""
 
-#: src/ui/menufile.cc:45
+#: src/ui/menufile.cc:46
 msgid "Saves all open files"
 msgstr ""
 
-#: src/ui/menufile.cc:46
+#: src/ui/menufile.cc:47
 msgid "C&lose all"
 msgstr ""
 
-#: src/ui/menufile.cc:47
+#: src/ui/menufile.cc:48
 msgid "Closes all open files"
 msgstr ""
 
-#: src/ui/menufile.cc:49
+#: src/ui/menufile.cc:51
+msgid "&Import..."
+msgstr ""
+
+#: src/ui/menufile.cc:52
+msgid "Imports a block of bytes into a new file"
+msgstr ""
+
+#: src/ui/menufile.cc:55
+msgid "&Export..."
+msgstr ""
+
+#: src/ui/menufile.cc:56
+msgid "Exports a block of bytes from the current file"
+msgstr ""
+
+#: src/ui/menufile.cc:58
 msgid "E&xit"
 msgstr ""
 
-#: src/ui/menufile.cc:49
+#: src/ui/menufile.cc:58
 msgid "Closes the application"
 msgstr ""
 
-#: src/ui/menufile.cc:51
+#: src/ui/menufile.cc:60
 msgid "&File"
 msgstr ""
 
@@ -302,24 +318,24 @@ msgstr ""
 msgid "Exit"
 msgstr ""
 
-#: src/ui/textinput.cc:53 src/ui/dialogs/find.cc:53
+#: src/ui/textinput.cc:53 src/ui/dialogs/find.cc:62
 msgid "Text"
 msgstr ""
 
-#: src/ui/textinput.cc:75
+#: src/ui/textinput.cc:65 src/ui/valueinput.cc:59
 msgid "Encoding"
 msgstr ""
 
-#: src/ui/textinput.cc:88
+#: src/ui/textinput.cc:75
 msgid "Case insensitive"
 msgstr ""
 
-#: src/ui/textinput.cc:110
+#: src/ui/textinput.cc:107
 #, c-format
 msgid "Configured character encoding (%s)"
 msgstr ""
 
-#: src/ui/textinput.cc:123
+#: src/ui/textinput.cc:121
 msgid "The entered text cannot be represented in the selected encoding."
 msgstr ""
 
@@ -391,7 +407,7 @@ msgstr ""
 msgid "Finds the next match with the same search"
 msgstr ""
 
-#: src/ui/menusearch.cc:37 src/ui/dialogs/find.cc:114
+#: src/ui/menusearch.cc:37 src/ui/dialogs/find.cc:136
 #: src/ui/dialogs/replace.cc:57
 msgid "Find &previous"
 msgstr ""
@@ -420,168 +436,210 @@ msgstr ""
 msgid "&Search"
 msgstr ""
 
-#: src/ui/context.cc:76
+#: src/ui/context.cc:90
 msgid "Action in progress"
 msgstr ""
 
-#: src/ui/context.cc:146
+#: src/ui/context.cc:160
 #, c-format
 msgid ""
 "Backup failed:\n"
 "%s"
 msgstr ""
 
-#: src/ui/context.cc:148 src/ui/hexbed.cc:363
+#: src/ui/context.cc:162 src/ui/hexbed.cc:418
 msgid "&Retry"
 msgstr ""
 
-#: src/ui/context.cc:148
+#: src/ui/context.cc:162
 msgid "&Ignore"
 msgstr ""
 
-#: src/ui/context.cc:148
+#: src/ui/context.cc:162
 msgid "&Abort"
 msgstr ""
 
-#: src/ui/context.cc:150
+#: src/ui/context.cc:164
 msgid "'Retry' to try again, 'Ignore' to save anyway or 'Abort' to cancel."
 msgstr ""
 
-#: src/ui/context.cc:154
+#: src/ui/context.cc:168
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 
-#: src/ui/hexbed.cc:251
+#: src/ui/hexbed.cc:306
 #, c-format
 msgid "[unsaved] %s"
 msgstr ""
 
 #. / main window title bar
-#: src/ui/hexbed.cc:260 src/ui/hexbed.cc:431
+#: src/ui/hexbed.cc:315 src/ui/hexbed.cc:490
 #, c-format
 msgid "%s - %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:282
+#: src/ui/hexbed.cc:337
 msgid "Save a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:283 src/ui/hexbed.cc:915
+#: src/ui/hexbed.cc:338 src/ui/hexbed.cc:979 src/ui/plugins/export.cc:49
+#: src/ui/plugins/import.cc:49
 msgid "All files (*.*)"
 msgstr ""
 
-#: src/ui/hexbed.cc:309
+#: src/ui/hexbed.cc:364
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:337
+#: src/ui/hexbed.cc:392
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr ""
 
-#: src/ui/hexbed.cc:357
+#: src/ui/hexbed.cc:412
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:363
+#: src/ui/hexbed.cc:418
 msgid "&Cancel"
 msgstr ""
 
-#: src/ui/hexbed.cc:365
+#: src/ui/hexbed.cc:420
 msgid "Retry?"
 msgstr ""
 
-#: src/ui/hexbed.cc:389
+#: src/ui/hexbed.cc:444
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr ""
 
-#: src/ui/hexbed.cc:537
+#: src/ui/hexbed.cc:598
 #, c-format
 msgid "[read-only] %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:547
+#: src/ui/hexbed.cc:608
 #, c-format
 msgid "New-%llu"
 msgstr ""
 
-#: src/ui/hexbed.cc:551
+#: src/ui/hexbed.cc:613
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:575
+#: src/ui/hexbed.cc:640
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:584
+#: src/ui/hexbed.cc:649
 msgid "Read only"
 msgstr ""
 
-#: src/ui/hexbed.cc:623
+#: src/ui/hexbed.cc:687
 msgid "No more results found for this search."
 msgstr ""
 
-#: src/ui/hexbed.cc:629
+#: src/ui/hexbed.cc:693
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/hexbed.cc:731
+#: src/ui/hexbed.cc:795
 #, c-format
 msgid "Insert failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:758
+#: src/ui/hexbed.cc:822
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:779
+#: src/ui/hexbed.cc:843
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:801
+#: src/ui/hexbed.cc:865
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:914
+#: src/ui/hexbed.cc:978
 msgid "Open a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:988
-#, c-format
-msgid "Failed to copy: %s"
+#: src/ui/hexbed.cc:1025
+msgid "Import file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1019
+#: src/ui/hexbed.cc:1045
+#, c-format
+msgid ""
+"Error on line %llu:\n"
+"%s"
+msgstr ""
+
+#: src/ui/hexbed.cc:1047
+#, c-format
+msgid ""
+"Failed to import:\n"
+"Import file was invalid.\n"
+"%s"
+msgstr ""
+
+#: src/ui/hexbed.cc:1056
+#, c-format
+msgid ""
+"Failed to import:\n"
+"%s"
+msgstr ""
+
+#: src/ui/hexbed.cc:1080
+msgid "Export file"
+msgstr ""
+
+#: src/ui/hexbed.cc:1111
+#, c-format
+msgid ""
+"Failed to export:\n"
+"%s"
+msgstr ""
+
+#: src/ui/hexbed.cc:1155
+#, c-format
+msgid ""
+"Failed to copy:\n"
+"%s"
+msgstr ""
+
+#: src/ui/hexbed.cc:1188
 msgid ""
 "Cannot paste the current clipboard contents, because it contains characters "
 "that the currently selected character encoding cannot represent."
 msgstr ""
 
-#: src/ui/hexbed.cc:1022
+#: src/ui/hexbed.cc:1191
 msgid ""
 "Cannot paste the current clipboard contents, because it does not contain "
 "valid hexadecimal data. Text data should be a string of hexadecimal bytes."
 msgstr ""
 
-#: src/ui/hexbed.cc:1033
+#: src/ui/hexbed.cc:1204
 #, c-format
-msgid "Failed to paste: %s"
+msgid ""
+"Failed to paste:\n"
+"%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1080
+#: src/ui/hexbed.cc:1253
 msgid "A hex editor."
 msgstr ""
 
@@ -589,27 +647,27 @@ msgstr ""
 msgid "Bit editor"
 msgstr ""
 
-#: src/ui/tools/inspector.cc:68
+#: src/ui/tools/inspector.cc:69
 msgid "Enter data"
 msgstr ""
 
-#: src/ui/tools/inspector.cc:126
+#: src/ui/tools/inspector.cc:127
 msgid "The given input is invalid for this data type."
 msgstr ""
 
-#: src/ui/tools/inspector.cc:144
+#: src/ui/tools/inspector.cc:145
 msgid "Data inspector"
 msgstr ""
 
-#: src/ui/tools/inspector.cc:154
+#: src/ui/tools/inspector.cc:155 src/ui/valueinput.cc:68
 msgid "Little endian"
 msgstr ""
 
-#: src/ui/tools/inspector.cc:176
+#: src/ui/tools/inspector.cc:177
 msgid "Type"
 msgstr ""
 
-#: src/ui/tools/inspector.cc:177
+#: src/ui/tools/inspector.cc:178 src/ui/valueinput.cc:49
 msgid "Value"
 msgstr ""
 
@@ -669,23 +727,27 @@ msgstr ""
 msgid "Start:"
 msgstr ""
 
-#: src/ui/dialogs/find.cc:52
+#: src/ui/dialogs/find.cc:61
 msgid "Hex data"
 msgstr ""
 
-#: src/ui/dialogs/find.cc:98
+#: src/ui/dialogs/find.cc:63
+msgid "Data value"
+msgstr ""
+
+#: src/ui/dialogs/find.cc:119
 msgid "Find"
 msgstr ""
 
-#: src/ui/dialogs/find.cc:111 src/ui/dialogs/replace.cc:54
+#: src/ui/dialogs/find.cc:133 src/ui/dialogs/replace.cc:54
 msgid "Find &next"
 msgstr ""
 
-#: src/ui/dialogs/find.cc:132 src/ui/dialogs/replace.cc:106
+#: src/ui/dialogs/find.cc:154 src/ui/dialogs/replace.cc:108
 msgid "Find data"
 msgstr ""
 
-#: src/ui/dialogs/find.cc:136
+#: src/ui/dialogs/find.cc:158
 msgid "&Wrap around"
 msgstr ""
 
@@ -709,11 +771,11 @@ msgstr ""
 msgid "Replace and find"
 msgstr ""
 
-#: src/ui/dialogs/replace.cc:110
+#: src/ui/dialogs/replace.cc:112
 msgid "&Wrap around (find only)"
 msgstr ""
 
-#: src/ui/dialogs/replace.cc:115
+#: src/ui/dialogs/replace.cc:117
 msgid "Find and replace"
 msgstr ""
 
@@ -993,6 +1055,10 @@ msgid ""
 "settings and try again."
 msgstr ""
 
+#: src/ui/valueinput.cc:113
+msgid "The entered value cannot be represented with the specified data type."
+msgstr ""
+
 #: src/ui/status.cc:42
 msgid "Insert"
 msgstr ""
@@ -1024,15 +1090,15 @@ msgstr ""
 msgid "int8 (signed 8-bit integer)"
 msgstr ""
 
-#: src/ui/plugins/inspector/uint16.cc:38
+#: src/ui/plugins/inspector/uint16.cc:39
 msgid "uint16 (unsigned 16-bit integer)"
 msgstr ""
 
-#: src/ui/plugins/inspector/uint32.cc:38
+#: src/ui/plugins/inspector/uint32.cc:39
 msgid "uint32 (unsigned 32-bit integer)"
 msgstr ""
 
-#: src/ui/plugins/inspector/uint64.cc:38
+#: src/ui/plugins/inspector/uint64.cc:39
 msgid "uint64 (unsigned 64-bit integer)"
 msgstr ""
 
@@ -1060,6 +1126,50 @@ msgstr ""
 msgid "Hexadecimal float (IEEE 754 binary32 single-precision floating-point)"
 msgstr ""
 
-#: src/ui/plugins/inspector/float64x.cc:43
+#: src/ui/plugins/inspector/float64x.cc:44
 msgid "Hexadecimal double (IEEE 754 binary64 double-precision floating-point)"
+msgstr ""
+
+#. / format name, perhaps should not be translated
+#: src/ui/plugins/export/intelhex.cc:54 src/ui/plugins/export/intelhex.cc:105
+#: src/ui/plugins/import/intelhex.cc:47 src/ui/plugins/import/intelhex.cc:76
+msgid "Intel HEX"
+msgstr ""
+
+#: src/ui/plugins/export/intelhex.cc:72
+msgid "Bytes per row"
+msgstr ""
+
+#: src/ui/plugins/export/intelhex.cc:83 src/ui/plugins/export/intelhex.cc:89
+msgid "x86 segment mode"
+msgstr ""
+
+#: src/ui/plugins/export/intelhex.cc:108 src/ui/plugins/import/intelhex.cc:79
+msgid "Intel HEX file (*.hex, *.h86)"
+msgstr ""
+
+#: src/ui/plugins/export/intelhex.cc:116
+msgid ""
+"The exported section is 4 GiB (2^32 bytes) or longer, which is too long for "
+"Intel HEX files."
+msgstr ""
+
+#: src/ui/plugins/import/intelhex.cc:61
+msgid "Verify checksums"
+msgstr ""
+
+#: src/ui/plugins/import/intelhex.cc:97
+msgid "Unexpected end-of-file while reading line."
+msgstr ""
+
+#: src/ui/plugins/import/intelhex.cc:101
+msgid "Invalid character while reading line; expected hex digit."
+msgstr ""
+
+#: src/ui/plugins/import/intelhex.cc:134
+msgid "Checksum error."
+msgstr ""
+
+#: src/ui/plugins/import/intelhex.cc:154
+msgid "Unrecognized record type."
 msgstr ""

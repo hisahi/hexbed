@@ -92,6 +92,7 @@ class HexEditor : public wxWindow {
     void OnPaint(wxPaintEvent& event);
     void OnFocus(wxFocusEvent& event);
     void OnBlur(wxFocusEvent& event);
+    void OnShow(wxShowEvent& event);
     void OnResize(wxSizeEvent& event);
     void OnLMouseDown(wxMouseEvent& event);
     void OnLMouseUp(wxMouseEvent& event);
@@ -128,16 +129,21 @@ class HexEditor : public wxWindow {
     void DoRemoveByte(bufsize offset);
     void DoRemoveBytes(bufsize offset, bufsize len);
 
-    wxCoord GetColumnX(unsigned c);
-    void GetColumnFromX(wxCoord x, unsigned& div, unsigned& rem);
+    wxCoord GetColumnX(unsigned c) const noexcept;
+    void GetColumnFromX(wxCoord x, unsigned& div, unsigned& rem) const noexcept;
     bool HitPos(wxCoord x, wxCoord y, HitPoint& point, bool drag);
     bufsize Buffer(bufsize beg, bufsize end, bufsize off);
+
+    void WhenVisible();
+    void QueueRefresh();
+    bool TestVisibility() const noexcept;
 
     void OnEditorCopy();
 
     HexEditorParent* parent_;
     wxMemoryDC* dc_{nullptr};
     wxBitmap* surface_{nullptr};
+    bool waitRedraw_{false};
 
     bufsize off_{0};
 

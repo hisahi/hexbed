@@ -35,9 +35,9 @@ namespace hexbed {
 namespace plugins {
 
 InspectorPluginUInt64::InspectorPluginUInt64(pluginid id)
-    : DataInspectorPlugin(id, _("uint64 (unsigned 64-bit integer)"),
-                          sizeof(std::uint64_t),
-                          1 + maxDecimalDigits<std::uint64_t>()) {}
+    : LocalizableDataInspectorPlugin(
+          id, TAG("uint64 (unsigned 64-bit integer)"), sizeof(std::uint64_t),
+          1 + maxDecimalDigits<std::uint64_t>()) {}
 
 bool InspectorPluginUInt64::convertFromBytes(
     std::size_t outstr_n, char* outstr, const_bytespan data,

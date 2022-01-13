@@ -146,6 +146,10 @@ addUndoAgain:
     return UndoToken(&undos_, z);
 }
 
+HexBedUndoEntry& UndoToken::entry() noexcept {
+    return *(undos_->begin() + index_);
+}
+
 class UndoWriter {
   public:
     UndoWriter(HexBedBuffer& buf, std::vector<byte>& b,
@@ -303,8 +307,8 @@ bool HexBedDocument::compareEqual(bufoffset offset, bufoffset size,
     return true;
 }
 
-SearchResult HexBedDocument::searchForward(bufoffset start, bufoffset end,
-                                           const_bytespan data) {
+SearchResult HexBedDocument::searchForward(HexBedTask& task, bufoffset start,
+                                           bufoffset end, const_bytespan data) {
     bufsize r, rr, o = start, z = data.size(), c, hc;
     if (start >= end) return SearchResult{};
     if (!z) return SearchResult{SearchResultType::Full, z, start};
@@ -323,6 +327,7 @@ SearchResult HexBedDocument::searchForward(bufoffset start, bufoffset end,
 
     SearchResult pres{};
     while ((rr = std::min(end - o, hc)), (r = read(o, bytespan(flip, rr)))) {
+        if (task.isCancelled()) break;
         if (pres.type == SearchResultType::Partial) {
             pres = searchFullForward(hc, flippers[flipindex], r, flip, z, si,
                                      pres.offset);
@@ -342,7 +347,8 @@ SearchResult HexBedDocument::searchForward(bufoffset start, bufoffset end,
     return SearchResult{};
 }
 
-SearchResult HexBedDocument::searchBackward(bufoffset start, bufoffset end,
+SearchResult HexBedDocument::searchBackward(HexBedTask& task, bufoffset start,
+                                            bufoffset end,
                                             const_bytespan data) {
     bufsize r, rr, o = end, z = data.size(), c, hc;
     if (start >= end) return SearchResult{};
@@ -363,6 +369,7 @@ SearchResult HexBedDocument::searchBackward(bufoffset start, bufoffset end,
     SearchResult pres{};
     while ((rr = std::min(o - start, hc)) &&
            rr == (r = read(o - rr, bytespan(flip, rr)))) {
+        if (task.isCancelled()) break;
         o -= r;
         if (pres.type == SearchResultType::Partial) {
             pres = searchFullBackward(hc, flippers[flipindex], r, flip, z, si,
@@ -383,27 +390,30 @@ SearchResult HexBedDocument::searchBackward(bufoffset start, bufoffset end,
     return SearchResult{};
 }
 
-SearchResult HexBedDocument::searchForwardFull(bufoffset start, bool wrap,
+SearchResult HexBedDocument::searchForwardFull(HexBedTask& task,
+                                               bufoffset start, bool wrap,
                                                const_bytespan data) {
     bufsize dz = size(), sz = data.size();
     if (sz > dz) return SearchResult{};
-    SearchResult res = searchForward(start, dz, data);
-    if (!res && wrap) {
+    SearchResult res = searchForward(task, start, dz, data);
+    if (!res && wrap && !task.isCancelled()) {
         bufoffset end = start + sz - 1;
         if (end < start) end = dz;
-        res = searchForward(0, end, data);
+        res = searchForward(task, 0, end, data);
     }
     return res;
 }
 
-SearchResult HexBedDocument::searchBackwardFull(bufoffset start, bool wrap,
+SearchResult HexBedDocument::searchBackwardFull(HexBedTask& task,
+                                                bufoffset start, bool wrap,
                                                 const_bytespan data) {
     bufsize dz = size(), sz = data.size();
     if (sz > dz) return SearchResult{};
     bufoffset end = start + sz;
     if (end < start) end = dz;
-    SearchResult res = searchBackward(0, end, data);
-    if (!res && wrap) res = searchBackward(start + 1, dz, data);
+    SearchResult res = searchBackward(task, 0, end, data);
+    if (!res && wrap && !task.isCancelled())
+        res = searchBackward(task, start + 1, dz, data);
     return res;
 }
 
@@ -708,6 +718,58 @@ bool HexBedDocument::map(bufoffset offset, bufsize size,
             }
         });
     return ok;
+}
+
+bool HexBedDocument::pry(
+    bufoffset offset, bufsize size,
+    std::function<void(HexBedTask&, std::function<void(const_bytespan)>)>
+        source) {
+    auto token = addUndoReplaceDiffSize(offset, size, 0);
+    if (size) treble_.remove(offset, size);
+    Treble& treble = treble_;
+    HexBedUndoEntry& entry = token.entry();
+    bufsize off = offset;
+    bufsize* sz = &entry.size;
+    auto insert = [&treble, &off, sz](const_bytespan dta) -> void {
+        bufsize n = dta.size();
+        treble.insert(off, n, dta.data());
+        off += n;
+        *sz += n;
+    };
+    HexBedTask task = HexBedTask(context_.get(), 0, true);
+    task.run(
+        [this, &source, &insert](HexBedTask& task) { source(task, insert); });
+    if (!task.isCancelled()) token.commit();
+    dirty_ = true;
+    context_->announceUndoChange(this);
+    context_->announceBytesChanged(this, offset);
+    return !task.isCancelled();
+}
+
+bool HexBedDocument::romp(
+    std::function<void(HexBedTask&,
+                       std::function<void(bufsize, const_bytespan)>)>
+        source) {
+    truncateUndo();
+    Treble& treble = treble_;
+    auto impose = [&treble](bufsize o, const_bytespan dta) -> void {
+        bufsize n = dta.size();
+        bufsize z = treble.size();
+        if (o > z) treble.insert(z, o - z, static_cast<byte>(0));
+        if (o + n <= z)
+            treble.replace(o, n, dta.data());
+        else {
+            treble.replace(o, z - o, dta.data());
+            treble.insert(z, n - (z - o), dta.data());
+        }
+    };
+    HexBedTask task = HexBedTask(context_.get(), 0, true);
+    task.run(
+        [this, &source, &impose](HexBedTask& task) { source(task, impose); });
+    dirty_ = true;
+    context_->announceUndoChange(this);
+    context_->announceBytesChanged(this, 0);
+    return !task.isCancelled();
 }
 
 bool HexBedDocument::reverse(bufoffset offset, bufsize size) {

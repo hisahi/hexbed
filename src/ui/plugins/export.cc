@@ -17,48 +17,36 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/plugins/inspector/uint16.cc -- impl for builtin uint16 inspector
+// ui/plugins/export.cc -- impl for the export plugin system
 
-#include "ui/plugins/inspector/uint16.hh"
+#include "ui/plugins/export.hh"
 
-#include <wx/string.h>
-#include <wx/translation.h>
+#include <wx/intl.h>
 
-#include <cstdint>
+#include <memory>
+#include <vector>
 
-#include "common/intconv.hh"
-#include "common/limits.hh"
-#include "common/logger.hh"
+#include "ui/plugins/export/intelhex.hh"
 
 namespace hexbed {
 
 namespace plugins {
 
-InspectorPluginUInt16::InspectorPluginUInt16(pluginid id)
-    : LocalizableDataInspectorPlugin(
-          id, TAG("uint16 (unsigned 16-bit integer)"), sizeof(std::uint16_t),
-          1 + maxDecimalDigits<std::uint16_t>()) {}
+static std::vector<std::unique_ptr<ExportPlugin>> exportPlugins;
 
-bool InspectorPluginUInt16::convertFromBytes(
-    std::size_t outstr_n, char* outstr, const_bytespan data,
-    const DataInspectorSettings& settings) {
-    std::uint16_t result = uintFromBytes<std::uint16_t>(
-        data.size(), data.data(), settings.littleEndian);
-    uintToString<std::uint16_t>(outstr_n, outstr, result);
-    return true;
+void loadBuiltinExportPlugins() {
+    exportPlugins.push_back(
+        std::make_unique<ExportPluginIntelHEX>(nextBuiltinPluginId()));
 }
 
-bool InspectorPluginUInt16::convertToBytes(
-    std::size_t& outdata_n, byte* outdata, const char* instr,
-    const DataInspectorSettings& settings) {
-    std::uint16_t result;
-    HEXBED_ASSERT(outdata_n >= 1);
-    if (uintFromString<std::uint16_t>(result, instr)) {
-        outdata_n = uintToBytes<std::uint16_t>(outdata_n, outdata, result,
-                                               settings.littleEndian);
-        return true;
-    }
-    return false;
+std::size_t exportPluginCount() { return exportPlugins.size(); }
+
+ExportPlugin& exportPluginByIndex(std::size_t i) {
+    return *exportPlugins.at(i);
+}
+
+wxString ExportPlugin::getFileFilter() const {
+    return _("All files (*.*)") + "|*";
 }
 
 };  // namespace plugins

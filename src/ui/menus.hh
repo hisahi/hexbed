@@ -73,8 +73,19 @@ wxMenuItem* addItem(wxMenu* menu, int id, const wxString& text,
 wxMenuItem* addCheckItem(wxMenu* menu, int id, const wxString& text,
                          const wxString& tip, int flags, int keyCode);
 
+struct FileMenus {
+    wxMenu* importMenu{nullptr};
+    wxMenu* exportMenu{nullptr};
+
+    int firstImportId;
+    int importPluginCount{0};
+    int firstExportId;
+    int exportPluginCount{0};
+};
+
 // menufile.cc
-wxMenu* createFileMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly);
+wxMenu* createFileMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                       FileMenus& menus);
 // menuedit.cc
 wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly);
 // menusearch.cc

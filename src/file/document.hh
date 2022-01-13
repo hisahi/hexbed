@@ -120,6 +120,7 @@ class UndoToken {
     inline UndoToken(std::deque<HexBedUndoEntry>* undos, size_t x)
         : undos_(undos), index_(x), stored_(false) {}
     inline void commit() noexcept { stored_ = true; }
+    HexBedUndoEntry& entry() noexcept;
 
     UndoToken(const UndoToken& copy) = delete;
     UndoToken(UndoToken&& move) = delete;
@@ -196,17 +197,23 @@ class HexBedDocument {
 
     bool map(bufoffset offset, bufsize size,
              std::function<bool(bufoffset, bytespan)> mapper, bufsize mul = 1);
+    bool pry(
+        bufoffset offset, bufsize size,
+        std::function<void(HexBedTask&, std::function<void(const_bytespan)>)>);
+    // destroys undo history!
+    bool romp(std::function<
+              void(HexBedTask&, std::function<void(bufsize, const_bytespan)>)>);
     bool reverse(bufoffset offset, bufsize size);
 
-    SearchResult searchForward(bufoffset start, bufoffset end,
+    SearchResult searchForward(HexBedTask& task, bufoffset start, bufoffset end,
                                const_bytespan data);
-    SearchResult searchBackward(bufoffset start, bufoffset end,
-                                const_bytespan data);
+    SearchResult searchBackward(HexBedTask& task, bufoffset start,
+                                bufoffset end, const_bytespan data);
 
-    SearchResult searchForwardFull(bufoffset start, bool wrap,
+    SearchResult searchForwardFull(HexBedTask& task, bufoffset start, bool wrap,
                                    const_bytespan data);
-    SearchResult searchBackwardFull(bufoffset start, bool wrap,
-                                    const_bytespan data);
+    SearchResult searchBackwardFull(HexBedTask& task, bufoffset start,
+                                    bool wrap, const_bytespan data);
 
     bool compareEqual(bufoffset offset, bufoffset size, const_bytespan data);
 

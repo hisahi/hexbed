@@ -38,6 +38,7 @@
 #include "ui/context.hh"
 #include "ui/dialogs/find.hh"
 #include "ui/editor-fwd.hh"
+#include "ui/menus.hh"
 #include "ui/tools/bitedit.hh"
 #include "ui/tools/inspector.hh"
 
@@ -68,6 +69,7 @@ class HexBedMainFrame : public wxFrame {
     void OnClose(wxCloseEvent& event);
     void OnTabSwitch(wxAuiNotebookEvent& event);
     void OnTabClose(wxAuiNotebookEvent& event);
+    void OnLastTabClose();
     void OnDocumentEdit(wxCommandEvent& event);
 
     void OnExit(wxCommandEvent& event);
@@ -81,6 +83,8 @@ class HexBedMainFrame : public wxFrame {
     void OnFileSaveAll(wxCommandEvent& event);
     void OnFileCloseAll(wxCommandEvent& event);
     void OnFileReload(wxCommandEvent& event);
+    void OnFileMenuImport(wxCommandEvent& event);
+    void OnFileMenuExport(wxCommandEvent& event);
 
     void OnEditMenuOpened(wxMenuEvent& event);
     void OnEditUndo(wxCommandEvent& event);
@@ -134,6 +138,7 @@ class HexBedMainFrame : public wxFrame {
     template <bool insert>
     void DoPaste();
 
+    bool FileNew();
     void FileReload(std::size_t i);
     bool FileSave(std::size_t i, bool saveAs);
     bool FileClose(std::size_t i);
@@ -159,6 +164,7 @@ class HexBedMainFrame : public wxFrame {
     std::unique_ptr<FindDialog> findDialog_;
     std::unique_ptr<BitEditorTool> bitEditorTool_;
     std::unique_ptr<DataInspector> dataInspector_;
+    hexbed::menu::FileMenus fileMenus_;
 };
 
 };  // namespace ui

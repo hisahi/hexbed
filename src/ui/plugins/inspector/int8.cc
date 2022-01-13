@@ -35,9 +35,9 @@ namespace hexbed {
 namespace plugins {
 
 InspectorPluginInt8::InspectorPluginInt8(pluginid id)
-    : DataInspectorPlugin(id, _("int8 (signed 8-bit integer)"),
-                          sizeof(std::int8_t),
-                          2 + maxDecimalDigits<std::int8_t>()) {}
+    : LocalizableDataInspectorPlugin(id, TAG("int8 (signed 8-bit integer)"),
+                                     sizeof(std::int8_t),
+                                     2 + maxDecimalDigits<std::int8_t>()) {}
 
 bool InspectorPluginInt8::convertFromBytes(
     std::size_t outstr_n, char* outstr, const_bytespan data,

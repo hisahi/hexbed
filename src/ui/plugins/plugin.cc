@@ -21,6 +21,8 @@
 
 #include "ui/plugins/plugin.hh"
 
+#include "ui/plugins/export.hh"
+#include "ui/plugins/import.hh"
 #include "ui/plugins/inspector.hh"
 
 namespace hexbed {
@@ -29,7 +31,8 @@ namespace plugins {
 
 void loadBuiltinPlugins() {
     loadBuiltinDataInspectorPlugins();
-    // ...
+    loadBuiltinImportPlugins();
+    loadBuiltinExportPlugins();
 }
 
 pluginid nextPluginId_ = 0;

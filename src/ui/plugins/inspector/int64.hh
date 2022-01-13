@@ -28,7 +28,7 @@ namespace hexbed {
 
 namespace plugins {
 
-class InspectorPluginInt64 : public DataInspectorPlugin {
+class InspectorPluginInt64 : public LocalizableDataInspectorPlugin {
   public:
     InspectorPluginInt64(pluginid id);
     bool convertFromBytes(std::size_t outstr_n, char* outstr,

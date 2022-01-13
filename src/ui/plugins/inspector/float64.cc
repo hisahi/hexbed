@@ -39,8 +39,8 @@ namespace plugins {
 #define STRINGIFY(x) STRINGIFY_(x)
 
 InspectorPluginFloat64::InspectorPluginFloat64(pluginid id)
-    : DataInspectorPlugin(
-          id, _("double (IEEE 754 binary64 double-precision floating-point)"),
+    : LocalizableDataInspectorPlugin(
+          id, TAG("double (IEEE 754 binary64 double-precision floating-point)"),
           sizeof(double), 64) {
     static_assert(sizeof(double) == 8);
     static_assert(std::numeric_limits<double>::is_iec559);

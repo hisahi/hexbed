@@ -26,18 +26,20 @@
 
 namespace hexbed {
 
-bufsize memCopy(byte* edi, const byte* esi, bufsize ecx);
-bufsize memCopyBack(byte* edi, const byte* esi, bufsize ecx);
-bufsize memMove(byte* edi, const byte* esi, bufsize ecx);
-bufsize memFill(byte* edi, byte al, bufsize ecx);
-bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx);
-bufsize memReverse(byte* edi, bufsize ecx);
-const byte* memFindFirst(const byte* start, const byte* end, byte c);
-const byte* memFindLast(const byte* start, const byte* end, byte c);
-const byte* memFindFirst2(const byte* start, const byte* end, byte c1, byte c2);
-const byte* memFindLast2(const byte* start, const byte* end, byte c1, byte c2);
-bool memEqual(const byte* a, const byte* b, bufsize n);
-
+bufsize memCopy(byte* edi, const byte* esi, bufsize ecx) noexcept;
+bufsize memCopyBack(byte* edi, const byte* esi, bufsize ecx) noexcept;
+bufsize memMove(byte* edi, const byte* esi, bufsize ecx) noexcept;
+bufsize memFill(byte* edi, byte al, bufsize ecx) noexcept;
+bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi,
+                      bufsize ecx) noexcept;
+bufsize memReverse(byte* edi, bufsize ecx) noexcept;
+bool memEqual(const byte* a, const byte* b, bufsize n) noexcept;
+const byte* memFindFirst(const byte* start, const byte* end, byte c) noexcept;
+const byte* memFindLast(const byte* start, const byte* end, byte c) noexcept;
+const byte* memFindFirst2(const byte* start, const byte* end, byte c1,
+                          byte c2) noexcept;
+const byte* memFindLast2(const byte* start, const byte* end, byte c1,
+                         byte c2) noexcept;
 };  // namespace hexbed
 
 #endif /* HEXBED_COMMON_MEMORY_HH */

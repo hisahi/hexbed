@@ -25,10 +25,12 @@
 #include "common/charconv.hh"
 #include "file/document-fwd.hh"
 #include "file/search.hh"
+#include "file/task.hh"
 
 namespace hexbed {
 
 struct CaseInsensitivePattern {
+    CaseInsensitivePattern();
     CaseInsensitivePattern(const std::string& encoding,
                            const std::wstring& text);
 
@@ -41,10 +43,12 @@ struct CaseInsensitivePattern {
     byte headUpper[MBCS_CHAR_MAX];
 };
 
-SearchResult searchForwardCaseless(const HexBedDocument& document,
+SearchResult searchForwardCaseless(HexBedTask& task,
+                                   const HexBedDocument& document,
                                    bufsize start, bufsize end,
                                    CaseInsensitivePattern& pattern);
-SearchResult searchBackwardCaseless(const HexBedDocument& document,
+SearchResult searchBackwardCaseless(HexBedTask& task,
+                                    const HexBedDocument& document,
                                     bufsize start, bufsize end,
                                     CaseInsensitivePattern& pattern);
 

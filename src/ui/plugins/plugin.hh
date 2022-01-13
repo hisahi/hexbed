@@ -28,6 +28,8 @@ namespace hexbed {
 
 namespace plugins {
 
+#define TAG(x) wxTRANSLATE(x)
+
 using pluginid = unsigned long;
 
 class Plugin {

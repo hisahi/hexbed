@@ -17,50 +17,62 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/plugins/inspector/uint16.cc -- impl for builtin uint16 inspector
+// ui/plugins/export.hh -- header for the export plugin system
 
-#include "ui/plugins/inspector/uint16.hh"
+#ifndef HEXBED_UI_PLUGINS_EXPORT_HH
+#define HEXBED_UI_PLUGINS_EXPORT_HH
 
 #include <wx/string.h>
-#include <wx/translation.h>
+#include <wx/window.h>
 
-#include <cstdint>
+#include <functional>
 
-#include "common/intconv.hh"
-#include "common/limits.hh"
-#include "common/logger.hh"
+#include "common/types.hh"
+#include "file/task.hh"
+#include "ui/plugins/plugin.hh"
 
 namespace hexbed {
 
 namespace plugins {
 
-InspectorPluginUInt16::InspectorPluginUInt16(pluginid id)
-    : LocalizableDataInspectorPlugin(
-          id, TAG("uint16 (unsigned 16-bit integer)"), sizeof(std::uint16_t),
-          1 + maxDecimalDigits<std::uint16_t>()) {}
+class ExportPlugin : public Plugin {
+  public:
+    inline const wxString& getTitle() const noexcept { return title_; }
+    inline bool isLocalizable() const noexcept { return localizable_; }
+    virtual wxString getFileFilter() const;
 
-bool InspectorPluginUInt16::convertFromBytes(
-    std::size_t outstr_n, char* outstr, const_bytespan data,
-    const DataInspectorSettings& settings) {
-    std::uint16_t result = uintFromBytes<std::uint16_t>(
-        data.size(), data.data(), settings.littleEndian);
-    uintToString<std::uint16_t>(outstr_n, outstr, result);
-    return true;
-}
+    virtual bool configureExport(wxWindow* parent, const std::string& filename,
+                                 bufsize size) = 0;
+    virtual void doExport(HexBedTask& task, const std::string& filename,
+                          std::function<bufsize(bufsize, bytespan)> read,
+                          bufsize actualOffset, bufsize size) = 0;
 
-bool InspectorPluginUInt16::convertToBytes(
-    std::size_t& outdata_n, byte* outdata, const char* instr,
-    const DataInspectorSettings& settings) {
-    std::uint16_t result;
-    HEXBED_ASSERT(outdata_n >= 1);
-    if (uintFromString<std::uint16_t>(result, instr)) {
-        outdata_n = uintToBytes<std::uint16_t>(outdata_n, outdata, result,
-                                               settings.littleEndian);
-        return true;
-    }
-    return false;
-}
+  protected:
+    inline ExportPlugin(pluginid id, const wxString& title,
+                        std::size_t maxDataLen, std::size_t maxStrLen)
+        : ExportPlugin(id, title, false) {}
+
+    inline ExportPlugin(pluginid id, const wxString& title, bool localizable)
+        : Plugin(id), title_(title), localizable_(localizable) {}
+
+  private:
+    wxString title_;
+    bool readOnly_;
+    bool localizable_;
+};
+
+class LocalizableExportPlugin : public ExportPlugin {
+  protected:
+    inline LocalizableExportPlugin(pluginid id, const wxString& title)
+        : ExportPlugin(id, title, true) {}
+};
+
+void loadBuiltinExportPlugins();
+std::size_t exportPluginCount();
+ExportPlugin& exportPluginByIndex(std::size_t);
 
 };  // namespace plugins
 
 };  // namespace hexbed
+
+#endif /* HEXBED_UI_PLUGINS_EXPORT_HH */

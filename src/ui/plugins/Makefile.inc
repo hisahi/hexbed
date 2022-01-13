@@ -1,4 +1,4 @@
 
-FILES := inspector.o plugin.o
+FILES := export.o import.o inspector.o plugin.o
 
 OBJS := $(OBJS) $(addprefix ui/plugins/,$(FILES))

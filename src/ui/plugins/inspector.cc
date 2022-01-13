@@ -17,7 +17,7 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/plugins/inspector.hh -- header for the data inspector plugin system
+// ui/plugins/inspector.cc -- impl for the data inspector plugin system
 
 #include "ui/plugins/inspector.hh"
 

@@ -180,7 +180,9 @@ void DataInspector::UpdatePlugins() {
          i < e; ++i) {
         hexbed::plugins::DataInspectorPlugin& plugin =
             hexbed::plugins::dataInspectorPluginByIndex(i);
-        long index = listView_->InsertItem(i, plugin.getTitle());
+        long index = listView_->InsertItem(
+            i, plugin.isLocalizable() ? wxGetTranslation(plugin.getTitle())
+                                      : plugin.getTitle());
         plugins_.emplace(&plugin, index);
         listView_->SetItemPtrData(index, reinterpret_cast<wxUIntPtr>(&plugin));
     }

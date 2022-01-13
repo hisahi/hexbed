@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "common/types.hh"
+#include "file/cisearch.hh"
 #include "file/context.hh"
 #include "file/document-fwd.hh"
 #include "file/task.hh"
@@ -54,6 +55,8 @@ struct EditorState {
     wxString searchReplaceDataValue;
     std::size_t searchFindDataType;
     std::size_t searchReplaceDataType;
+
+    CaseInsensitivePattern searchCaseInsensitive;
 };
 
 class HexBedContextMain;
@@ -155,8 +158,8 @@ class HexBedContextMain : public HexBedContext {
     std::vector<byte> searchBuffer_;
     std::vector<byte> replaceBuffer_;
     std::vector<HexBedViewer*> viewers_;
-    HexBedDocument* lastdoc_;
-    bufsize lastoff_;
+    HexBedDocument* lastdoc_{nullptr};
+    bufsize lastoff_{0};
 };
 
 }  // namespace hexbed

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-12 01:00+0200\n"
+"POT-Creation-Date: 2022-01-13 22:05+0200\n"
 "PO-Revision-Date: 2021-12-23 21:14+0200\n"
 "Last-Translator: Sampo Hippeläinen <sampo.hippelainen@gmail.com>\n"
 "Language-Team: fi\n"
@@ -209,79 +209,95 @@ msgstr "Avaa ohjelman asetukset"
 msgid "&Edit"
 msgstr "&Muokkaa"
 
-#: src/ui/menufile.cc:29
+#: src/ui/menufile.cc:30
 msgid "&New"
 msgstr "&Uusi"
 
-#: src/ui/menufile.cc:29
+#: src/ui/menufile.cc:30
 msgid "Creates a new file"
 msgstr "Luo uuden tiedoston"
 
-#: src/ui/menufile.cc:31
+#: src/ui/menufile.cc:32
 msgid "&Open..."
 msgstr "&Avaa..."
 
-#: src/ui/menufile.cc:31
+#: src/ui/menufile.cc:32
 msgid "Opens an existing file"
 msgstr "Avaa olemassa olevan tiedoston"
 
-#: src/ui/menufile.cc:33
+#: src/ui/menufile.cc:34
 msgid "&Save"
 msgstr "&Tallenna"
 
-#: src/ui/menufile.cc:34
+#: src/ui/menufile.cc:35
 msgid "Saves the file in the current location"
 msgstr "Tallentaa tiedoston samaan sijaintiin"
 
-#: src/ui/menufile.cc:36
+#: src/ui/menufile.cc:37
 msgid "Save &As..."
 msgstr "Tallenna &nimellä..."
 
-#: src/ui/menufile.cc:37
+#: src/ui/menufile.cc:38
 msgid "Saves the file in a new location"
 msgstr "Tallentaa tiedoston uuteen sijaintiin"
 
-#: src/ui/menufile.cc:38
+#: src/ui/menufile.cc:39
 msgid "&Reload"
 msgstr "Avaa &uudelleen"
 
-#: src/ui/menufile.cc:39
+#: src/ui/menufile.cc:40
 msgid "Reload the open file and discard changes"
 msgstr "Avaa tiedoston uudelleen ja hylkää muutokset"
 
-#: src/ui/menufile.cc:40
+#: src/ui/menufile.cc:41
 msgid "&Close"
 msgstr "&Sulje"
 
-#: src/ui/menufile.cc:41
+#: src/ui/menufile.cc:42
 msgid "Closes the current file"
 msgstr "Sulkee tämänhetkisen tiedoston"
 
-#: src/ui/menufile.cc:44
+#: src/ui/menufile.cc:45
 msgid "Sa&ve all"
 msgstr "Tallenna &kaikki"
 
-#: src/ui/menufile.cc:45
+#: src/ui/menufile.cc:46
 msgid "Saves all open files"
 msgstr "Tallentaa kaikki avoimet tiedostot"
 
-#: src/ui/menufile.cc:46
+#: src/ui/menufile.cc:47
 msgid "C&lose all"
 msgstr "Sul&je kaikki"
 
-#: src/ui/menufile.cc:47
+#: src/ui/menufile.cc:48
 msgid "Closes all open files"
 msgstr "Sulkee kaikki avoimet tiedostot"
 
-#: src/ui/menufile.cc:49
+#: src/ui/menufile.cc:51
+msgid "&Import..."
+msgstr "T&uo..."
+
+#: src/ui/menufile.cc:52
+msgid "Imports a block of bytes into a new file"
+msgstr "Tuo tavulohkon uuteen tiedostoon"
+
+#: src/ui/menufile.cc:55
+msgid "&Export..."
+msgstr "&Vie..."
+
+#: src/ui/menufile.cc:56
+msgid "Exports a block of bytes from the current file"
+msgstr "Vie tiedostosta tavulohkon muualle"
+
+#: src/ui/menufile.cc:58
 msgid "E&xit"
 msgstr "&Lopeta"
 
-#: src/ui/menufile.cc:49
+#: src/ui/menufile.cc:58
 msgid "Closes the application"
 msgstr "Sulkee ohjelman"
 
-#: src/ui/menufile.cc:51
+#: src/ui/menufile.cc:60
 msgid "&File"
 msgstr "&Tiedosto"
 
@@ -301,24 +317,24 @@ msgstr "Tallenna"
 msgid "Exit"
 msgstr "Lopeta"
 
-#: src/ui/textinput.cc:53 src/ui/dialogs/find.cc:53
+#: src/ui/textinput.cc:53 src/ui/dialogs/find.cc:62
 msgid "Text"
 msgstr "Teksti"
 
-#: src/ui/textinput.cc:75
+#: src/ui/textinput.cc:65 src/ui/valueinput.cc:59
 msgid "Encoding"
 msgstr "Koodaus"
 
-#: src/ui/textinput.cc:88
+#: src/ui/textinput.cc:75
 msgid "Case insensitive"
 msgstr "Aakkoskoosta riippumaton"
 
-#: src/ui/textinput.cc:110
+#: src/ui/textinput.cc:107
 #, c-format
 msgid "Configured character encoding (%s)"
 msgstr "Asetuksissa määritelty koodaus (%s)"
 
-#: src/ui/textinput.cc:123
+#: src/ui/textinput.cc:121
 msgid "The entered text cannot be represented in the selected encoding."
 msgstr "Syötettyä tekstiä ei voi esittää valitulla merkistökoodauksella."
 
@@ -390,7 +406,7 @@ msgstr "Et&si seuraava"
 msgid "Finds the next match with the same search"
 msgstr "Etsii seuraavan tuloksen viime haulla"
 
-#: src/ui/menusearch.cc:37 src/ui/dialogs/find.cc:114
+#: src/ui/menusearch.cc:37 src/ui/dialogs/find.cc:136
 #: src/ui/dialogs/replace.cc:57
 msgid "Find &previous"
 msgstr "Etsi e&dellinen"
@@ -419,11 +435,11 @@ msgstr "Siirtyy haluttuun kohtaan tiedostoa"
 msgid "&Search"
 msgstr "&Etsi"
 
-#: src/ui/context.cc:76
+#: src/ui/context.cc:90
 msgid "Action in progress"
 msgstr "Toimintoa suoritetaan"
 
-#: src/ui/context.cc:146
+#: src/ui/context.cc:160
 #, c-format
 msgid ""
 "Backup failed:\n"
@@ -432,60 +448,61 @@ msgstr ""
 "Varmuuskopiointi epäonnistui:\n"
 "%s"
 
-#: src/ui/context.cc:148 src/ui/hexbed.cc:363
+#: src/ui/context.cc:162 src/ui/hexbed.cc:418
 msgid "&Retry"
 msgstr "&Uudelleen"
 
-#: src/ui/context.cc:148
+#: src/ui/context.cc:162
 msgid "&Ignore"
 msgstr "&Ohita"
 
-#: src/ui/context.cc:148
+#: src/ui/context.cc:162
 msgid "&Abort"
 msgstr "&Keskeytä"
 
-#: src/ui/context.cc:150
+#: src/ui/context.cc:164
 msgid "'Retry' to try again, 'Ignore' to save anyway or 'Abort' to cancel."
 msgstr ""
 "'Uudelleen' yrittää uudelleen, 'Ohita' tallentaa joka tapauksessa ja "
 "'Keskeytä' peruuttaa tallennuksen."
 
-#: src/ui/context.cc:154
+#: src/ui/context.cc:168
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 "Yritetäänkö uudelleen? 'Ei' tallentaa silti ja 'Peruuta' peruuttaa "
 "tallennuksen."
 
-#: src/ui/hexbed.cc:251
+#: src/ui/hexbed.cc:306
 #, c-format
 msgid "[unsaved] %s"
 msgstr "[muokattu] %s"
 
 #. / main window title bar
-#: src/ui/hexbed.cc:260 src/ui/hexbed.cc:431
+#: src/ui/hexbed.cc:315 src/ui/hexbed.cc:490
 #, c-format
 msgid "%s - %s"
 msgstr "%s - %s"
 
-#: src/ui/hexbed.cc:282
+#: src/ui/hexbed.cc:337
 msgid "Save a file"
 msgstr "Tallenna tiedosto"
 
-#: src/ui/hexbed.cc:283 src/ui/hexbed.cc:915
+#: src/ui/hexbed.cc:338 src/ui/hexbed.cc:979 src/ui/plugins/export.cc:49
+#: src/ui/plugins/import.cc:49
 msgid "All files (*.*)"
 msgstr "Kaikki tiedostot (*.*)"
 
-#: src/ui/hexbed.cc:309
+#: src/ui/hexbed.cc:364
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr "Tiedoston %s tallentaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:337
+#: src/ui/hexbed.cc:392
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Hylätäänkö ne?"
 
-#: src/ui/hexbed.cc:357
+#: src/ui/hexbed.cc:412
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
@@ -494,84 +511,134 @@ msgstr ""
 "Tiedostosta %s ei voitu lukea:\n"
 "%s"
 
-#: src/ui/hexbed.cc:363
+#: src/ui/hexbed.cc:418
 msgid "&Cancel"
 msgstr "&Peruuta"
 
-#: src/ui/hexbed.cc:365
+#: src/ui/hexbed.cc:420
 msgid "Retry?"
 msgstr "Yritetäänkö uudelleen?"
 
-#: src/ui/hexbed.cc:389
+#: src/ui/hexbed.cc:444
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Haluatko tallentaa ne?"
 
-#: src/ui/hexbed.cc:537
+#: src/ui/hexbed.cc:598
 #, c-format
 msgid "[read-only] %s"
 msgstr "[vain luku] %s"
 
-#: src/ui/hexbed.cc:547
+#: src/ui/hexbed.cc:608
 #, c-format
 msgid "New-%llu"
 msgstr "Uusi-%llu"
 
-#: src/ui/hexbed.cc:551
+#: src/ui/hexbed.cc:613
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr "Uuden tiedoston luonti epäonnistui: %s"
 
-#: src/ui/hexbed.cc:575
+#: src/ui/hexbed.cc:640
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr "Tiedoston %s avaaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:584
+#: src/ui/hexbed.cc:649
 msgid "Read only"
 msgstr "Vain luku"
 
-#: src/ui/hexbed.cc:623
+#: src/ui/hexbed.cc:687
 msgid "No more results found for this search."
 msgstr "Tällä haulla ei löytynyt lisää tuloksia."
 
-#: src/ui/hexbed.cc:629
+#: src/ui/hexbed.cc:693
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] "%llu esiintymä korvattiin."
 msgstr[1] "%llu esiintymää korvattiin."
 
-#: src/ui/hexbed.cc:731
+#: src/ui/hexbed.cc:795
 #, c-format
 msgid "Insert failed: %s"
 msgstr "Lisäys epäonnistui: %s"
 
-#: src/ui/hexbed.cc:758
+#: src/ui/hexbed.cc:822
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr "Binäärilaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:779
+#: src/ui/hexbed.cc:843
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr "Unaarilaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:801
+#: src/ui/hexbed.cc:865
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr "Bittisiirtolaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:914
+#: src/ui/hexbed.cc:978
 msgid "Open a file"
 msgstr "Avaa tiedosto"
 
-#: src/ui/hexbed.cc:988
-#, c-format
-msgid "Failed to copy: %s"
-msgstr "Kopiointi epäonnistui: %s"
+#: src/ui/hexbed.cc:1025
+msgid "Import file"
+msgstr "Tuo tiedosto"
 
-#: src/ui/hexbed.cc:1019
+#: src/ui/hexbed.cc:1045
+#, c-format
+msgid ""
+"Error on line %llu:\n"
+"%s"
+msgstr ""
+"Virhe rivillä %llu:\n"
+"%s"
+
+#: src/ui/hexbed.cc:1047
+#, c-format
+msgid ""
+"Failed to import:\n"
+"Import file was invalid.\n"
+"%s"
+msgstr ""
+"Tuonti epäonnistui:\n"
+"Tuotu tiedosto on virheellinen.\n"
+"%s"
+
+#: src/ui/hexbed.cc:1056
+#, c-format
+msgid ""
+"Failed to import:\n"
+"%s"
+msgstr ""
+"Tuonti epäonnistui:\n"
+"%s"
+
+#: src/ui/hexbed.cc:1080
+msgid "Export file"
+msgstr "Vie tiedosto"
+
+#: src/ui/hexbed.cc:1111
+#, c-format
+msgid ""
+"Failed to export:\n"
+"%s"
+msgstr ""
+"Vienti epäonnistui:\n"
+"%s"
+
+#: src/ui/hexbed.cc:1155
+#, c-format
+msgid ""
+"Failed to copy:\n"
+"%s"
+msgstr ""
+"Kopiointi epäonnistui:\n"
+"%s"
+
+#: src/ui/hexbed.cc:1188
 msgid ""
 "Cannot paste the current clipboard contents, because it contains characters "
 "that the currently selected character encoding cannot represent."
@@ -579,7 +646,7 @@ msgstr ""
 "Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä on merkkejä, joita "
 "valittu merkistökoodaus ei tue."
 
-#: src/ui/hexbed.cc:1022
+#: src/ui/hexbed.cc:1191
 msgid ""
 "Cannot paste the current clipboard contents, because it does not contain "
 "valid hexadecimal data. Text data should be a string of hexadecimal bytes."
@@ -587,12 +654,16 @@ msgstr ""
 "Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä ei ole kelvollista "
 "heksadesimaalimuotoista tietoa. Tekstin tulisi olla heksadesimaalisia tavuja."
 
-#: src/ui/hexbed.cc:1033
+#: src/ui/hexbed.cc:1204
 #, c-format
-msgid "Failed to paste: %s"
-msgstr "Liittäminen epäonnistui: %s"
+msgid ""
+"Failed to paste:\n"
+"%s"
+msgstr ""
+"Liittäminen epäonnistui:\n"
+"%s"
 
-#: src/ui/hexbed.cc:1080
+#: src/ui/hexbed.cc:1253
 msgid "A hex editor."
 msgstr "Tavumuokkain."
 
@@ -600,27 +671,27 @@ msgstr "Tavumuokkain."
 msgid "Bit editor"
 msgstr "Bittimuokkain"
 
-#: src/ui/tools/inspector.cc:68
+#: src/ui/tools/inspector.cc:69
 msgid "Enter data"
 msgstr "Syötä arvo"
 
-#: src/ui/tools/inspector.cc:126
+#: src/ui/tools/inspector.cc:127
 msgid "The given input is invalid for this data type."
 msgstr "Syöte ei kelpaa valitulle tietotyypille."
 
-#: src/ui/tools/inspector.cc:144
+#: src/ui/tools/inspector.cc:145
 msgid "Data inspector"
 msgstr "Tietojenkatselin"
 
-#: src/ui/tools/inspector.cc:154
+#: src/ui/tools/inspector.cc:155 src/ui/valueinput.cc:68
 msgid "Little endian"
 msgstr "Nouseva tavujärjestys"
 
-#: src/ui/tools/inspector.cc:176
+#: src/ui/tools/inspector.cc:177
 msgid "Type"
 msgstr "Tyyppi"
 
-#: src/ui/tools/inspector.cc:177
+#: src/ui/tools/inspector.cc:178 src/ui/valueinput.cc:49
 msgid "Value"
 msgstr "Arvo"
 
@@ -680,23 +751,27 @@ msgstr "Loppu:"
 msgid "Start:"
 msgstr "Alku:"
 
-#: src/ui/dialogs/find.cc:52
+#: src/ui/dialogs/find.cc:61
 msgid "Hex data"
 msgstr "Heksatieto"
 
-#: src/ui/dialogs/find.cc:98
+#: src/ui/dialogs/find.cc:63
+msgid "Data value"
+msgstr "Tietoarvo"
+
+#: src/ui/dialogs/find.cc:119
 msgid "Find"
 msgstr "Etsi"
 
-#: src/ui/dialogs/find.cc:111 src/ui/dialogs/replace.cc:54
+#: src/ui/dialogs/find.cc:133 src/ui/dialogs/replace.cc:54
 msgid "Find &next"
 msgstr "Etsi &seuraava"
 
-#: src/ui/dialogs/find.cc:132 src/ui/dialogs/replace.cc:106
+#: src/ui/dialogs/find.cc:154 src/ui/dialogs/replace.cc:108
 msgid "Find data"
 msgstr "Haku"
 
-#: src/ui/dialogs/find.cc:136
+#: src/ui/dialogs/find.cc:158
 msgid "&Wrap around"
 msgstr "Kul&je tiedosto ympäri"
 
@@ -720,11 +795,11 @@ msgstr "Ka&ikki"
 msgid "Replace and find"
 msgstr "Korvaa ja hae"
 
-#: src/ui/dialogs/replace.cc:110
+#: src/ui/dialogs/replace.cc:112
 msgid "&Wrap around (find only)"
 msgstr "Kul&je tiedosto ympäri (etsittäessä)"
 
-#: src/ui/dialogs/replace.cc:115
+#: src/ui/dialogs/replace.cc:117
 msgid "Find and replace"
 msgstr "Etsi ja korvaa"
 
@@ -1008,6 +1083,10 @@ msgstr ""
 "Jokin määrittelemistäsi asetuksista on väärin. Tarkista asetuksesi ja yritä "
 "uudelleen."
 
+#: src/ui/valueinput.cc:113
+msgid "The entered value cannot be represented with the specified data type."
+msgstr "Syöttämääsi arvoa ei voi esittää valitulla tietotyypillä."
+
 #: src/ui/status.cc:42
 msgid "Insert"
 msgstr "Lisää"
@@ -1039,15 +1118,15 @@ msgstr "uint8 (etumerkitön 8-bittinen kokonaisluku)"
 msgid "int8 (signed 8-bit integer)"
 msgstr "int8 (etumerkillinen 8-bittinen kokonaisluku)"
 
-#: src/ui/plugins/inspector/uint16.cc:38
+#: src/ui/plugins/inspector/uint16.cc:39
 msgid "uint16 (unsigned 16-bit integer)"
 msgstr "uint16 (etumerkitön 16-bittinen kokonaisluku)"
 
-#: src/ui/plugins/inspector/uint32.cc:38
+#: src/ui/plugins/inspector/uint32.cc:39
 msgid "uint32 (unsigned 32-bit integer)"
 msgstr "uint32 (etumerkitön 32-bittinen kokonaisluku)"
 
-#: src/ui/plugins/inspector/uint64.cc:38
+#: src/ui/plugins/inspector/uint64.cc:39
 msgid "uint64 (unsigned 64-bit integer)"
 msgstr "uint64 (etumerkitön 64-bittinen kokonaisluku)"
 
@@ -1076,7 +1155,53 @@ msgid "Hexadecimal float (IEEE 754 binary32 single-precision floating-point)"
 msgstr ""
 "Heksadesimaalinen float (IEEE 754 binary32, liukuluku perustarkkuudella"
 
-#: src/ui/plugins/inspector/float64x.cc:43
+#: src/ui/plugins/inspector/float64x.cc:44
 msgid "Hexadecimal double (IEEE 754 binary64 double-precision floating-point)"
 msgstr ""
 "Heksadesimaalinen double (IEEE 754 binary64, liukuluku kaksoistarkkuudella"
+
+#. / format name, perhaps should not be translated
+#: src/ui/plugins/export/intelhex.cc:54 src/ui/plugins/export/intelhex.cc:105
+#: src/ui/plugins/import/intelhex.cc:47 src/ui/plugins/import/intelhex.cc:76
+msgid "Intel HEX"
+msgstr "Intel HEX"
+
+#: src/ui/plugins/export/intelhex.cc:72
+msgid "Bytes per row"
+msgstr "Tavuja rivillä"
+
+#: src/ui/plugins/export/intelhex.cc:83 src/ui/plugins/export/intelhex.cc:89
+msgid "x86 segment mode"
+msgstr "x86-segmenttiosoitetila"
+
+#: src/ui/plugins/export/intelhex.cc:108 src/ui/plugins/import/intelhex.cc:79
+msgid "Intel HEX file (*.hex, *.h86)"
+msgstr "Intel HEX -tiedosto (*.hex, *.h86)"
+
+#: src/ui/plugins/export/intelhex.cc:116
+msgid ""
+"The exported section is 4 GiB (2^32 bytes) or longer, which is too long for "
+"Intel HEX files."
+msgstr ""
+"Vietävä alue on 4 GiB (2^32 tavua) tai suurempi, joka on suurempi kuin "
+"Intel HEX -tiedostojen enimmäisraja."
+
+#: src/ui/plugins/import/intelhex.cc:61
+msgid "Verify checksums"
+msgstr "Tarkistussummien tarkistus"
+
+#: src/ui/plugins/import/intelhex.cc:97
+msgid "Unexpected end-of-file while reading line."
+msgstr "Tiedosto loppui kesken rivin lukemisen."
+
+#: src/ui/plugins/import/intelhex.cc:101
+msgid "Invalid character while reading line; expected hex digit."
+msgstr "Virheellinen merkki riviä lukiessa, heksadesimaalinumero vaaditaan."
+
+#: src/ui/plugins/import/intelhex.cc:134
+msgid "Checksum error."
+msgstr "Tarkistussumma ei täsmää."
+
+#: src/ui/plugins/import/intelhex.cc:154
+msgid "Unrecognized record type."
+msgstr "Tietueen tyyppiä ei tunnistettu."

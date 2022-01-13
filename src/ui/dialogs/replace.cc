@@ -179,7 +179,10 @@ void ReplaceDialog::OnReplacePrevious(wxCommandEvent& event) {
 void ReplaceDialog::OnReplaceAll(wxCommandEvent& event) {
     if (!Recommit()) return;
     HexEditorParent* ed = parent_->GetCurrentEditor();
-    if (ed) parent_->OnReplaceDone(replaceAll(ed));
+    if (ed) {
+        bufsize count;
+        if (replaceAll(ed, count)) parent_->OnReplaceDone(count);
+    }
 }
 
 void ReplaceDialog::OnChangedInput(wxCommandEvent& event) {
@@ -209,31 +212,39 @@ void ReplaceDialog::replaceSelection(HexEditorParent* ed) {
     }
 }
 
-bufsize ReplaceDialog::replaceAll(HexEditorParent* ed) {
-    bufsize sel, seln, repls = 0, cur, rat;
+bool ReplaceDialog::replaceAll(HexEditorParent* ed, bufsize& count) {
+    bufsize sel, seln, repls = 0;
     bool seltext;
     ed->GetSelection(sel, seln, seltext);
-    cur = sel;
-    rat = 0;
-    SearchResult res;
     const_bytespan search = ed->context().getSearchString();
     const_bytespan replace = ed->context().getReplaceString();
     bufsize sn = search.size(), rn = replace.size();
-    UndoGroupToken ugt = ed->document().undoGroup();
-    while ((res = ed->document().searchForwardFull(rat, false, search))) {
-        bufsize so = res.offset;
-        ++repls;
-        if (so < cur && sn != rn) {
-            cur = cur >= sn ? cur - sn : 0;
-            cur += rn;
+    HexBedDocument& doc = ed->document();
+    UndoGroupToken ugt = doc.undoGroup();
+    bufsize cur = sel;
+    HexBedTask task(&ed->context(), 0, true);
+    task.run([&ugt, &doc, search, replace, sn, rn, sel, &repls,
+              &cur](HexBedTask& task) {
+        SearchResult res;
+        bufsize rat = 0;
+        while (!task.isCancelled() &&
+               (res = doc.searchForwardFull(task, rat, false, search))) {
+            bufsize so = res.offset;
+            ++repls;
+            if (so < cur && sn != rn) {
+                cur = cur >= sn ? cur - sn : 0;
+                cur += rn;
+            }
+            doc.replace(so, sn, replace);
+            ugt.tick();
+            rat = so + rn;
         }
-        ed->document().replace(so, sn, replace);
-        ugt.tick();
-        rat = so + rn;
-    }
+    });
     ed->SelectBytes(cur, 0, SelectFlags());
+    count = repls;
+    if (task.isCancelled()) return false;
     ugt.commit();
-    return repls;
+    return true;
 }
 
 };  // namespace ui

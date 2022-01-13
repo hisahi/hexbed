@@ -27,28 +27,28 @@
 
 namespace hexbed {
 
-bufsize memCopy(byte* edi, const byte* esi, bufsize ecx) {
+bufsize memCopy(byte* edi, const byte* esi, bufsize ecx) noexcept {
     std::copy(esi, esi + ecx, edi);
     return ecx;
 }
 
-bufsize memCopyBack(byte* edi, const byte* esi, bufsize ecx) {
+bufsize memCopyBack(byte* edi, const byte* esi, bufsize ecx) noexcept {
     std::copy_backward(esi, esi + ecx, edi + ecx);
     return ecx;
 }
 
-bufsize memMove(byte* edi, const byte* esi, bufsize ecx) {
+bufsize memMove(byte* edi, const byte* esi, bufsize ecx) noexcept {
     std::memmove(edi, esi, ecx);
     return ecx;
 }
 
-bufsize memFill(byte* edi, byte al, bufsize ecx) {
+bufsize memFill(byte* edi, byte al, bufsize ecx) noexcept {
     std::memset(edi, al, ecx);
     return ecx;
 }
 
 static bufsize memFillRepeatNaive(byte* edi, bufsize ebx, const byte* esi,
-                                  bufsize ecx) {
+                                  bufsize ecx) noexcept {
     bufsize ecx_orig = ecx;
     while (ecx >= ebx) edi += memCopy(edi, esi, ebx), ecx -= ebx;
     if (ecx) edi += memCopy(edi, esi, ecx);
@@ -56,7 +56,7 @@ static bufsize memFillRepeatNaive(byte* edi, bufsize ebx, const byte* esi,
 }
 
 static bufsize memFillRepeatLog(byte* edi, bufsize ebx, const byte* esi,
-                                bufsize ecx) {
+                                bufsize ecx) noexcept {
     // ecx >> (much greater than) ebx
     bufsize edx = ecx;
     byte* ebp = edi;
@@ -71,7 +71,8 @@ static bufsize memFillRepeatLog(byte* edi, bufsize ebx, const byte* esi,
     return edx;
 }
 
-bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx) {
+bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi,
+                      bufsize ecx) noexcept {
     if (ebx <= 1) return memFill(edi, ebx ? *esi : 0, ecx);
     if (ecx <= ebx) return memCopy(edi, esi, ecx);
     if (ecx < 256 || ebx >= 32 || (ecx >> 4) < ebx)
@@ -79,17 +80,22 @@ bufsize memFillRepeat(byte* edi, bufsize ebx, const byte* esi, bufsize ecx) {
     return memFillRepeatLog(edi, ebx, esi, ecx);
 }
 
-bufsize memReverse(byte* edi, bufsize ecx) {
+bufsize memReverse(byte* edi, bufsize ecx) noexcept {
     std::reverse(edi, edi + ecx);
     return ecx;
 }
 
+bool memEqual(const byte* a, const byte* b, bufsize n) noexcept {
+    return !std::memcmp(a, b, n);
+}
+
 // first match in [start, end) or null
-const byte* memFindFirst(const byte* start, const byte* end, byte c) {
+const byte* memFindFirst(const byte* start, const byte* end, byte c) noexcept {
     return reinterpret_cast<const byte*>(std::memchr(start, c, end - start));
 }
 
-static const void* memrchr(const void* ptr, int ch, std::size_t count) {
+static const void* memrchr(const void* ptr, int ch,
+                           std::size_t count) noexcept {
     const unsigned char* esi = reinterpret_cast<const unsigned char*>(ptr);
     unsigned char al = static_cast<unsigned char>(ch);
     esi += count;
@@ -99,14 +105,14 @@ static const void* memrchr(const void* ptr, int ch, std::size_t count) {
 }
 
 // final match in [start, end) or null
-const byte* memFindLast(const byte* start, const byte* end, byte c) {
+const byte* memFindLast(const byte* start, const byte* end, byte c) noexcept {
     return reinterpret_cast<const byte*>(memrchr(start, c, end - start));
 }
 
 static constexpr bufsize alternateSize = 1024;
 
 const byte* memFindFirst2(const byte* start, const byte* end, byte c1,
-                          byte c2) {
+                          byte c2) noexcept {
     bufsize z = end - start;
     const byte* p = start;
     while (z > alternateSize) {
@@ -125,7 +131,8 @@ const byte* memFindFirst2(const byte* start, const byte* end, byte c1,
     return p1 ? (p2 ? std::min(p1, p2) : p1) : p2;
 }
 
-const byte* memFindLast2(const byte* start, const byte* end, byte c1, byte c2) {
+const byte* memFindLast2(const byte* start, const byte* end, byte c1,
+                         byte c2) noexcept {
     bufsize z = end - start;
     const byte* p = end;
     while (z > alternateSize) {
@@ -142,10 +149,6 @@ const byte* memFindLast2(const byte* start, const byte* end, byte c1, byte c2) {
     const byte* p1 = memFindLast(start, p, c1);
     const byte* p2 = memFindLast(p1 ? p1 : start, p, c2);
     return p1 ? (p2 ? std::max(p1, p2) : p1) : p2;
-}
-
-bool memEqual(const byte* a, const byte* b, bufsize n) {
-    return !std::memcmp(a, b, n);
 }
 
 };  // namespace hexbed

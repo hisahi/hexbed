@@ -61,7 +61,7 @@ HexBedValueInput::HexBedValueInput(wxWindow* parent, wxString* string,
     wxBoxSizer* row = new wxBoxSizer(wxHORIZONTAL);
     row->Add(label, wxSizerFlags().Center().Proportion(1));
     row->AddStretchSpacer();
-    row->Add(choice_);
+    row->Add(choice_, wxSizerFlags().Proportion(1));
     sizer->Add(row, wxSizerFlags().Expand());
 
     littleEndian_ =
@@ -83,9 +83,13 @@ void HexBedValueInput::UpdateConfig() {
          i < e; ++i) {
         hexbed::plugins::DataInspectorPlugin& plugin =
             hexbed::plugins::dataInspectorPluginByIndex(i);
-        if (!plugin.isReadOnly()) validate->AddItem(i, plugin.getTitle());
+        if (!plugin.isReadOnly())
+            validate->AddItem(i, plugin.isLocalizable()
+                                     ? wxGetTranslation(plugin.getTitle())
+                                     : plugin.getTitle());
     }
     TransferDataToWindow();
+    if (choice_->GetSelection() != wxNOT_FOUND) choice_->SetSelection(0);
 }
 
 void HexBedValueInput::ForwardEvent(wxCommandEvent& event) {

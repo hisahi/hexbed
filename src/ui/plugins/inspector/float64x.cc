@@ -39,10 +39,11 @@ namespace plugins {
 #define STRINGIFY(x) STRINGIFY_(x)
 
 InspectorPluginFloat64Hex::InspectorPluginFloat64Hex(pluginid id)
-    : DataInspectorPlugin(id,
-                          _("Hexadecimal double (IEEE 754 binary64 "
-                            "double-precision floating-point)"),
-                          false, sizeof(double), 64) {
+    : LocalizableDataInspectorPlugin(
+          id,
+          TAG("Hexadecimal double (IEEE 754 binary64 "
+              "double-precision floating-point)"),
+          sizeof(double), 64) {
     static_assert(sizeof(double) == 8);
     static_assert(std::numeric_limits<double>::is_iec559);
 }

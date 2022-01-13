@@ -42,7 +42,7 @@ class ReplaceDialog : public FindDialog {
     void AllowReplace(bool flag);
 
     static void replaceSelection(HexEditorParent* ed);
-    static bufsize replaceAll(HexEditorParent* ed);
+    static bool replaceAll(HexEditorParent* ed, bufsize& count);
 
   private:
     void OnFindNext(wxCommandEvent& event);

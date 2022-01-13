@@ -50,6 +50,8 @@
 #include "ui/hexedit.hh"
 #include "ui/logger.hh"
 #include "ui/menus.hh"
+#include "ui/plugins/export.hh"
+#include "ui/plugins/import.hh"
 #include "ui/plugins/plugin.hh"
 #include "ui/settings.hh"
 
@@ -202,12 +204,41 @@ int HexBedWxApp::OnExit() {
     return 0;
 }
 
+static int addImportPlugins(HexBedMainFrame* main, wxMenu* menu, int n) {
+    if (!n) return wxID_NONE;
+    int id = wxWindow::NewControlId(n);
+    if (id == wxID_NONE) return wxID_NONE;
+    for (int i = 0; i < n; ++i) {
+        hexbed::plugins::ImportPlugin& plugin =
+            hexbed::plugins::importPluginByIndex(i);
+        menu->Append(id + i, plugin.isLocalizable()
+                                 ? wxGetTranslation(plugin.getTitle())
+                                 : plugin.getTitle());
+    }
+    return id;
+}
+
+static int addExportPlugins(HexBedMainFrame* main, wxMenu* menu, int n) {
+    if (!n) return wxID_NONE;
+    int id = wxWindow::NewControlId(n);
+    if (id == wxID_NONE) return wxID_NONE;
+    for (int i = 0; i < n; ++i) {
+        hexbed::plugins::ExportPlugin& plugin =
+            hexbed::plugins::exportPluginByIndex(i);
+        menu->Append(id + i, plugin.isLocalizable()
+                                 ? wxGetTranslation(plugin.getTitle())
+                                 : plugin.getTitle());
+        menu->Enable(id + i, false);
+    }
+    return id;
+}
+
 HexBedMainFrame::HexBedMainFrame()
     : wxFrame(NULL, wxID_ANY, "HexBed", wxDefaultPosition, wxSize(-1, -1)) {
     tabs_ = new wxAuiNotebook(this, tabContainerID);
     context_ = std::make_shared<HexBedContextMain>(this);
     wxMenuBar* menuBar = new wxMenuBar;
-    hexbed::menu::createFileMenu(menuBar, fileOnlyMenuItems_);
+    hexbed::menu::createFileMenu(menuBar, fileOnlyMenuItems_, fileMenus_);
     hexbed::menu::createEditMenu(menuBar, fileOnlyMenuItems_)
         ->Bind(wxEVT_MENU_OPEN, &HexBedMainFrame::OnEditMenuOpened, this);
     hexbed::menu::createSearchMenu(menuBar, fileOnlyMenuItems_);
@@ -217,6 +248,30 @@ HexBedMainFrame::HexBedMainFrame()
     hexbed::menu::populateToolBar(toolBar, fileOnlyToolItems_);
     toolBar->Show(true);
     SetMenuBar(menuBar);
+    if (fileMenus_.importMenu) {
+        int n = static_cast<int>(
+            std::min<size_t>(std::numeric_limits<int>::max(),
+                             hexbed::plugins::importPluginCount()));
+        if (n) {
+            int id = addImportPlugins(this, fileMenus_.importMenu, n);
+            menuBar->Bind(wxEVT_MENU, &HexBedMainFrame::OnFileMenuImport, this,
+                          id, id + n - 1);
+            fileMenus_.importPluginCount = n;
+            fileMenus_.firstImportId = id;
+        }
+    }
+    if (fileMenus_.exportMenu) {
+        int n = static_cast<int>(
+            std::min<size_t>(std::numeric_limits<int>::max(),
+                             hexbed::plugins::exportPluginCount()));
+        if (n) {
+            int id = addExportPlugins(this, fileMenus_.exportMenu, n);
+            menuBar->Bind(wxEVT_MENU, &HexBedMainFrame::OnFileMenuExport, this,
+                          id, id + n - 1);
+            fileMenus_.exportPluginCount = n;
+            fileMenus_.firstExportId = id;
+        }
+    }
     sbar_ = CreateStatusBar(4);
     if (sbar_) hexbed::menu::populateStatusBar(sbar_);
     tabs_->Layout();
@@ -414,9 +469,13 @@ bool HexBedMainFrame::FileCloseAll() {
 }
 
 void HexBedMainFrame::UpdateFileOnly() {
+    wxMenuBar& mbar = *GetMenuBar();
     bool haveFiles = tabs_->GetPageCount() > 0;
     for (wxMenuItem* p : fileOnlyMenuItems_) p->Enable(haveFiles);
     for (wxToolBarToolBase* p : fileOnlyToolItems_) p->Enable(haveFiles);
+    for (int i = 0; i < fileMenus_.exportPluginCount; ++i) {
+        mbar.Enable(fileMenus_.firstExportId + i, haveFiles);
+    }
 }
 
 void HexBedMainFrame::OnTabSwitch(wxAuiNotebookEvent& event) {
@@ -495,19 +554,21 @@ void HexBedMainFrame::OnDocumentEdit(wxCommandEvent& event) {
     if (sel != wxNOT_FOUND) UpdateTabSymbol(static_cast<std::size_t>(sel));
 }
 
+void HexBedMainFrame::OnLastTabClose() {
+    SetTitle("HexBed");
+    UpdateFileOnly();
+    InitMenuEnabled();
+    hexbed::menu::updateStatusBarNoFile(GetStatusBar(), context_->state);
+    context_->announceCursorUpdate(HexBedPeekRegion{});
+}
+
 void HexBedMainFrame::OnTabClose(wxAuiNotebookEvent& event) {
     auto s = event.GetSelection();
     if (s == wxNOT_FOUND) return;
     if (!FileClose(s))
         event.Veto();
     else {
-        if (tabs_->GetPageCount() <= 1) {
-            SetTitle("HexBed");
-            InitMenuEnabled();
-            hexbed::menu::updateStatusBarNoFile(GetStatusBar(),
-                                                context_->state);
-            context_->announceCursorUpdate(HexBedPeekRegion{});
-        }
+        if (tabs_->GetPageCount() <= 1) OnLastTabClose();
         context_->removeWindow(GetEditor(s));
         event.Allow();
         AddPendingEvent(wxCommandEvent(HEX_SELECT_EVENT));
@@ -542,10 +603,11 @@ void HexBedMainFrame::AddTab(std::unique_ptr<hexbed::ui::HexBedEditor>&& editor,
     editor.release();
 }
 
-void HexBedMainFrame::OnFileNew(wxCommandEvent& event) {
+bool HexBedMainFrame::FileNew() {
     try {
         AddTab(MakeEditor(), wxString::Format(_("New-%llu"), ++newFileIndex_),
                "");
+        return true;
     } catch (...) {
         try {
             wxMessageBox(wxString::Format(_("Failed to create a new file: %s"),
@@ -553,8 +615,11 @@ void HexBedMainFrame::OnFileNew(wxCommandEvent& event) {
                          "HexBed", wxOK | wxICON_ERROR);
         } catch (...) {
         }
+        return false;
     }
 }
+
+void HexBedMainFrame::OnFileNew(wxCommandEvent& event) { FileNew(); }
 
 void HexBedMainFrame::FileKnock(const std::string& fp, bool readOnly) {
     try {
@@ -952,6 +1017,107 @@ void HexBedMainFrame::OnFileReload(wxCommandEvent& event) {
 
 void HexBedMainFrame::OnFileCloseAll(wxCommandEvent& event) { FileCloseAll(); }
 
+void HexBedMainFrame::OnFileMenuImport(wxCommandEvent& event) {
+    int i = event.GetId() - fileMenus_.firstImportId;
+    if (i >= 0 && i < fileMenus_.importPluginCount) {
+        hexbed::plugins::ImportPlugin& plugin =
+            hexbed::plugins::importPluginByIndex(i);
+        wxFileDialog dial(this, _("Import file"), "", "",
+                          plugin.getFileFilter(),
+                          wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+        if (dial.ShowModal() == wxID_CANCEL) return;
+        std::string fn = dial.GetPath().ToStdString();
+        if (plugin.configureImport(this, fn)) {
+            if (!FileNew()) return;
+            hexbed::ui::HexBedEditor* ed = GetEditor();
+            HexBedDocument& doc = ed->document();
+            try {
+                doc.romp(
+                    [&plugin, &fn](
+                        HexBedTask& task,
+                        std::function<void(bufsize, const_bytespan)> outp) {
+                        plugin.doImport(task, fn, outp);
+                    });
+            } catch (const hexbed::plugins::ImportFileInvalidError& e) {
+                try {
+                    wxString msg = wxGetTranslation(e.what());
+                    if (e.lineKnown())
+                        msg = wxString::Format(_("Error on line %llu:\n%s"),
+                                               e.lineNumber(), msg);
+                    wxMessageBox(wxString::Format(_("Failed to import:\nImport "
+                                                    "file was invalid.\n%s"),
+                                                  msg),
+                                 "HexBed", wxOK | wxICON_ERROR);
+                } catch (...) {
+                }
+            } catch (...) {
+                try {
+                    wxMessageBox(
+                        wxString::Format(_("Failed to import:\n%s"),
+                                         currentExceptionAsString().c_str()),
+                        "HexBed", wxOK | wxICON_ERROR);
+                } catch (...) {
+                }
+            }
+        }
+    }
+}
+
+void HexBedMainFrame::OnFileMenuExport(wxCommandEvent& event) {
+    int i = event.GetId() - fileMenus_.firstExportId;
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    if (ed && i >= 0 && i < fileMenus_.exportPluginCount) {
+        HexBedDocument& doc = ed->document();
+        hexbed::plugins::ExportPlugin& plugin =
+            hexbed::plugins::exportPluginByIndex(i);
+        std::string pathdir = "";
+        if (doc.filed()) {
+            try {
+                pathdir = std::filesystem::path(doc.path()).parent_path();
+            } catch (...) {
+            }
+        }
+        wxFileDialog dial(this, _("Export file"), pathdir, "",
+                          plugin.getFileFilter(),
+                          wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+        if (dial.ShowModal() == wxID_CANCEL) return;
+        bufsize sel, seln;
+        bool seltext;
+        ed->GetSelection(sel, seln, seltext);
+        if (!seln) {
+            sel = 0;
+            seln = doc.size();
+        }
+        std::string fn = dial.GetPath().ToStdString();
+        if (plugin.configureExport(this, fn, seln)) {
+            bufsize beg = sel, end = seln;
+            try {
+                HexBedTask(&ed->context(), 0, true)
+                    .run([&plugin, &doc, &fn, beg, end](HexBedTask& task) {
+                        plugin.doExport(
+                            task, fn,
+                            [&doc, beg, end](bufsize off,
+                                             bytespan arr) -> bufsize {
+                                bufsize read =
+                                    std::min<bufsize>(arr.size(), end - off);
+                                return doc.read(off + beg,
+                                                bytespan{arr.data(), read});
+                            },
+                            beg, end);
+                    });
+            } catch (...) {
+                try {
+                    wxMessageBox(
+                        wxString::Format(_("Failed to export:\n%s"),
+                                         currentExceptionAsString().c_str()),
+                        "HexBed", wxOK | wxICON_ERROR);
+                } catch (...) {
+                }
+            }
+        }
+    }
+}
+
 void HexBedMainFrame::OnEditUndo(wxCommandEvent& event) {
     hexbed::ui::HexBedEditor* ed = GetEditor();
     if (ed->document().canUndo()) {
@@ -984,9 +1150,13 @@ void HexBedMainFrame::DoCopy() {
         try {
             hexbed::clip::CopyBytes(ed->document(), sel, seln, seltext);
         } catch (...) {
-            wxMessageBox(wxString::Format(_("Failed to copy: %s"),
-                                          currentExceptionAsString().c_str()),
-                         "HexBed", wxOK | wxICON_ERROR);
+            try {
+                wxMessageBox(
+                    wxString::Format(_("Failed to copy:\n%s"),
+                                     currentExceptionAsString().c_str()),
+                    "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
             return;
         }
         if constexpr (cut) {
@@ -1029,9 +1199,13 @@ void HexBedMainFrame::DoPaste() {
                                 SelectFlags().caretAtEnd().highlightCaret());
             }
         } catch (...) {
-            wxMessageBox(wxString::Format(_("Failed to paste: %s"),
-                                          currentExceptionAsString().c_str()),
-                         "HexBed", wxOK | wxICON_ERROR);
+            try {
+                wxMessageBox(
+                    wxString::Format(_("Failed to paste:\n%s"),
+                                     currentExceptionAsString().c_str()),
+                    "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
         }
     }
 }

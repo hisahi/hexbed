@@ -17,50 +17,38 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/plugins/inspector/uint16.cc -- impl for builtin uint16 inspector
+// ui/plugins/export/intelhex.hh -- header for builtin Intel HEX exporter
 
-#include "ui/plugins/inspector/uint16.hh"
+#ifndef HEXBED_UI_PLUGINS_EXPORT_INTELHEX_HH
+#define HEXBED_UI_PLUGINS_EXPORT_INTELHEX_HH
 
-#include <wx/string.h>
-#include <wx/translation.h>
-
-#include <cstdint>
-
-#include "common/intconv.hh"
-#include "common/limits.hh"
-#include "common/logger.hh"
+#include "ui/plugins/export.hh"
 
 namespace hexbed {
 
 namespace plugins {
 
-InspectorPluginUInt16::InspectorPluginUInt16(pluginid id)
-    : LocalizableDataInspectorPlugin(
-          id, TAG("uint16 (unsigned 16-bit integer)"), sizeof(std::uint16_t),
-          1 + maxDecimalDigits<std::uint16_t>()) {}
+struct ExportPluginIntelHEXSettings {
+    unsigned columns{16};
+    bool segmentMode{false};
+};
 
-bool InspectorPluginUInt16::convertFromBytes(
-    std::size_t outstr_n, char* outstr, const_bytespan data,
-    const DataInspectorSettings& settings) {
-    std::uint16_t result = uintFromBytes<std::uint16_t>(
-        data.size(), data.data(), settings.littleEndian);
-    uintToString<std::uint16_t>(outstr_n, outstr, result);
-    return true;
-}
+class ExportPluginIntelHEX : public LocalizableExportPlugin {
+  public:
+    ExportPluginIntelHEX(pluginid id);
+    wxString getFileFilter() const;
+    bool configureExport(wxWindow* parent, const std::string& filename,
+                         bufsize size);
+    void doExport(HexBedTask& task, const std::string& filename,
+                  std::function<bufsize(bufsize, bytespan)> read,
+                  bufsize actualOffset, bufsize size);
 
-bool InspectorPluginUInt16::convertToBytes(
-    std::size_t& outdata_n, byte* outdata, const char* instr,
-    const DataInspectorSettings& settings) {
-    std::uint16_t result;
-    HEXBED_ASSERT(outdata_n >= 1);
-    if (uintFromString<std::uint16_t>(result, instr)) {
-        outdata_n = uintToBytes<std::uint16_t>(outdata_n, outdata, result,
-                                               settings.littleEndian);
-        return true;
-    }
-    return false;
-}
+  private:
+    ExportPluginIntelHEXSettings settings_;
+};
 
 };  // namespace plugins
 
 };  // namespace hexbed
+
+#endif /* HEXBED_UI_PLUGINS_EXPORT_INTELHEX_HH */

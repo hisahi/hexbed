@@ -67,7 +67,7 @@ HexBedTextInput::HexBedTextInput(wxWindow* parent, wxString* string,
     wxBoxSizer* row = new wxBoxSizer(wxHORIZONTAL);
     row->Add(label, wxSizerFlags().Center().Proportion(1));
     row->AddStretchSpacer();
-    row->Add(choice_);
+    row->Add(choice_, wxSizerFlags().Proportion(1));
     sizer->Add(row, wxSizerFlags().Expand());
 
     if (caseInsensitive) {

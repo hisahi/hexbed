@@ -62,6 +62,7 @@ HexEditor::HexEditor(wxWindow* parent, HexEditorParent* editor)
     Bind(wxEVT_SIZE, &HexEditor::OnResize, this);
     Bind(wxEVT_SET_FOCUS, &HexEditor::OnFocus, this);
     Bind(wxEVT_KILL_FOCUS, &HexEditor::OnBlur, this);
+    Bind(wxEVT_SHOW, &HexEditor::OnShow, this);
     Bind(wxEVT_ERASE_BACKGROUND, &HexEditor::OnEraseBackground, this);
     Bind(wxEVT_LEFT_DOWN, &HexEditor::OnLMouseDown, this);
     Bind(wxEVT_LEFT_UP, &HexEditor::OnLMouseUp, this);
@@ -254,6 +255,19 @@ unsigned HexEditor::FitColumns(wxCoord width) {
 
 unsigned HexEditor::GetLineHeight() { return lineHeight_; }
 
+bool HexEditor::TestVisibility() const noexcept { return IsShownOnScreen(); }
+
+void HexEditor::QueueRefresh() {
+    waitRedraw_ = true;
+}
+
+void HexEditor::WhenVisible() {
+    if (waitRedraw_) {
+        Redraw();
+        waitRedraw_ = false;
+    }
+}
+
 void HexEditor::OnEditorCopy() { parent_->OnEditorCopy(); }
 
 void HexEditor::InitDraw() {
@@ -435,6 +449,10 @@ void HexEditor::DrawFull() {
 }
 
 void HexEditor::RedrawLite() {
+    if (!TestVisibility()) {
+        QueueRefresh();
+        return;
+    }
     DrawFull();
     Refresh();
     UpdateCaret();
@@ -505,6 +523,10 @@ HexBedPeekRegion HexEditor::PeekBufferAtCursor() {
 
 void HexEditor::HintByteChanged(bufsize offset) {
     if (offset < off_ || offset >= off_ + bufn_) return;
+    if (!TestVisibility()) {
+        QueueRefresh();
+        return;
+    }
     bufsize sub = offset - off_;
     Buffer(sub, sub + 1, offset);
     unsigned r = convertRow(offset, off_, rows_, columns_);
@@ -513,6 +535,10 @@ void HexEditor::HintByteChanged(bufsize offset) {
 
 void HexEditor::HintBytesChanged(bufsize begin) {
     if (begin > off_ + bufn_) return;
+    if (!TestVisibility()) {
+        QueueRefresh();
+        return;
+    }
     Rebuffer();
     unsigned r = convertRow(begin, off_, rows_, columns_);
     for (unsigned i = r; i < rows_; ++i) RedrawRow(i);
@@ -520,6 +546,10 @@ void HexEditor::HintBytesChanged(bufsize begin) {
 
 void HexEditor::HintBytesChanged(bufsize begin, bufsize end) {
     if (end < off_ || begin > off_ + bufn_) return;
+    if (!TestVisibility()) {
+        QueueRefresh();
+        return;
+    }
     bufsize sub = begin >= off_ ? begin - off_ : 0;
     bufsize subend = std::min(bufc_, end + 1 - off_);
     Buffer(sub, subend, off_ + sub);
@@ -746,11 +776,12 @@ void HexEditor::OnChar(wxKeyEvent& e) {
     }
 }
 
-wxCoord HexEditor::GetColumnX(unsigned c) {
+wxCoord HexEditor::GetColumnX(unsigned c) const noexcept {
     return byteWidth_ * c + charWidth_ * (c >> group_);
 }
 
-void HexEditor::GetColumnFromX(wxCoord x, unsigned& div, unsigned& rem) {
+void HexEditor::GetColumnFromX(wxCoord x, unsigned& div,
+                               unsigned& rem) const noexcept {
     unsigned long col = x << group_;
     col /= (byteWidth_ << group_) + charWidth_;
     div = col;
@@ -961,12 +992,16 @@ void HexEditor::OnBlur(wxFocusEvent& event) {
     if (caret_.IsVisible()) HideCaret();
 }
 
+void HexEditor::OnShow(wxShowEvent& event) { WhenVisible(); }
+
 void HexEditor::ResizeDone() {
     GetDC();
     if (IsShownOnScreen()) Redraw();
 }
 
-void HexEditor::Selected() {}
+void HexEditor::Selected() {
+    WhenVisible();
+}
 
 void HexEditor::OnResize(wxSizeEvent& e) {
     /* ResizeDone(); */

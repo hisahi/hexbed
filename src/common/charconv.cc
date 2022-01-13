@@ -179,42 +179,6 @@ static std::size_t encodeCharUTF8(byte* out, char32_t c) {
     return i;
 }
 
-// 0 = OK
-// > 0 = truncated
-// < 0 = invalid
-int decodeCharUTF8(const byte* p, std::size_t n, char32_t& u, std::size_t& rc) {
-    if (!n) return 1;
-    byte c = *p;
-    char32_t t;
-    std::size_t j;
-    if (!(c & 0x80)) {
-        rc = 1;
-        u = c;
-        return 0;
-    } else if ((c & 0xE0) == 0xC0) {
-        t = c & 0x1F;
-        j = 2;
-    } else if ((c & 0xF0) == 0xE0) {
-        t = c & 0x0F;
-        j = 3;
-    } else if ((c & 0xF8) == 0xF0) {
-        t = c & 0x07;
-        j = 4;
-    } else {
-        return -1;
-    }
-    if (j > n) return 1;
-    for (std::size_t i = 1; i < j; ++i) {
-        c = p[i];
-        if ((c & 0xC0) != 0x80) return -1;
-        t = (t << 6) | (c & 0x3F);
-    }
-    rc = j;
-    if (t >= 0x110000UL || (0xD800UL <= t && t <= 0xDFFFUL)) return -1;
-    u = t;
-    return 0;
-}
-
 std::size_t encodeCharMbcsOrSbcs(TextEncoding enc,
                                  const SingleByteCharacterSet& sbcs, char32_t c,
                                  std::size_t size, byte* out) {
@@ -261,6 +225,42 @@ std::size_t encodeCharMbcsOrSbcs(TextEncoding enc,
     return memCopy(out, outbuf, std::min(outlen, size));
 }
 
+// 0 = OK
+// > 0 = truncated
+// < 0 = invalid
+int decodeCharUTF8(const byte* p, std::size_t n, char32_t& u, std::size_t& rc) {
+    if (!n) return 1;
+    byte c = *p;
+    char32_t t;
+    std::size_t j;
+    if (!(c & 0x80)) {
+        rc = 1;
+        u = c;
+        return 0;
+    } else if ((c & 0xE0) == 0xC0) {
+        t = c & 0x1F;
+        j = 2;
+    } else if ((c & 0xF0) == 0xE0) {
+        t = c & 0x0F;
+        j = 3;
+    } else if ((c & 0xF8) == 0xF0) {
+        t = c & 0x07;
+        j = 4;
+    } else {
+        return -1;
+    }
+    if (j > n) return 1;
+    for (std::size_t i = 1; i < j; ++i) {
+        c = p[i];
+        if ((c & 0xC0) != 0x80) return -1;
+        t = (t << 6) | (c & 0x3F);
+    }
+    rc = j;
+    if (t >= 0x110000UL || (0xD800UL <= t && t <= 0xDFFFUL)) return -1;
+    u = t;
+    return 0;
+}
+
 DecodeStatus decodeStringMbcsOrSbcs(TextEncoding enc,
                                     const SingleByteCharacterSet& sbcs,
                                     u32ostringstream& out,
@@ -272,11 +272,11 @@ DecodeStatus decodeStringMbcsOrSbcs(TextEncoding enc,
     case TextEncoding::SBCS:
         for (std::size_t i = 0; i < ds; ++i) {
             char32_t u = sbcs.toChar(data[i]);
-            ++status.readCount;
             if (!u) {
                 status.ok = false;
                 return status;
             }
+            ++status.readCount;
             ++status.charCount;
             out << u;
         }

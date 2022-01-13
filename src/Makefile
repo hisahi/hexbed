@@ -24,7 +24,9 @@ CXXFLAGS := -std=c++20 $(CXXFLAGS) -MMD -MP `wx-config --cflags`
 LDFLAGS := $(LDFLAGS) `wx-config --libs std,aui`
 LDLIBS=-lm
 OBJS=
-SUBDIRS=common file app ui/dialogs ui/plugins ui/plugins/inspector ui/settings ui/tools ui
+SUBDIRS=common file app ui/dialogs \
+		ui/plugins ui/plugins/export ui/plugins/import ui/plugins/inspector \
+		ui/settings ui/tools ui
 
 TARGET := ../hexbed
 IROOT := .
