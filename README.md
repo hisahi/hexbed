@@ -17,13 +17,14 @@ A graphical hex editor, still a work in progress.
 * Data inspector and editor (integers, etc.)
 * Search for text (including with case insensitivity)
 * Search for integers, floats, etc.
+* Import/export data
 
 ## Planned features
 * Stability
 * Performance
 * Not losing data
 * Not having bugs
-* Import/export data
+* Support for more import/export formats
 * Support for more text encodings
 * Bookmarks
 * Multiple windows/views
