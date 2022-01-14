@@ -28,6 +28,10 @@
 #include "app/config.hh"
 #include "common/charconv.hh"
 
+#if HAS_ICU
+#include <unicode/uchar.h>
+#endif
+
 namespace hexbed {
 
 template <typename T>
@@ -38,18 +42,19 @@ bool textEncode_(const T& buf, bufsize& outp, HexBedDocument* doc) {
     return true;
 }
 
-bool textEncode(const std::string& encoding, const wxString& text,
-                bufsize& outp, HexBedDocument* doc) {
-    if (!std::strncmp(encoding.c_str(), "m_", 2)) {
-        if (encoding == "m_utf8") {
+bool textEncode(const string& encoding, const wxString& text, bufsize& outp,
+                HexBedDocument* doc) {
+    if (encoding.size() > 2 &&
+        stringview(encoding.c_str(), 2) == STRING("m_")) {
+        if (encoding == STRING("m_utf8")) {
             return textEncode_(text.utf8_str(), outp, doc);
-        } else if (encoding == "m_utf16le") {
+        } else if (encoding == STRING("m_utf16le")) {
             return textEncode_(text.mb_str(wxMBConvUTF16LE()), outp, doc);
-        } else if (encoding == "m_utf16be") {
+        } else if (encoding == STRING("m_utf16be")) {
             return textEncode_(text.mb_str(wxMBConvUTF16BE()), outp, doc);
-        } else if (encoding == "m_utf32le") {
+        } else if (encoding == STRING("m_utf32le")) {
             return textEncode_(text.mb_str(wxMBConvUTF32LE()), outp, doc);
-        } else if (encoding == "m_utf32be") {
+        } else if (encoding == STRING("m_utf32be")) {
             return textEncode_(text.mb_str(wxMBConvUTF32BE()), outp, doc);
         }
     }
@@ -65,26 +70,26 @@ bool textEncode(const std::string& encoding, const wxString& text,
     return true;
 }
 
-bool textDecode(const std::string& encoding, wxString& text,
-                const_bytespan data) {
+bool textDecode(const string& encoding, wxString& text, const_bytespan data) {
     if (!data.size()) {
         text = wxEmptyString;
         return true;
     }
-    if (!std::strncmp(encoding.c_str(), "m_", 2)) {
+    if (encoding.size() > 2 &&
+        stringview(encoding.c_str(), 2) == STRING("m_")) {
         const char* c = reinterpret_cast<const char*>(data.data());
-        if (encoding == "m_utf8") {
+        if (encoding == STRING("m_utf8")) {
             return !(text = wxString::FromUTF8(c, data.size())).empty();
-        } else if (encoding == "m_utf16le") {
+        } else if (encoding == STRING("m_utf16le")) {
             return !(text = wxString(c, wxMBConvUTF16LE(), data.size()))
                         .empty();
-        } else if (encoding == "m_utf16be") {
+        } else if (encoding == STRING("m_utf16be")) {
             return !(text = wxString(c, wxMBConvUTF16BE(), data.size()))
                         .empty();
-        } else if (encoding == "m_utf32le") {
+        } else if (encoding == STRING("m_utf32le")) {
             return !(text = wxString(c, wxMBConvUTF32LE(), data.size()))
                         .empty();
-        } else if (encoding == "m_utf32be") {
+        } else if (encoding == STRING("m_utf32be")) {
             return !(text = wxString(c, wxMBConvUTF32BE(), data.size()))
                         .empty();
         }
@@ -93,6 +98,15 @@ bool textDecode(const std::string& encoding, wxString& text,
         getSbcsByName(!encoding.empty() ? encoding : config().charset);
     text = sbcsFromBytes(sbcs, data.size(), data.data());
     return true;
+}
+
+// implement the func needed by common/charconv.cc
+bool isUnicodePrintable(char32_t c) {
+#if HAS_ICU
+    return u_isprint(static_cast<UChar32>(c));
+#else
+    return false;
+#endif
 }
 
 };  // namespace hexbed

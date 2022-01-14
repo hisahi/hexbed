@@ -41,9 +41,44 @@ namespace hexbed {
 static std::random_device rd;
 static std::default_random_engine re{rd()};
 
-std::string getBackupFilename(const std::string& fn) { return fn + ".bak"; }
+FILE_unique_ptr fopen_unique(const char* filename, const char* mode) {
+    return FILE_unique_ptr(std::fopen(filename, mode), [](std::FILE* fp) {
+        return fp ? std::fclose(fp) : 0;
+    });
+}
 
-void makeBackupOf(HexBedContext& ctx, const std::string& fn) {
+FILE_unique_ptr fopen_unique(const pathstring& filename, const char* mode) {
+    return fopen_unique(filename.c_str(), mode);
+}
+
+FILE_unique_ptr fopen_unique(const std::filesystem::path& filename,
+                             const char* mode) {
+    return fopen_unique(filename.c_str(), mode);
+}
+
+FILE_unique_ptr freopen_unique(const char* filename, const char* mode,
+                               FILE_unique_ptr& fp) {
+    return FILE_unique_ptr(
+        std::freopen(filename, mode, fp.release()),
+        [](std::FILE* fp) { return fp ? std::fclose(fp) : 0; });
+}
+
+FILE_unique_ptr freopen_unique(const pathstring& filename, const char* mode,
+                               FILE_unique_ptr& fp) {
+    return freopen_unique(filename.c_str(), mode, fp);
+}
+
+FILE_unique_ptr freopen_unique(const std::filesystem::path& filename,
+                               const char* mode, FILE_unique_ptr& fp) {
+    return freopen_unique(filename.c_str(), mode, fp);
+}
+
+std::filesystem::path getBackupFilename(std::filesystem::path fn) {
+    fn += pathstring(".bak");
+    return fn;
+}
+
+void makeBackupOf(HexBedContext& ctx, const std::filesystem::path& fn) {
     for (;;) {
         try {
             if (!std::filesystem::exists(fn)) return;
@@ -55,7 +90,7 @@ void makeBackupOf(HexBedContext& ctx, const std::string& fn) {
         } catch (...) {
             using enum FailureResponse;
             std::exception_ptr eptr = std::current_exception();
-            switch (ctx.ifBackupFails(exceptionAsString(eptr).c_str())) {
+            switch (ctx.ifBackupFails(exceptionAsString(eptr))) {
             default:
             case Abort:
                 std::rethrow_exception(eptr);
@@ -211,8 +246,8 @@ class HexBedBufferFileVbufOverlay : public VirtualBuffer {
 #endif
 };
 
-HexBedBufferFile::HexBedBufferFile(const std::string& filename)
-    : f_((errno = 0, fopen_unique(filename.c_str(), "rb"))) {
+HexBedBufferFile::HexBedBufferFile(const std::filesystem::path& filename)
+    : f_((errno = 0, fopen_unique(filename, "rb"))) {
     if (!f_) throw errno_to_exception(errno);
     updateSize();
 }
@@ -234,8 +269,9 @@ bufsize HexBedBufferFile::read(bufoffset offset, bytespan data) {
     return r;
 }
 
-FILE_unique_ptr fopen_replace_before(const std::string& filename,
-                                     std::string& tempfilename, bool backup) {
+FILE_unique_ptr fopen_replace_before(const std::filesystem::path& filename,
+                                     std::filesystem::path& tempfilename,
+                                     bool backup) {
     if (backup) {
         tempfilename = getBackupFilename(filename);
         FILE_unique_ptr fp;
@@ -243,21 +279,23 @@ FILE_unique_ptr fopen_replace_before(const std::string& filename,
         std::error_code ec;
         std::filesystem::rename(filename, tempfilename, ec);
         if (!ec) tempfilename = filename;
-        fp = fopen_unique(tempfilename.c_str(), "wb");
+        fp = fopen_unique(tempfilename, "wb");
         if (!fp) throw errno_to_exception(errno);
         std::setvbuf(fp.get(), nullptr, _IONBF, 0);
         return fp;
     } else {
-        std::string tmpfn = filename + ".hexbedtmp000000";
+        pathstring tmpfn =
+            static_cast<pathstring>(filename) + ".hexbedtmp000000";
         size_t rndoff = tmpfn.size() - 6;
         FILE_unique_ptr fp;
         std::uniform_int_distribution distr{0, 15};
         for (int tries = 0; tries < 20; ++tries) {
-            char* buf = tmpfn.data() + rndoff;
-            buf[0] = HEX_LOWERCASE[tries & 15];
-            for (int i = 1; i < 6; ++i) buf[i] = HEX_LOWERCASE[distr(re)];
+            strchar* buf = tmpfn.data() + rndoff;
+            buf[0] = static_cast<strchar>(HEX_LOWERCASE[tries & 15]);
+            for (int i = 1; i < 6; ++i)
+                buf[i] = static_cast<strchar>(HEX_LOWERCASE[distr(re)]);
             errno = 0;
-            fp = fopen_unique(tmpfn.c_str(), "wxb");
+            fp = fopen_unique(tmpfn, "wxb");
             if (fp) break;
         }
         if (!fp) throw errno_to_exception(errno);
@@ -267,16 +305,18 @@ FILE_unique_ptr fopen_replace_before(const std::string& filename,
     }
 }
 
-static void filesystem_swap(const std::string& fn1, const std::string& fn2) {
-    std::string tmpfn = fn1 + ".hexbedtmp000000";
+static void filesystem_swap(const std::filesystem::path& fn1,
+                            const std::filesystem::path& fn2) {
+    pathstring tmpfn = static_cast<pathstring>(fn1) + ".hexbedtmp000000";
     size_t rndoff = tmpfn.size() - 6;
     FILE_unique_ptr fp;
     std::uniform_int_distribution distr{0, 15};
     std::error_code ec;
     for (int tries = 0; tries < 20; ++tries) {
-        char* buf = tmpfn.data() + rndoff;
-        buf[0] = HEX_LOWERCASE[tries & 15];
-        for (int i = 1; i < 6; ++i) buf[i] = HEX_LOWERCASE[distr(re)];
+        strchar* buf = tmpfn.data() + rndoff;
+        buf[0] = static_cast<strchar>(HEX_LOWERCASE[tries & 15]);
+        for (int i = 1; i < 6; ++i)
+            buf[i] = static_cast<strchar>(HEX_LOWERCASE[distr(re)]);
         std::filesystem::rename(fn1, tmpfn, ec);
         if (!ec) {
             std::filesystem::rename(fn2, fn1);
@@ -286,8 +326,8 @@ static void filesystem_swap(const std::string& fn1, const std::string& fn2) {
     throw std::system_error(ec);
 }
 
-void fopen_replace_after(const std::string& filename,
-                         const std::string& tempfilename, bool backup,
+void fopen_replace_after(const std::filesystem::path& filename,
+                         const std::filesystem::path& tempfilename, bool backup,
                          FILE_unique_ptr&& f) {
     f = nullptr;
     if (backup) {
@@ -298,9 +338,9 @@ void fopen_replace_after(const std::string& filename,
 }
 
 void HexBedBufferFile::write(HexBedContext& ctx, WriteCallback write,
-                             const std::string& filename) {
+                             const std::filesystem::path& filename) {
     if (!f_) throw system_io_error("file is closed");
-    std::string tmpfn;
+    std::filesystem::path tmpfn;
     bool backup = ctx.shouldBackup();
     FILE_unique_ptr fp = fopen_replace_before(filename, tmpfn, backup);
 
@@ -318,14 +358,14 @@ void HexBedBufferFile::write(HexBedContext& ctx, WriteCallback write,
 }
 
 void HexBedBufferFile::writeOverlay(HexBedContext& ctx, WriteCallback write,
-                                    const std::string& filename) {
+                                    const std::filesystem::path& filename) {
 #if HAVE_TRUNCATE
     if (!f_) throw system_io_error("file is closed");
     if (ctx.shouldBackup()) makeBackupOf(ctx, filename);
     auto fp = freopen_unique(nullptr, "r+b", f_);
     if (!fp) {
         int old_errno = errno;
-        f_ = fopen_unique(filename.c_str(), "rb");
+        f_ = fopen_unique(filename, "rb");
         throw errno_to_exception(old_errno);
     }
 
@@ -343,11 +383,11 @@ void HexBedBufferFile::writeOverlay(HexBedContext& ctx, WriteCallback write,
 }
 
 void HexBedBufferFile::writeNew(HexBedContext& ctx, WriteCallback write,
-                                const std::string& filename) {
+                                const std::filesystem::path& filename) {
     if (!f_) throw system_io_error("file is closed");
     if (ctx.shouldBackup()) makeBackupOf(ctx, filename);
     errno = 0;
-    auto fp = fopen_unique(filename.c_str(), "wb");
+    auto fp = fopen_unique(filename, "wb");
     if (!fp) throw errno_to_exception(errno);
 
     std::setvbuf(fp.get(), nullptr, _IONBF, 0);
@@ -359,7 +399,7 @@ void HexBedBufferFile::writeNew(HexBedContext& ctx, WriteCallback write,
 }
 
 void HexBedBufferFile::writeCopy(HexBedContext& ctx, WriteCallback write,
-                                 const std::string& filename) {
+                                 const std::filesystem::path& filename) {
     writeNew(ctx, write, filename);
 }
 

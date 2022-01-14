@@ -57,7 +57,8 @@ namespace hexbed {
 #if HEXBED_MMAP_POSIX
 struct file_wrapper {
     int fd;
-    inline file_wrapper(const std::string& filename, int flags = O_RDONLY) {
+    inline file_wrapper(const std::filesystem::path& filename,
+                        int flags = O_RDONLY) {
         fd = open(filename.c_str(), flags);
         if (fd == -1) throw errno_to_exception(errno);
     }
@@ -86,7 +87,7 @@ struct file_wrapper {
 #else
 struct file_wrapper {
     inline file_wrapper() { throw std::runtime_error("not supported"); }
-    inline file_wrapper(const std::string& filename, int flags = 0)
+    inline file_wrapper(const std::filesystem::path& filename, int flags = 0)
         : file_wrapper() {}
 
     inline file_wrapper(const file_wrapper& copy) = delete;
@@ -104,16 +105,16 @@ struct file_wrapper {
 
 class HexBedBufferMmap : public HexBedBuffer {
   public:
-    HexBedBufferMmap(const std::string& filename);
+    HexBedBufferMmap(const std::filesystem::path& filename);
     bufsize read(bufoffset offset, bytespan data);
     void write(HexBedContext& ctx, WriteCallback write,
-               const std::string& filename);
+               const std::filesystem::path& filename);
     void writeOverlay(HexBedContext& ctx, WriteCallback write,
-                      const std::string& filename);
+                      const std::filesystem::path& filename);
     void writeNew(HexBedContext& ctx, WriteCallback write,
-                  const std::string& filename);
+                  const std::filesystem::path& filename);
     void writeCopy(HexBedContext& ctx, WriteCallback write,
-                   const std::string& filename);
+                   const std::filesystem::path& filename);
     bufsize size() const noexcept;
 
     byte* extent(bufsize offset, bufsize& size);

@@ -23,14 +23,15 @@
 #define HEXBED_COMMON_CONFIG_HH
 
 #include <initializer_list>
-#include <string>
+
+#include "common/types.hh"
 
 namespace hexbed {
 
 constexpr unsigned MAX_COLUMNS = 64;
 
 struct ConfigurationValues {
-    std::string language;
+    string language;
     long backgroundColor;
     long offsetColor;
     long hexColorOdd;
@@ -48,8 +49,8 @@ struct ConfigurationValues {
     long groupSize;
     long offsetRadix;
     bool autoFit;
-    std::string charset;
-    std::string font;
+    string charset;
+    string font;
     long showColumnTypes;
     bool backupFiles;
 };
@@ -65,22 +66,20 @@ class Configuration {
     void saveValues();
     void applySettings();
 
-    long loadIntRange(const std::string& key, long def, long min, long max);
-    long loadIntSet(const std::string& key, long def,
+    long loadIntRange(const string& key, long def, long min, long max);
+    long loadIntSet(const string& key, long def,
                     std::initializer_list<long> pass);
-    long loadColor(const std::string& key, long def);
+    long loadColor(const string& key, long def);
 
-    virtual bool loadBool(const std::string& key, bool def) = 0;
-    virtual long loadInt(const std::string& key, long def) = 0;
-    virtual float loadFloat(const std::string& key, double def) = 0;
-    virtual std::string loadString(const std::string& key,
-                                   const std::string& def) = 0;
+    virtual bool loadBool(const string& key, bool def) = 0;
+    virtual long loadInt(const string& key, long def) = 0;
+    virtual float loadFloat(const string& key, double def) = 0;
+    virtual string loadString(const string& key, const string& def) = 0;
 
-    virtual void saveBool(const std::string& key, bool value) = 0;
-    virtual void saveInt(const std::string& key, long value) = 0;
-    virtual void saveFloat(const std::string& key, double value) = 0;
-    virtual void saveString(const std::string& key,
-                            const std::string& value) = 0;
+    virtual void saveBool(const string& key, bool value) = 0;
+    virtual void saveInt(const string& key, long value) = 0;
+    virtual void saveFloat(const string& key, double value) = 0;
+    virtual void saveString(const string& key, const string& value) = 0;
 };
 
 };  // namespace hexbed

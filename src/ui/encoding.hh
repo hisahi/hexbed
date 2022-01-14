@@ -29,32 +29,43 @@
 
 namespace hexbed {
 
-bool textEncode(const std::string& encoding, const wxString& text,
-                bufsize& outp, HexBedDocument* doc);
-bool textDecode(const std::string& encoding, wxString& text,
-                const_bytespan data);
+bool textEncode(const string& encoding, const wxString& text, bufsize& outp,
+                HexBedDocument* doc);
+bool textDecode(const string& encoding, wxString& text, const_bytespan data);
 
 // clang-format off
 
-#define MBCS_ENCODING_KEYS() \
-    "m_utf8",                \
-    "m_utf16le",             \
-    "m_utf16be",             \
-    "m_utf32le",             \
-    "m_utf32be"
+/* these lists only control what the user can pick, they still need to be
+   implemented elsewhere */
+
+#define MBCS_ENCODING_KEYS()                                                   \
+    STRING("m_utf8"),                                                          \
+    STRING("m_utf16le"),                                                       \
+    STRING("m_utf16be"),                                                       \
+    STRING("m_utf32le"),                                                       \
+    STRING("m_utf32be"),                                                       \
+
 #define MBCS_ENCODING_NAMES()                                                  \
     _("Unicode, UTF-8"),                                                       \
     _("Unicode, UTF-16LE (little-endian)"),                                    \
     _("Unicode, UTF-16BE (big-endian)"),                                       \
     _("Unicode, UTF-32LE (little-endian)"),                                    \
-    _("Unicode, UTF-32BE (big-endian)")
+    _("Unicode, UTF-32BE (big-endian)"),                                       \
 
-#define SBCS_ENCODING_KEYS() \
-    "ascii",                 \
-    "latin1"
+// make sure common/charconv.cc defines all of these
+#define SBCS_ENCODING_KEYS()                                                   \
+    STRING("ascii"),                                                           \
+    STRING("latin1"),                                                          \
+    STRING("cp437"),                                                           \
+    STRING("cp850"),                                                           \
+
 #define SBCS_ENCODING_NAMES()                                                  \
     _("ASCII"),                                                                \
-    _("Latin-1 (ISO 8859-1)")
+    _("Latin-1 (ISO 8859-1)"),                                                 \
+    _("IBM 437"),                                                              \
+    _("IBM 850"),                                                              \
+
+/* ... */
 
 // clang-format on
 

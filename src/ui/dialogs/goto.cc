@@ -25,6 +25,7 @@
 
 #include "app/config.hh"
 #include "common/hexconv.hh"
+#include "ui/string.hh"
 
 namespace hexbed {
 
@@ -104,7 +105,7 @@ bufsize GoToDialog::GetOffset() const noexcept {
     using enum SeekBase;
     bufsize o;
     int negative;
-    if (!convertBaseFromNeg(o, negative, text_->GetValue().ToStdString(),
+    if (!convertBaseFromNeg(o, negative, stringFromWx(text_->GetValue()),
                             base_))
         return 0;
     switch (seek_) {
@@ -134,7 +135,7 @@ bool GoToDialog::CheckInput() {
     using enum SeekBase;
     bufsize o;
     int negative;
-    if (convertBaseFromNeg(o, negative, text_->GetValue().ToStdString(),
+    if (convertBaseFromNeg(o, negative, stringFromWx(text_->GetValue()),
                            base_)) {
         switch (seek_) {
         case Begin:
@@ -151,7 +152,7 @@ void GoToDialog::ConvertBase(unsigned base) {
     bufsize o;
     int negative;
     bool ok =
-        convertBaseFromNeg(o, negative, text_->GetValue().ToStdString(), base_);
+        convertBaseFromNeg(o, negative, stringFromWx(text_->GetValue()), base_);
     if (ok)
         text_->SetValue(
             convertBaseToNeg(o, negative, base, config().uppercase));

@@ -33,40 +33,42 @@ namespace hexbed {
 using FILE_unique_ptr =
     std::unique_ptr<std::FILE, std::function<int(std::FILE*)>>;
 
-std::string getBackupFilename(const std::string& fn);
-void makeBackupOf(HexBedContext& ctx, const std::string& fn);
+std::filesystem::path getBackupFilename(std::filesystem::path fn);
+void makeBackupOf(HexBedContext& ctx, const std::filesystem::path& fn);
 
-inline FILE_unique_ptr fopen_unique(const char* filename, const char* mode) {
-    return FILE_unique_ptr(std::fopen(filename, mode), [](std::FILE* fp) {
-        return fp ? std::fclose(fp) : 0;
-    });
-}
+typedef std::basic_string<std::filesystem::path::value_type> pathstring;
 
-inline FILE_unique_ptr freopen_unique(const char* filename, const char* mode,
-                                      FILE_unique_ptr& fp) {
-    return FILE_unique_ptr(
-        std::freopen(filename, mode, fp.release()),
-        [](std::FILE* fp) { return fp ? std::fclose(fp) : 0; });
-}
+FILE_unique_ptr fopen_unique(const char* filename, const char* mode);
+FILE_unique_ptr fopen_unique(const pathstring& filename, const char* mode);
+FILE_unique_ptr fopen_unique(const std::filesystem::path& filename,
+                             const char* mode);
 
-FILE_unique_ptr fopen_replace_before(const std::string& filename,
-                                     std::string& tempfilename, bool backup);
-void fopen_replace_after(const std::string& filename,
-                         const std::string& tempfilename, bool backup,
+FILE_unique_ptr freopen_unique(const char* filename, const char* mode,
+                               FILE_unique_ptr& fp);
+FILE_unique_ptr freopen_unique(const pathstring& filename, const char* mode,
+                               FILE_unique_ptr& fp);
+FILE_unique_ptr freopen_unique(const std::filesystem::path& filename,
+                               const char* mode, FILE_unique_ptr& fp);
+
+FILE_unique_ptr fopen_replace_before(const std::filesystem::path& filename,
+                                     std::filesystem::path& tempfilename,
+                                     bool backup);
+void fopen_replace_after(const std::filesystem::path& filename,
+                         const std::filesystem::path& tempfilename, bool backup,
                          FILE_unique_ptr&& f);
 
 class HexBedBufferFile : public HexBedBuffer {
   public:
-    HexBedBufferFile(const std::string& filename);
+    HexBedBufferFile(const std::filesystem::path& filename);
     bufsize read(bufoffset offset, bytespan data);
     void write(HexBedContext& ctx, WriteCallback write,
-               const std::string& filename);
+               const std::filesystem::path& filename);
     void writeOverlay(HexBedContext& ctx, WriteCallback write,
-                      const std::string& filename);
+                      const std::filesystem::path& filename);
     void writeNew(HexBedContext& ctx, WriteCallback write,
-                  const std::string& filename);
+                  const std::filesystem::path& filename);
     void writeCopy(HexBedContext& ctx, WriteCallback write,
-                   const std::string& filename);
+                   const std::filesystem::path& filename);
     // bufsize size() noexcept;
     bufsize size() const noexcept;
 

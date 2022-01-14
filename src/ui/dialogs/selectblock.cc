@@ -25,6 +25,7 @@
 
 #include "app/config.hh"
 #include "common/hexconv.hh"
+#include "ui/string.hh"
 
 namespace hexbed {
 
@@ -106,15 +107,15 @@ SelectBlockDialog::SelectBlockDialog(wxWindow* parent, bufsize cur, bufsize len,
 
 bufsize SelectBlockDialog::GetOffset() const noexcept {
     bufsize o;
-    if (!convertBaseFrom(o, text_->GetValue().ToStdString(), base_)) return 0;
+    if (!convertBaseFrom(o, stringFromWx(text_->GetValue()), base_)) return 0;
     return o;
 }
 
 bufsize SelectBlockDialog::GetLength() const noexcept {
     bufsize o, o2;
     int negative;
-    if (!convertBaseFrom(o, text_->GetValue().ToStdString(), base_)) return 0;
-    if (!convertBaseFromNeg(o2, negative, text2_->GetValue().ToStdString(),
+    if (!convertBaseFrom(o, stringFromWx(text_->GetValue()), base_)) return 0;
+    if (!convertBaseFromNeg(o2, negative, stringFromWx(text2_->GetValue()),
                             base_))
         return 0;
     return sub_ ? o2 - o : o2;
@@ -134,9 +135,9 @@ void SelectBlockDialog::UpdateMetrics(bufsize cur, bufsize len, bufsize end) {
 
 bool SelectBlockDialog::CheckInput() {
     bufsize o, oe;
-    if (!convertBaseFrom(o, text_->GetValue().ToStdString(), base_))
+    if (!convertBaseFrom(o, stringFromWx(text_->GetValue()), base_))
         return false;
-    if (!convertBaseFrom(oe, text2_->GetValue().ToStdString(), base_))
+    if (!convertBaseFrom(oe, stringFromWx(text2_->GetValue()), base_))
         return false;
     if (sub_)
         return o <= oe && oe <= end_;
@@ -147,10 +148,10 @@ bool SelectBlockDialog::CheckInput() {
 void SelectBlockDialog::ConvertBase(unsigned base) {
     bufsize o;
     int neg;
-    bool ok = convertBaseFrom(o, text_->GetValue().ToStdString(), base_);
+    bool ok = convertBaseFrom(o, stringFromWx(text_->GetValue()), base_);
     if (ok) text_->SetValue(convertBaseTo(o, base, config().uppercase));
     bool ok2 =
-        convertBaseFromNeg(o, neg, text2_->GetValue().ToStdString(), base_);
+        convertBaseFromNeg(o, neg, stringFromWx(text2_->GetValue()), base_);
     if (ok2)
         text2_->SetValue(convertBaseToNeg(o, neg, base, config().uppercase));
     base_ = base;
@@ -159,11 +160,11 @@ void SelectBlockDialog::ConvertBase(unsigned base) {
 void SelectBlockDialog::ConvertNewSub(bool sub) {
     bufsize o;
     if (sub_ == sub) return;
-    bool ok = convertBaseFrom(o, text_->GetValue().ToStdString(), base_);
+    bool ok = convertBaseFrom(o, stringFromWx(text_->GetValue()), base_);
     if (ok) {
         bufsize oe;
         int neg;
-        ok = convertBaseFromNeg(oe, neg, text2_->GetValue().ToStdString(),
+        ok = convertBaseFromNeg(oe, neg, stringFromWx(text2_->GetValue()),
                                 base_);
         if (sub) {
             // length -> end

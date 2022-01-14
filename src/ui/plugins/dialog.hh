@@ -17,45 +17,32 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/applock.cc -- impl for application single-instance lock
+// ui/plugins/dialog.hh -- header for the plugin configure dialog
 
-#include "ui/applock.hh"
+#ifndef HEXBED_UI_PLUGINS_DIALOG_HH
+#define HEXBED_UI_PLUGINS_DIALOG_HH
 
-#include "ui/string.hh"
+#include <wx/dialog.h>
 
 namespace hexbed {
 
-static wxString getMutexName() { return "/tmp/hexbed.lock"; }
+namespace plugins {
 
-AppLock::AppLock(std::function<void(const wxString&)> f)
-    : mutexName_(getMutexName()), knock_(f) {
-    server_ = new AppLockServer(this);
-}
+template <bool preCommit>
+class PluginConfigureDialog : public wxDialog {
+  public:
+    using wxDialog::wxDialog;
 
-bool AppLock::acquire(const wxString& token) {
-    if (single_.IsAnotherRunning()) {
-        wxClient* client = new wxClient;
-        wxConnectionBase* conn =
-            client->MakeConnection("localhost", mutexName_, "applock");
-        conn->Execute("!" + token);
-        delete conn;
-        delete client;
-        return false;
+  protected:
+    void OnOK(wxCommandEvent& event) {
+        if constexpr (preCommit) TransferDataFromWindow();
+        if (CheckValid()) EndModal(wxID_OK);
     }
-    server_->Create(mutexName_);
-    return true;
-}
+    virtual bool CheckValid() noexcept { return true; }
+};
 
-void AppLock::release() {
-    // wxSingleInstanceChecker self-destructs
-    delete server_;
-}
-
-void AppLock::knock(const wxString& token) { knock_(token); }
-
-bool AppLockConnection::OnExec(const wxString& topic, const wxString& data) {
-    lock_->knock(data.Mid(1));
-    return true;
-}
+};  // namespace plugins
 
 };  // namespace hexbed
+
+#endif /* HEXBED_UI_PLUGINS_DIALOG_HH */

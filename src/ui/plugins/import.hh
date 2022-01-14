@@ -25,6 +25,7 @@
 #include <wx/string.h>
 #include <wx/window.h>
 
+#include <filesystem>
 #include <functional>
 #include <stdexcept>
 
@@ -56,9 +57,9 @@ class ImportPlugin : public Plugin {
     virtual wxString getFileFilter() const;
 
     virtual bool configureImport(wxWindow* parent,
-                                 const std::string& filename) = 0;
+                                 const std::filesystem::path& filename) = 0;
     virtual void doImport(
-        HexBedTask& task, const std::string& filename,
+        HexBedTask& task, const std::filesystem::path& filename,
         std::function<void(bufsize, const_bytespan)> output) = 0;
 
   protected:

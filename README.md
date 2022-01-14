@@ -39,5 +39,8 @@ Tested and developed for Linux, but theoretically cross-platform.
 ## Implementation
 In modern C++ (C++17 with some C++20). The UI uses wxWidgets.
 
+ICU is used, but not technically necessary (it can be disabled by changing
+the Makefile).
+
 ## License
 GPL version 3. See `COPYING`.

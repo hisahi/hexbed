@@ -155,7 +155,7 @@ HexBedTaskHandler* HexBedContextMain::getTaskHandler() { return task_.get(); }
 
 bool HexBedContextMain::shouldBackup() { return config().backupFiles; }
 
-FailureResponse HexBedContextMain::ifBackupFails(const char* message) {
+FailureResponse HexBedContextMain::ifBackupFails(const string& message) {
     wxMessageDialog dial(
         main_, wxString::Format(_("Backup failed:\n%s"), message), "HexBed",
         wxYES_NO | wxCANCEL | wxCANCEL_DEFAULT | wxICON_EXCLAMATION);

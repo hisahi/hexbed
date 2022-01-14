@@ -17,9 +17,9 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/plugins/import/intelhex.cc -- impl for builtin Intel HEX importer
+// ui/plugins/import/srec.cc -- impl for builtin Motorola S-record importer
 
-#include "ui/plugins/import/intelhex.hh"
+#include "ui/plugins/import/srec.hh"
 
 #include <wx/button.h>
 #include <wx/checkbox.h>
@@ -40,11 +40,11 @@ namespace hexbed {
 
 namespace plugins {
 
-class ImportPluginIntelHEXDialog : public wxDialog {
+class ImportPluginMotorolaSRECDialog : public wxDialog {
   public:
-    ImportPluginIntelHEXDialog(wxWindow* parent,
-                               ImportPluginIntelHEXSettings& settings)
-        : wxDialog(parent, wxID_ANY, _("Intel HEX"), wxDefaultPosition,
+    ImportPluginMotorolaSRECDialog(wxWindow* parent,
+                                   ImportPluginMotorolaSRECSettings& settings)
+        : wxDialog(parent, wxID_ANY, _("Motorola S-record"), wxDefaultPosition,
                    wxDefaultSize, wxDEFAULT_DIALOG_STYLE) {
         SetReturnCode(wxID_CANCEL);
 
@@ -70,19 +70,19 @@ class ImportPluginIntelHEXDialog : public wxDialog {
     }
 };
 
-ImportPluginIntelHEX::ImportPluginIntelHEX(pluginid id)
+ImportPluginMotorolaSREC::ImportPluginMotorolaSREC(pluginid id)
     : LocalizableImportPlugin(
           /// format name, perhaps should not be translated
-          id, TAG("Intel HEX")) {}
+          id, TAG("Motorola S-record")) {}
 
-wxString ImportPluginIntelHEX::getFileFilter() const {
-    return _("Intel HEX file (*.hex, *.h86)") + "|*.hex;*.h86|" +
-           ImportPlugin::getFileFilter();
+wxString ImportPluginMotorolaSREC::getFileFilter() const {
+    return _("Motorola S-record file (*.s19, *.s28, *.s37)") +
+           "|*.s19;*.s28;*.s37|" + ImportPlugin::getFileFilter();
 }
 
-bool ImportPluginIntelHEX::configureImport(
+bool ImportPluginMotorolaSREC::configureImport(
     wxWindow* parent, const std::filesystem::path& filename) {
-    ImportPluginIntelHEXDialog dial(parent, settings_);
+    ImportPluginMotorolaSRECDialog dial(parent, settings_);
     dial.TransferDataToWindow();
     int result = dial.ShowModal();
     if (result != wxID_OK) return false;
@@ -111,44 +111,70 @@ static byte readByte(std::size_t lineno, const char** text) {
 
 static std::size_t readRow(std::size_t lineno, byte* row, const char* text) {
     std::size_t n = 0;
-    for (int i = 0; i < 4; ++i) row[n++] = readByte(lineno, &text);
-    for (int i = 0; i < row[0]; ++i) row[n++] = readByte(lineno, &text);
     row[n++] = readByte(lineno, &text);
+    for (int i = 0; i < row[0]; ++i) row[n++] = readByte(lineno, &text);
     return n;
 }
 
-void ImportPluginIntelHEX::doImport(
+void ImportPluginMotorolaSREC::doImport(
     HexBedTask& task, const std::filesystem::path& filename,
     std::function<void(bufsize, const_bytespan)> output) {
     std::ifstream f(filename);
-    byte row[261];
+    byte row[256];
     std::size_t lineno = 1;
-    bufsize mask = 0;
     for (std::string line; std::getline(f, line); ++lineno) {
-        std::size_t index = line.find(':');
-        if (index == std::string::npos) continue;
-        std::size_t n = readRow(lineno, row, line.c_str() + index + 1);
+        if (line[0] != 'S') continue;
+        int type = hexDigitToNum(line[1]);
+        if (type >= 10) type = -1;
+        if (type < 0)
+            throw ImportFileInvalidError(TAG("Invalid record type."), lineno);
+        std::size_t n = readRow(lineno, row, line.c_str() + 2);
         if (settings_.checksums) {
             byte b = 0;
             for (std::size_t i = 0; i < n; ++i) b += row[i];
-            if (b) throw ImportFileInvalidError(TAG("Checksum error."), lineno);
+            if (~b & 255)
+                throw ImportFileInvalidError(TAG("Checksum error."), lineno);
         }
-        auto addr = uintFromBytes<std::uint16_t>(2, &row[1], false);
-        switch (row[3]) {
-        case 0:  // data
-            output(mask + addr, const_bytespan{&row[4], row[0]});
+        std::size_t addr = 0;
+        unsigned offset, count = row[0];
+        switch (type) {
+        case 0:  // header, skip
             break;
-        case 1:  // end of file
-            return;
-        case 2:  // data segment
-            mask = addr << 4;
+        case 1:  // data 16-bit addr
+            addr |= row[1] << 8;
+            addr |= row[2];
+            offset = 3;
+            count -= offset;
+            output(addr, const_bytespan{row + offset, count});
             break;
-        case 3:  // exec segment
+        case 2:  // data 24-bit addr
+            addr |= row[1] << 16;
+            addr |= row[2] << 8;
+            addr |= row[3];
+            offset = 4;
+            count -= offset;
+            output(addr, const_bytespan{row + offset, count});
             break;
-        case 4:  // data hiword
-            mask = addr << 16;
+        case 3:  // data 32-bit addr
+            addr |= row[1] << 24;
+            addr |= row[2] << 16;
+            addr |= row[3] << 8;
+            addr |= row[4];
+            offset = 5;
+            count -= offset;
+            output(addr, const_bytespan{row + offset, count});
             break;
-        case 5:  // exec hiword
+        case 4:  // invalid, skip
+            break;
+        case 5:  // count 16-bit, skip
+            break;
+        case 6:  // count 24-bit, skip
+            break;
+        case 7:  // exec addr 32-bit, skip
+            break;
+        case 8:  // exec addr 24-bit, skip
+            break;
+        case 9:  // exec addr 16-bit, skip
             break;
         default:
             throw ImportFileInvalidError(TAG("Unrecognized record type."),

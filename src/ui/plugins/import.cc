@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "ui/plugins/import/intelhex.hh"
+#include "ui/plugins/import/srec.hh"
 
 namespace hexbed {
 
@@ -37,6 +38,8 @@ static std::vector<std::unique_ptr<ImportPlugin>> importPlugins;
 void loadBuiltinImportPlugins() {
     importPlugins.push_back(
         std::make_unique<ImportPluginIntelHEX>(nextBuiltinPluginId()));
+    importPlugins.push_back(
+        std::make_unique<ImportPluginMotorolaSREC>(nextBuiltinPluginId()));
 }
 
 std::size_t importPluginCount() { return importPlugins.size(); }

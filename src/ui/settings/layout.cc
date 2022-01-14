@@ -76,7 +76,7 @@ HexBedPrefsLayout::HexBedPrefsLayout(wxWindow* parent, ConfigurationValues* cfg)
                          {_("8 (octal)"), _("10 (decimal)"), _("16 (hex)")},
                          {8L, 10L, 16L});
     /// character encodings
-    PREFS_SETTING_CHOICE(col, _("Text encoding"), charset, std::string,
+    PREFS_SETTING_CHOICE(col, _("Text encoding"), charset, string,
                          {SBCS_ENCODING_NAMES()}, {SBCS_ENCODING_KEYS()});
     PREFS_FINISHCOLUMN(col);
 }

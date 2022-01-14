@@ -33,8 +33,8 @@ namespace ui {
 constexpr int MINIMUM_HEX_FONTSIZE = 3;
 constexpr int MAXIMUM_HEX_FONTSIZE = 144;
 
-wxFont getHexFontOrDefault(const std::string& s);
-std::string hexFontToString(const wxFont& font);
+wxFont getHexFontOrDefault(const string& s);
+string hexFontToString(const wxFont& font);
 
 wxFont configFont();
 void configFont(const wxFont& font);

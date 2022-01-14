@@ -27,6 +27,7 @@
 #include "app/config.hh"
 #include "common/charconv.hh"
 #include "common/hexconv.hh"
+#include "ui/string.hh"
 
 namespace hexbed {
 namespace clip {
@@ -41,9 +42,7 @@ bool HasClipboard() {
 }
 
 void CopyBytes(HexBedDocument& document, bufsize off, bufsize cnt, bool text) {
-    if (!wxTheClipboard->Open())
-        throw std::runtime_error(
-            _("Failed to open the clipboard").ToStdString());
+    if (!wxTheClipboard->Open()) throw ClipboardError();
     bufsize q = 0, qq;
     byte buf[256];
     if (text) {
@@ -59,7 +58,7 @@ void CopyBytes(HexBedDocument& document, bufsize off, bufsize cnt, bool text) {
 
         wxTheClipboard->SetData(new wxTextDataObject(result));
     } else {
-        std::string result;
+        string result;
         bool cont = false;
 
         while (cnt) {
@@ -79,9 +78,7 @@ void CopyBytes(HexBedDocument& document, bufsize off, bufsize cnt, bool text) {
 bool PasteBytes(HexBedDocument& document, bool insert, bufsize off, bufsize cnt,
                 bool text, bufsize& len) {
     bool flag = true;
-    if (!wxTheClipboard->Open())
-        throw std::runtime_error(
-            _("Failed to open the clipboard").ToStdString());
+    if (!wxTheClipboard->Open()) throw ClipboardError();
     if (!wxTheClipboard->IsSupported(wxDF_TEXT))
         goto fail;
     else {
@@ -97,7 +94,7 @@ bool PasteBytes(HexBedDocument& document, bool insert, bufsize off, bufsize cnt,
             bytes.resize(len);
             if (!sbcsToBytes(len, bytes.data(), s)) goto fail;
         } else {
-            std::string s = data.GetText().ToStdString();
+            string s = stringFromWx(data.GetText());
             len = 0;
             bool ok = hexToBytes(len, nullptr, s);
             if (!ok) goto fail;

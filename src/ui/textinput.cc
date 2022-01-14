@@ -36,19 +36,19 @@
 namespace hexbed {
 namespace ui {
 
-static std::initializer_list<std::string> mbcsKeys_{MBCS_ENCODING_KEYS()};
+static std::initializer_list<string> mbcsKeys_{MBCS_ENCODING_KEYS()};
 static std::initializer_list<wxString> mbcsNames_{MBCS_ENCODING_NAMES()};
-static std::initializer_list<std::string> sbcsKeys_{SBCS_ENCODING_KEYS()};
+static std::initializer_list<string> sbcsKeys_{SBCS_ENCODING_KEYS()};
 static std::initializer_list<wxString> sbcsNames_{SBCS_ENCODING_NAMES()};
 
-HexBedTextInput::HexBedTextInput(wxWindow* parent, wxString* string,
-                                 std::string* encoding, bool* caseInsensitive)
-    : wxPanel(parent, wxID_ANY), pEncoding_(encoding), pText_(string) {
+HexBedTextInput::HexBedTextInput(wxWindow* parent, wxString* text,
+                                 string* encoding, bool* caseInsensitive)
+    : wxPanel(parent, wxID_ANY), pEncoding_(encoding), pText_(text) {
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(sizer);
-    textCtrl_ = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                               wxDefaultSize, 0,
-                               wxTextValidator(wxFILTER_NONE, string));
+    textCtrl_ =
+        new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                       wxDefaultSize, 0, wxTextValidator(wxFILTER_NONE, text));
 
     sizer->Add(new wxStaticText(this, wxID_ANY, _("Text"), wxDefaultPosition,
                                 wxDefaultSize, wxST_ELLIPSIZE_END),
@@ -59,7 +59,7 @@ HexBedTextInput::HexBedTextInput(wxWindow* parent, wxString* string,
 
     choice_ = new wxChoice(
         this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 1, &choices, 0,
-        ChoiceValidator<std::string>(encoding, std::vector<std::string>{""}));
+        ChoiceValidator<string>(encoding, std::vector<string>{string()}));
 
     wxStaticText* label =
         new wxStaticText(this, wxID_ANY, _("Encoding"), wxDefaultPosition,
@@ -84,8 +84,8 @@ HexBedTextInput::HexBedTextInput(wxWindow* parent, wxString* string,
 }
 
 void HexBedTextInput::UpdateConfig() {
-    ChoiceValidator<std::string>* validate =
-        wxDynamicCast(choice_->GetValidator(), ChoiceValidator<std::string>);
+    ChoiceValidator<string>* validate =
+        wxDynamicCast(choice_->GetValidator(), ChoiceValidator<string>);
 
     HEXBED_ASSERT(mbcsKeys_.size() == mbcsNames_.size());
     HEXBED_ASSERT(sbcsKeys_.size() == sbcsNames_.size());
@@ -98,7 +98,7 @@ void HexBedTextInput::UpdateConfig() {
 
     std::size_t n = sbcsKeys_.size();
     std::size_t i = 0;
-    const std::string& encoding = config().charset;
+    const string& encoding = config().charset;
     for (i = 0; i < n; ++i) {
         if (encoding == sbcsKeys_.begin()[i]) break;
     }

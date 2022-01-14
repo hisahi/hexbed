@@ -31,6 +31,7 @@
 #include "common/hexconv.hh"
 #include "ui/hexbed.hh"
 #include "ui/plugins/inspector.hh"
+#include "ui/string.hh"
 
 namespace hexbed {
 
@@ -121,9 +122,8 @@ bool DataEntryDialog::CheckInput() { return !textCtrl_->IsEmpty(); }
 void DataEntryDialog::OnOK(wxCommandEvent& event) {
     if (!CheckInput()) return;
     std::size_t l = dataSize_;
-    if (!plugin_->convertToBytes(l, data_.get(),
-                                 textCtrl_->GetValue().ToStdString().c_str(),
-                                 *settings_)) {
+    if (!plugin_->convertToBytes(
+            l, data_.get(), stringFromWx(textCtrl_->GetValue()), *settings_)) {
         wxMessageBox(_("The given input is invalid for this data type."),
                      "HexBed", wxOK | wxICON_ERROR);
         return;

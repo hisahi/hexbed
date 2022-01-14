@@ -21,7 +21,9 @@
 
 #include <wx/translation.h>
 
+#include <cstdarg>
 #include <cstring>
+#include <cwchar>
 
 #include "app/config.hh"
 #include "ui/hexbed.hh"
@@ -54,42 +56,79 @@ void updateStatusBarNoFile(wxStatusBar* statusBar, const EditorState& state) {
 
 namespace ui {
 
-static char nbuf[(std::bit_width(std::numeric_limits<bufsize>::max()) + 2) / 3];
-static char buf[101 + sizeof(nbuf)];
+static strchar
+    nbuf[(std::bit_width(std::numeric_limits<bufsize>::max()) + 2) / 3];
+static strchar buf[101 + sizeof(nbuf)];
+
+template <typename T>
+static int snprintf(T* out, std::size_t outSize, const T* fmt, ...);
+
+template <>
+[[maybe_unused]] int snprintf<char>(char* out, std::size_t outSize,
+                                    const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int n = std::vsnprintf(out, outSize, fmt, args);
+    va_end(args);
+    return n;
+}
+
+template <>
+[[maybe_unused]] int snprintf<wchar_t>(wchar_t* out, std::size_t outSize,
+                                       const wchar_t* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int n = std::vswprintf(out, outSize, fmt, args);
+    va_end(args);
+    return n;
+}
+
+template <typename T>
+const T* cify(const wxString& string);
+
+template <>
+[[maybe_unused]] const char* cify<char>(const wxString& string) {
+    return string.c_str();
+}
+
+template <>
+[[maybe_unused]] const wchar_t* cify<wchar_t>(const wxString& string) {
+    return string.wc_str();
+}
 
 void HexEditor::UpdateStatusBar() {
     if (!sbar_) return;
     hexbed::menu::updateStatusBarBase(sbar_, context().state);
 
-    char fc;
+    strchar fc;
     switch (config().offsetRadix) {
     case 8:
-        fc = 'o';
+        fc = CHAR('o');
         break;
     case 10:
-        fc = 'u';
+        fc = CHAR('u');
         break;
     case 16:
     default:
-        fc = config().uppercase ? 'X' : 'x';
+        fc = config().uppercase ? CHAR('X') : CHAR('x');
         break;
     }
 
-    char fmt[] = "%llx";
-    char fmt2[] = "%llx : %llx";
+    strchar fmt[] = STRING("%llx");
+    strchar fmt2[] = STRING("%llx : %llx");
     fmt2[10] = fmt2[3] = fmt[3] = fc;
 
     int i = 1;
-    std::snprintf(nbuf, sizeof(nbuf), fmt, cur_);
-    std::snprintf(buf, sizeof(buf), _("Offset: %s").c_str(), nbuf);
+    snprintf(nbuf, sizeof(nbuf), fmt, cur_);
+    snprintf(buf, sizeof(buf), cify<strchar>(_("Offset: %s")), nbuf);
     sbar_->SetStatusText(buf, ++i);
 
     if (seln_) {
-        std::snprintf(nbuf, sizeof(nbuf), fmt2, sel_, sel_ + seln_ - 1);
-        std::snprintf(buf, sizeof(buf), _("Block: %s").c_str(), nbuf);
+        snprintf(nbuf, sizeof(nbuf), fmt2, sel_, sel_ + seln_ - 1);
+        snprintf(buf, sizeof(buf), cify<strchar>(_("Block: %s")), nbuf);
         sbar_->SetStatusText(buf, ++i);
-        std::snprintf(nbuf, sizeof(nbuf), fmt, seln_);
-        std::snprintf(buf, sizeof(buf), _("Length: %s").c_str(), nbuf);
+        snprintf(nbuf, sizeof(nbuf), fmt, seln_);
+        snprintf(buf, sizeof(buf), cify<strchar>(_("Length: %s")), nbuf);
         sbar_->SetStatusText(buf, ++i);
     } else {
         sbar_->SetStatusText(wxEmptyString, ++i);

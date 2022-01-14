@@ -48,12 +48,17 @@ class DataInspectorPlugin : public Plugin {
     }
     inline bool isReadOnly() const noexcept { return readOnly_; }
     inline bool isLocalizable() const noexcept { return localizable_; }
-    virtual bool convertFromBytes(std::size_t outstr_n, char* outstr,
+    virtual bool convertFromBytes(std::size_t outstr_n, strchar* outstr,
                                   const_bytespan data,
                                   const DataInspectorSettings& settings) = 0;
     virtual bool convertToBytes(std::size_t& outdata_n, byte* outdata,
-                                const char* instr,
+                                const strchar* instr,
                                 const DataInspectorSettings& settings) = 0;
+    inline bool convertToBytes(std::size_t& outdata_n, byte* outdata,
+                               const string& instr,
+                               const DataInspectorSettings& settings) {
+        return convertToBytes(outdata_n, outdata, instr.c_str(), settings);
+    }
 
   protected:
     inline DataInspectorPlugin(pluginid id, const wxString& title,

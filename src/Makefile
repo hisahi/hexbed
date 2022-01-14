@@ -20,8 +20,12 @@ endif
 
 # the rest
 CFLAGS := $(CFLAGS) -MMD -MP
-CXXFLAGS := -std=c++20 $(CXXFLAGS) -MMD -MP `wx-config --cflags`
-LDFLAGS := $(LDFLAGS) `wx-config --libs std,aui`
+CXXFLAGS := -std=c++20 $(CXXFLAGS) -MMD -MP \
+            `wx-config --cflags` \
+            `pkg-config --cflags icu-uc` -DHAS_ICU=1
+LDFLAGS := $(LDFLAGS) `wx-config --libs std,aui` \
+           `pkg-config --libs icu-uc`
+LDLIBS=-lm -lintl
 LDLIBS=-lm
 OBJS=
 SUBDIRS=common file app ui/dialogs \

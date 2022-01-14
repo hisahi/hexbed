@@ -23,6 +23,7 @@
 #define HEXBED_UI_SETTINGS_VALIDATE_HH
 
 #include <wx/choice.h>
+#include <wx/radiobut.h>
 #include <wx/valgen.h>
 #include <wx/validate.h>
 
@@ -30,9 +31,37 @@
 #include <string>
 #include <vector>
 
+#include "common/types.hh"
+
 namespace hexbed {
 
 namespace ui {
+
+template <typename T, typename Ttmp>
+class GenericCustomValidator : public wxGenericValidator {
+  public:
+    GenericCustomValidator(T* store)
+        : wxGenericValidator(&temp_), store_(store) {}
+
+    wxObject* Clone() const override {
+        return new GenericCustomValidator(store_);
+    }
+
+    bool TransferFromWindow() override {
+        if (!wxGenericValidator::TransferFromWindow()) return false;
+        *store_ = static_cast<T>(temp_);
+        return true;
+    }
+
+    bool TransferToWindow() override {
+        temp_ = static_cast<Ttmp>(*store_);
+        return wxGenericValidator::TransferToWindow();
+    }
+
+  private:
+    Ttmp temp_;
+    T* store_;
+};
 
 class GenericLongValidator : public wxGenericValidator {
   public:
@@ -48,14 +77,47 @@ class GenericLongValidator : public wxGenericValidator {
 
 class GenericStringValidator : public wxGenericValidator {
   public:
-    GenericStringValidator(std::string* store);
+    GenericStringValidator(string* store);
     wxObject* Clone() const override;
     bool TransferFromWindow() override;
     bool TransferToWindow() override;
 
   private:
     wxString temp_;
-    std::string* store_;
+    string* store_;
+};
+
+template <typename T>
+class RadioValidator : public wxValidator {
+  public:
+    RadioValidator(T* store, const T& value)
+        : wxValidator(), store_(store), value_(value) {}
+
+    wxObject* Clone() const { return new RadioValidator(*this); }
+
+    bool TransferFromWindow() {
+        wxRadioButton* radio = wxDynamicCast(GetWindow(), wxRadioButton);
+        if (radio) {
+            if (radio->GetValue()) *store_ = value_;
+            return true;
+        } else
+            return false;
+    }
+
+    bool TransferToWindow() {
+        wxRadioButton* radio = wxDynamicCast(GetWindow(), wxRadioButton);
+        if (radio) {
+            radio->SetValue(*store_ == value_);
+            return true;
+        } else
+            return false;
+    }
+
+    bool Validate(wxWindow* parent) { return true; }
+
+  private:
+    T* store_;
+    T value_;
 };
 
 template <typename T>
@@ -161,14 +223,14 @@ class ColourValidator : public wxValidator {
 
 class FontValidator : public wxValidator {
   public:
-    FontValidator(std::string* store);
+    FontValidator(string* store);
     wxObject* Clone() const override;
     bool TransferFromWindow() override;
     bool TransferToWindow() override;
     bool Validate(wxWindow* parent) override;
 
   private:
-    std::string* store_;
+    string* store_;
 };
 
 };  // namespace ui

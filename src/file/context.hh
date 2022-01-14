@@ -36,7 +36,7 @@ class HexBedContext {
     inline virtual HexBedTaskHandler* getTaskHandler() { return nullptr; }
 
     inline virtual bool shouldBackup() { return false; }
-    inline virtual FailureResponse ifBackupFails(const char* message) {
+    inline virtual FailureResponse ifBackupFails(const string& message) {
         return FailureResponse::Abort;
     }
 

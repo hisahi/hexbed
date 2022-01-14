@@ -24,10 +24,17 @@
 
 #include <wx/string.h>
 
+#include <stdexcept>
+
 #include "file/document.hh"
 
 namespace hexbed {
 namespace clip {
+
+class ClipboardError : public std::runtime_error {
+  public:
+    inline ClipboardError() : std::runtime_error("clipboard error") {}
+};
 
 bool HasClipboard();
 void CopyBytes(HexBedDocument& document, bufsize off, bufsize cnt, bool text);

@@ -26,6 +26,7 @@
 #include <unordered_map>
 
 #include "common/config.hh"
+#include "common/types.hh"
 
 namespace hexbed {
 
@@ -36,22 +37,22 @@ class HexBedConfiguration : public Configuration {
     void apply();
 
   protected:
-    bool loadBool(const std::string& key, bool def);
-    long loadInt(const std::string& key, long def);
-    float loadFloat(const std::string& key, double def);
-    std::string loadString(const std::string& key, const std::string& def);
+    bool loadBool(const string& key, bool def);
+    long loadInt(const string& key, long def);
+    float loadFloat(const string& key, double def);
+    string loadString(const string& key, const string& def);
 
-    void saveBool(const std::string& key, bool value);
-    void saveInt(const std::string& key, long value);
-    void saveFloat(const std::string& key, double value);
-    void saveString(const std::string& key, const std::string& value);
+    void saveBool(const string& key, bool value);
+    void saveInt(const string& key, long value);
+    void saveFloat(const string& key, double value);
+    void saveString(const string& key, const string& value);
 
   private:
-    std::unordered_map<std::string, bool> loadedBool_;
-    std::unordered_map<std::string, long> loadedInt_;
-    std::unordered_map<std::string, double> loadedFloat_;
-    std::unordered_map<std::string, std::string> loadedString_;
-    std::ostream* outStream_;
+    std::unordered_map<string, bool> loadedBool_;
+    std::unordered_map<string, long> loadedInt_;
+    std::unordered_map<string, double> loadedFloat_;
+    std::unordered_map<string, string> loadedString_;
+    std::basic_ostream<strchar>* outStream_;
 };
 
 extern HexBedConfiguration currentConfig;

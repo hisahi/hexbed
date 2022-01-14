@@ -31,13 +31,13 @@ class HexBedBufferNew : public HexBedBuffer {
   public:
     bufsize read(bufoffset offset, bytespan data);
     void write(HexBedContext& ctx, WriteCallback write,
-               const std::string& filename);
+               const std::filesystem::path& filename);
     void writeOverlay(HexBedContext& ctx, WriteCallback write,
-                      const std::string& filename);
+                      const std::filesystem::path& filename);
     void writeNew(HexBedContext& ctx, WriteCallback write,
-                  const std::string& filename);
+                  const std::filesystem::path& filename);
     void writeCopy(HexBedContext& ctx, WriteCallback write,
-                   const std::string& filename);
+                   const std::filesystem::path& filename);
     bufsize size() const noexcept;
 };
 

@@ -63,7 +63,7 @@ class HexBedBufferMmapVbuf : public VirtualBuffer {
     std::FILE* wf_;
 };
 
-HexBedBufferMmap::HexBedBufferMmap(const std::string& filename)
+HexBedBufferMmap::HexBedBufferMmap(const std::filesystem::path& filename)
     : fd_(filename), page_(0) {
 #if HEXBED_MMAP_POSIX
     struct stat sb;
@@ -157,8 +157,8 @@ bufsize HexBedBufferMmap::read(bufoffset offset, bytespan data) {
 }
 
 void HexBedBufferMmap::write(HexBedContext& ctx, WriteCallback write,
-                             const std::string& filename) {
-    std::string tmpfn;
+                             const std::filesystem::path& filename) {
+    std::filesystem::path tmpfn;
     bool backup = ctx.shouldBackup();
     FILE_unique_ptr fp = fopen_replace_before(filename, tmpfn, backup);
 
@@ -176,16 +176,16 @@ void HexBedBufferMmap::write(HexBedContext& ctx, WriteCallback write,
 }
 
 void HexBedBufferMmap::writeOverlay(HexBedContext& ctx, WriteCallback write,
-                                    const std::string& filename) {
+                                    const std::filesystem::path& filename) {
     HexBedBufferMmap::write(ctx, write, filename);
 }
 
 void HexBedBufferMmap::writeNew(HexBedContext& ctx, WriteCallback write,
-                                const std::string& filename) {
+                                const std::filesystem::path& filename) {
     if (!fd_) throw system_io_error("file is closed");
     if (ctx.shouldBackup()) makeBackupOf(ctx, filename);
     errno = 0;
-    auto fp = fopen_unique(filename.c_str(), "wb");
+    auto fp = fopen_unique(filename, "wb");
     if (!fp) throw errno_to_exception(errno);
     std::setvbuf(fp.get(), NULL, _IONBF, 0);
 
@@ -197,7 +197,7 @@ void HexBedBufferMmap::writeNew(HexBedContext& ctx, WriteCallback write,
 }
 
 void HexBedBufferMmap::writeCopy(HexBedContext& ctx, WriteCallback write,
-                                 const std::string& filenamep) {
+                                 const std::filesystem::path& filenamep) {
     writeNew(ctx, write, filename);
 }
 

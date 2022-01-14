@@ -51,7 +51,8 @@ static std::unique_ptr<HexBedBuffer> bufferNew() {
     } catch (...) {                           \
     }
 
-static std::unique_ptr<HexBedBuffer> bufferOpen(const std::string& filename) {
+static std::unique_ptr<HexBedBuffer> bufferOpen(
+    const std::filesystem::path& filename) {
     [[maybe_unused]] bool szknown;
     [[maybe_unused]] bufsize sz;
     try {
@@ -73,11 +74,12 @@ HexBedDocument::HexBedDocument(std::shared_ptr<HexBedContext> ctx)
     : context_(ctx), filename_(), buffer_(bufferNew()), treble_(0) {}
 
 HexBedDocument::HexBedDocument(std::shared_ptr<HexBedContext> ctx,
-                               const std::string& filename)
+                               const std::filesystem::path& filename)
     : HexBedDocument(ctx, filename, false) {}
 
 HexBedDocument::HexBedDocument(std::shared_ptr<HexBedContext> ctx,
-                               const std::string& filename, bool readOnly)
+                               const std::filesystem::path& filename,
+                               bool readOnly)
     : context_(ctx),
       filename_(filename),
       buffer_(bufferOpen(filename)),
@@ -755,7 +757,10 @@ bool HexBedDocument::romp(
     auto impose = [&treble](bufsize o, const_bytespan dta) -> void {
         bufsize n = dta.size();
         bufsize z = treble.size();
-        if (o > z) treble.insert(z, o - z, static_cast<byte>(0));
+        if (o > z) {
+            treble.insert(z, o - z, static_cast<byte>(0));
+            z = o;
+        }
         if (o + n <= z)
             treble.replace(o, n, dta.data());
         else {
@@ -991,7 +996,7 @@ bool HexBedDocument::filed() const noexcept { return !filename_.empty(); }
 
 bool HexBedDocument::unsaved() const noexcept { return dirty_; }
 
-std::string HexBedDocument::path() const { return filename_; }
+std::filesystem::path HexBedDocument::path() const { return filename_; }
 
 bool HexBedDocument::readOnly() const noexcept { return readOnly_; }
 
@@ -1016,7 +1021,7 @@ void HexBedDocument::commit() {
     discard();
 }
 
-void HexBedDocument::commitAs(const std::string& filename) {
+void HexBedDocument::commitAs(const std::filesystem::path& filename) {
     truncateUndo();
     for (auto& undoEntry : undos_) undoEntry.detach();
     buffer_->writeNew(
@@ -1028,7 +1033,7 @@ void HexBedDocument::commitAs(const std::string& filename) {
     discard();
 }
 
-void HexBedDocument::commitTo(const std::string& filename) {
+void HexBedDocument::commitTo(const std::filesystem::path& filename) {
     buffer_->writeCopy(
         *context_,
         [this](VirtualBuffer& vbuf) { treble_.write(vbuf, 0, BUFSIZE_MAX); },

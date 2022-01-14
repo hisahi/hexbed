@@ -38,7 +38,7 @@ CaseInsensitivePattern::CaseInsensitivePattern()
       headLowerLen(0),
       headUpperLen(0) {}
 
-CaseInsensitivePattern::CaseInsensitivePattern(const std::string& encname,
+CaseInsensitivePattern::CaseInsensitivePattern(const string& encname,
                                                const std::wstring& text_) {
     std::u32string text = wstringToU32string(text_);
     if (encname == "m_utf8") {

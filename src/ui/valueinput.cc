@@ -104,7 +104,7 @@ bool HexBedValueInput::Commit(HexBedDocument* document) {
     settings.littleEndian = littleEndian_->GetValue();
     std::size_t bs = plugin.getRequestedDataBufferSize();
     auto buf = std::make_unique<byte[]>(bs);
-    bool ok = plugin.convertToBytes(bs, buf.get(), pText_->c_str(), settings);
+    bool ok = plugin.convertToBytes(bs, buf.get(), *pText_, settings);
     if (ok) {
         if (document)
             document->replace(0, document->size(),

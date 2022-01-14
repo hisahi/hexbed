@@ -48,8 +48,8 @@ struct EditorState {
 
     wxString searchFindTextString;
     wxString searchReplaceTextString;
-    std::string searchFindTextEncoding;
-    std::string searchReplaceTextEncoding;
+    string searchFindTextEncoding;
+    string searchReplaceTextEncoding;
 
     wxString searchFindDataValue;
     wxString searchReplaceDataValue;
@@ -124,7 +124,7 @@ class HexBedContextMain : public HexBedContext {
     HexBedTaskHandler* getTaskHandler();
 
     bool shouldBackup();
-    FailureResponse ifBackupFails(const char* message);
+    FailureResponse ifBackupFails(const string& message);
 
     void announceBytesChanged(HexBedDocument* doc, bufsize start);
     void announceBytesChanged(HexBedDocument* doc, bufsize start,

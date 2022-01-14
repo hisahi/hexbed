@@ -25,8 +25,12 @@
 #include <cstdint>
 #include <limits>
 #include <span>
+#include <string>
+#include <string_view>
 
 namespace hexbed {
+
+#define USE_WIDE_STRINGS 0
 
 typedef std::uint8_t byte;
 typedef std::span<byte> bytespan;
@@ -36,6 +40,20 @@ typedef const byte* const_byteptr;
 typedef long long bufdiff;
 typedef unsigned long long bufsize;
 typedef bufsize bufoffset;
+
+#if USE_WIDE_STRINGS
+typedef wchar_t strchar;
+typedef std::basic_string<strchar> string;
+typedef std::basic_string_view<strchar> stringview;
+#define CHAR(c) L##c
+#define STRING(s) L##s
+#else
+typedef char strchar;
+typedef std::basic_string<strchar> string;
+typedef std::basic_string_view<strchar> stringview;
+#define CHAR(c) c
+#define STRING(s) s
+#endif
 
 constexpr bufsize BUFSIZE_MAX = std::numeric_limits<bufsize>::max();
 

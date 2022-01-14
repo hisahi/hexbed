@@ -23,6 +23,7 @@
 
 #include <cctype>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 
 #include "common/intconv.hh"
@@ -35,11 +36,7 @@ static constexpr bool isInRange(char32_t c, char32_t a, char32_t b) {
     return a <= c && c <= b;
 }
 
-static bool isPrintable(char32_t c) {
-    if (c == 0x7F || c == CHAR32_INVALID) return false;
-    return isInRange(c, 0x20, 0x7E) || isInRange(c, 0xA1, 0xAC) ||
-           isInRange(c, 0xAE, 0xFF);
-}
+static bool isPrintable(char32_t c);
 
 SingleByteCharacterSet::SingleByteCharacterSet() : map_{} { initPrint(); }
 
@@ -49,7 +46,7 @@ SingleByteCharacterSet::SingleByteCharacterSet(std::array<char32_t, 256> map)
 }
 
 SingleByteCharacterSet::SingleByteCharacterSet(std::u32string str) : map_{} {
-    unsigned off = 1;
+    unsigned off = 0;
     for (char32_t c : str) {
         map_[off] = c;
         if (++off >= 256) break;
@@ -82,17 +79,19 @@ struct charset_pair {
 
 SingleByteCharacterSet sbcs;
 
+using namespace std::string_literals;
+
 std::u32string ascii =
-    U"\x01\x02\x03\x04\x05\x06\x07"
+    U"\x00\x01\x02\x03\x04\x05\x06\x07"
     U"\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
     U"\x10\x11\x12\x13\x14\x15\x16\x17"
     U"\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
     U" !\"#$%&'()*+,-./"
     U"0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"
-    U"abcdefghijklmnopqrstuvwxyz{|}~";
+    U"abcdefghijklmnopqrstuvwxyz{|}~"s;
 
 std::u32string latin1 =
-    U"\x01\x02\x03\x04\x05\x06\x07"
+    U"\x00\x01\x02\x03\x04\x05\x06\x07"
     U"\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
     U"\x10\x11\x12\x13\x14\x15\x16\x17"
     U"\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
@@ -106,12 +105,25 @@ std::u32string latin1 =
     U"\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf"
     U"\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf"
     U"\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef"
-    U"\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff";
+    U"\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff"s;
 
-static std::unordered_map<std::string, std::u32string> sbcsTable = {
+#define HAS_CHARSETS_INC 1
+
+#if HAS_CHARSETS_INC
+#define CHARSET_DEFINE_S(name) std::u32string name
+#define CHARSET_DEFINE_A(name) \
+    std::u32string name = std::initializer_list<char32_t>
+#include "common/charsets.inc"
+
+#define CHARSETS_EXTRA_INCLUDE_SET(x) {#x, x},
+static std::unordered_map<string, std::u32string> sbcsTable = {
+    {"ascii", ascii}, {"latin1", latin1}, CHARSETS_EXTRA_INCLUDE()};
+#else
+static std::unordered_map<string, std::u32string> sbcsTable = {
     {"ascii", ascii}, {"latin1", latin1}};
+#endif
 
-SingleByteCharacterSet getSbcsByName(const std::string& name) {
+SingleByteCharacterSet getSbcsByName(const string& name) {
     auto s = sbcsTable.find(name);
     if (s == sbcsTable.end()) {
         LOG_WARN("unrecognized SBCS encoding name '%s'", name);
@@ -411,6 +423,21 @@ template <>
 
 std::wstring u32stringToWstring(const std::u32string& w) {
     return u32stringToWstring_<sizeof(wchar_t)>(w);
+}
+
+extern bool isUnicodePrintable(char32_t c);
+
+/*
+bool isUnicodePrintable(char32_t c) { return false; }
+*/
+
+static bool isPrintable(char32_t c) {
+    if (c == 0x7F || c == CHAR32_INVALID) return false;
+    if (isInRange(c, 0x20, 0x7E) || isInRange(c, 0xA1, 0xAC) ||
+        isInRange(c, 0xAE, 0xFF))
+        return true;
+    if (!(c & ~0xFF)) return false;
+    return isUnicodePrintable(c);
 }
 
 };  // namespace hexbed

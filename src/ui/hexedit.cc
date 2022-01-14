@@ -257,9 +257,7 @@ unsigned HexEditor::GetLineHeight() { return lineHeight_; }
 
 bool HexEditor::TestVisibility() const noexcept { return IsShownOnScreen(); }
 
-void HexEditor::QueueRefresh() {
-    waitRedraw_ = true;
-}
+void HexEditor::QueueRefresh() { waitRedraw_ = true; }
 
 void HexEditor::WhenVisible() {
     if (waitRedraw_) {
@@ -999,9 +997,7 @@ void HexEditor::ResizeDone() {
     if (IsShownOnScreen()) Redraw();
 }
 
-void HexEditor::Selected() {
-    WhenVisible();
-}
+void HexEditor::Selected() { WhenVisible(); }
 
 void HexEditor::OnResize(wxSizeEvent& e) {
     /* ResizeDone(); */

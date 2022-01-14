@@ -49,7 +49,7 @@ bool GenericLongValidator::TransferToWindow() {
     return wxGenericValidator::TransferToWindow();
 }
 
-GenericStringValidator::GenericStringValidator(std::string* store)
+GenericStringValidator::GenericStringValidator(string* store)
     : wxGenericValidator(&temp_), store_(store) {}
 
 wxObject* GenericStringValidator::Clone() const {
@@ -91,8 +91,7 @@ bool ColourValidator::TransferToWindow() {
 
 bool ColourValidator::Validate(wxWindow* parent) { return true; }
 
-FontValidator::FontValidator(std::string* store)
-    : wxValidator(), store_(store) {}
+FontValidator::FontValidator(string* store) : wxValidator(), store_(store) {}
 
 wxObject* FontValidator::Clone() const { return new FontValidator(*this); }
 

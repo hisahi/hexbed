@@ -52,7 +52,7 @@ extern SingleByteCharacterSet sbcs;
 
 enum class TextEncoding { SBCS, UTF8, UTF16LE, UTF16BE, UTF32LE, UTF32BE };
 
-SingleByteCharacterSet getSbcsByName(const std::string& name);
+SingleByteCharacterSet getSbcsByName(const string& name);
 
 std::wstring sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
                            const byte* data);

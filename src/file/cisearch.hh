@@ -31,8 +31,7 @@ namespace hexbed {
 
 struct CaseInsensitivePattern {
     CaseInsensitivePattern();
-    CaseInsensitivePattern(const std::string& encoding,
-                           const std::wstring& text);
+    CaseInsensitivePattern(const string& encoding, const std::wstring& text);
 
     TextEncoding encoding;
     SingleByteCharacterSet sbcs;

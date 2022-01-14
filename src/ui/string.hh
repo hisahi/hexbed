@@ -17,45 +17,21 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/applock.cc -- impl for application single-instance lock
+// ui/string.hh -- common string functions
 
-#include "ui/applock.hh"
+#ifndef HEXBED_UI_STRING_HH
+#define HEXBED_UI_STRING_HH
 
-#include "ui/string.hh"
+#include <wx/string.h>
+
+#include <filesystem>
+
+#include "common/types.hh"
 
 namespace hexbed {
 
-static wxString getMutexName() { return "/tmp/hexbed.lock"; }
-
-AppLock::AppLock(std::function<void(const wxString&)> f)
-    : mutexName_(getMutexName()), knock_(f) {
-    server_ = new AppLockServer(this);
-}
-
-bool AppLock::acquire(const wxString& token) {
-    if (single_.IsAnotherRunning()) {
-        wxClient* client = new wxClient;
-        wxConnectionBase* conn =
-            client->MakeConnection("localhost", mutexName_, "applock");
-        conn->Execute("!" + token);
-        delete conn;
-        delete client;
-        return false;
-    }
-    server_->Create(mutexName_);
-    return true;
-}
-
-void AppLock::release() {
-    // wxSingleInstanceChecker self-destructs
-    delete server_;
-}
-
-void AppLock::knock(const wxString& token) { knock_(token); }
-
-bool AppLockConnection::OnExec(const wxString& topic, const wxString& data) {
-    lock_->knock(data.Mid(1));
-    return true;
-}
+inline string stringFromWx(const wxString& s) { return static_cast<string>(s); }
 
 };  // namespace hexbed
+
+#endif /* HEXBED_UI_STRING_HH */

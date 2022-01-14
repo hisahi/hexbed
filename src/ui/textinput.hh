@@ -36,7 +36,7 @@ namespace ui {
 
 class HexBedTextInput : public wxPanel {
   public:
-    HexBedTextInput(wxWindow* parent, wxString* string, std::string* encoding,
+    HexBedTextInput(wxWindow* parent, wxString* text, string* encoding,
                     bool* caseInsensitive);
 
     void UpdateConfig();
@@ -44,7 +44,7 @@ class HexBedTextInput : public wxPanel {
     bool NonEmpty() const noexcept;
 
   private:
-    std::string* pEncoding_;
+    string* pEncoding_;
     wxString* pText_;
     wxTextCtrl* textCtrl_;
     wxChoice* choice_;

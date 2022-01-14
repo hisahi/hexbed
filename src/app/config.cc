@@ -29,6 +29,7 @@
 #include <stdexcept>
 
 #include "common/logger.hh"
+#include "common/types.hh"
 
 namespace hexbed {
 
@@ -95,7 +96,7 @@ namespace hexbed {
 #error not implemented on your platform
 #endif
 
-static std::string getConfigPath() {
+static std::filesystem::path getConfigPath() {
     std::filesystem::path cfgp;
 #if OS_POSIX
     const char* home = std::getenv("XDG_CONFIG_HOME");
@@ -123,9 +124,9 @@ static std::string getConfigPath() {
     cfgp = std::filesystem::path(home) / "hexbed.conf";
 #elif OS_WINDOWS
     char adata[MAX_PATH];
-    std::string adatas;
+    std::filesystem::path adatas;
     if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, adata)))
-        adatas = std::string(adata);
+        adatas = std::filesystem::path(adata);
     else
         adatas = ".";
     cfgp = std::filesystem::path(adatas) / "hexbed";
@@ -140,52 +141,50 @@ class convert_error : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-static bool stringToBool(const std::string& s) {
+static bool stringToBool(const string& s) {
     int res;
     auto fc = std::from_chars(s.data(), s.data() + s.size(), res);
     if (fc.ec != std::errc()) throw convert_error("failed to convert to bool");
     return res != 0;
 }
 
-static long stringToInt(const std::string& s) {
+static long stringToInt(const string& s) {
     long res;
     auto fc = std::from_chars(s.data(), s.data() + s.size(), res);
     if (fc.ec != std::errc()) throw convert_error("failed to convert to int");
     return res;
 }
 
-static double stringToFloat(const std::string& s) {
+static double stringToFloat(const string& s) {
     double res;
     auto fc = std::from_chars(s.data(), s.data() + s.size(), res);
     if (fc.ec != std::errc()) throw convert_error("failed to convert to float");
     return res;
 }
 
-static std::string stringFromBool(bool value) {
+static string stringFromBool(bool value) {
     return stringFormat("%d", value ? 1 : 0);
 }
 
-static std::string stringFromInt(long value) {
-    return stringFormat("%ld", value);
-}
+static string stringFromInt(long value) { return stringFormat("%ld", value); }
 
-static std::string stringFromFloat(double value) {
+static string stringFromFloat(double value) {
     return stringFormat("%.*lf", DECIMAL_DIG, value);
 }
 
 void HexBedConfiguration::load() {
     try {
-        std::string cpath = getConfigPath();
+        string cpath = getConfigPath();
         LOG_DEBUG("config path is %s", cpath);
-        std::ifstream cfg(cpath, std::ios::in);
+        std::basic_ifstream<strchar> cfg(cpath, std::ios::in);
         cfg.exceptions(std::ios::failbit | std::ios::badbit);
-        std::string line;
+        string line;
         while (std::getline(cfg, line)) {
             if (line.empty()) continue;
             auto eq = line.find('=');
-            if (eq == std::string::npos) continue;
-            std::string key = line.substr(1, eq - 1);
-            std::string value = line.substr(eq + 1);
+            if (eq == string::npos) continue;
+            string key = line.substr(1, eq - 1);
+            string value = line.substr(eq + 1);
             try {
                 switch (line[0]) {
                 case '?':
@@ -221,10 +220,9 @@ void HexBedConfiguration::load() {
 
 void HexBedConfiguration::save() {
     try {
-        std::string cpath = getConfigPath();
-        std::filesystem::create_directories(
-            std::filesystem::path(cpath).parent_path());
-        outStream_ = new std::ofstream(cpath, std::ios::out);
+        std::filesystem::path cpath = getConfigPath();
+        std::filesystem::create_directories(cpath.parent_path());
+        outStream_ = new std::basic_ofstream<strchar>(cpath, std::ios::out);
         outStream_->exceptions(std::ios::failbit | std::ios::badbit);
         saveValues();
         delete outStream_;
@@ -237,45 +235,43 @@ void HexBedConfiguration::save() {
 
 void HexBedConfiguration::apply() { applySettings(); }
 
-bool HexBedConfiguration::loadBool(const std::string& key, bool def) {
+bool HexBedConfiguration::loadBool(const string& key, bool def) {
     auto s = loadedBool_.find(key);
     if (s == loadedBool_.end()) return def;
     return s->second;
 }
 
-long HexBedConfiguration::loadInt(const std::string& key, long def) {
+long HexBedConfiguration::loadInt(const string& key, long def) {
     auto s = loadedInt_.find(key);
     if (s == loadedInt_.end()) return def;
     return s->second;
 }
 
-float HexBedConfiguration::loadFloat(const std::string& key, double def) {
+float HexBedConfiguration::loadFloat(const string& key, double def) {
     auto s = loadedFloat_.find(key);
     if (s == loadedFloat_.end()) return def;
     return s->second;
 }
 
-std::string HexBedConfiguration::loadString(const std::string& key,
-                                            const std::string& def) {
+string HexBedConfiguration::loadString(const string& key, const string& def) {
     auto s = loadedString_.find(key);
     if (s == loadedString_.end()) return def;
     return s->second;
 }
 
-void HexBedConfiguration::saveBool(const std::string& key, bool value) {
+void HexBedConfiguration::saveBool(const string& key, bool value) {
     *outStream_ << "?" << key << "=" << stringFromBool(value) << '\n';
 }
 
-void HexBedConfiguration::saveInt(const std::string& key, long value) {
+void HexBedConfiguration::saveInt(const string& key, long value) {
     *outStream_ << "&" << key << "=" << stringFromInt(value) << '\n';
 }
 
-void HexBedConfiguration::saveFloat(const std::string& key, double value) {
+void HexBedConfiguration::saveFloat(const string& key, double value) {
     *outStream_ << "#" << key << "=" << stringFromFloat(value) << '\n';
 }
 
-void HexBedConfiguration::saveString(const std::string& key,
-                                     const std::string& value) {
+void HexBedConfiguration::saveString(const string& key, const string& value) {
     *outStream_ << "$" << key << "=" << value << '\n';
 }
 

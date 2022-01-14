@@ -54,6 +54,7 @@
 #include "ui/plugins/import.hh"
 #include "ui/plugins/plugin.hh"
 #include "ui/settings.hh"
+#include "ui/string.hh"
 
 #define PLURAL wxPLURAL
 
@@ -72,8 +73,8 @@ class HexBedWxApp : public wxApp {
 
   private:
     HexBedMainFrame* window_;
-    void Knock(const std::string& s);
-    std::vector<std::string> openFiles;
+    void Knock(const wxString& s);
+    std::vector<wxString> openFiles;
 };
 
 // clang-format off
@@ -146,8 +147,46 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
     EVT_CLOSE(HexBedMainFrame::OnClose)
 wxEND_EVENT_TABLE()
 
-void HexBedWxApp::Knock(const std::string& s) {
-    LOG_DEBUG("got knock <%s>", s);
+template <typename T>
+const strchar* getCharPtr(const T&);
+
+// clang-format on
+
+static wxString pathToWxString(const std::filesystem::path& p) {
+    if constexpr (std::is_same_v<strchar, wchar_t>)
+        return wxString(p.native());
+    else
+#if defined(__unix__) || defined(__unix)
+        return wxString::FromUTF8(
+            reinterpret_cast<const char*>(p.u8string().data()));
+#else
+        return wxString::FromUTF8(p.native());
+#endif
+}
+
+template <>
+const strchar* getCharPtr<strchar*>(strchar* const& ptr) {
+    return ptr;
+}
+
+template <>
+const strchar* getCharPtr<wxCharTypeBuffer<strchar>>(
+    const wxCharTypeBuffer<strchar>& ptr) {
+    return ptr.data();
+}
+
+template <>
+const strchar* getCharPtr<wxScopedCharTypeBuffer<strchar>>(
+    const wxScopedCharTypeBuffer<strchar>& ptr) {
+    return ptr.data();
+}
+
+static std::filesystem::path pathFromWxString(const wxString& s) {
+    return std::filesystem::path(getCharPtr(s.fn_str()));
+}
+
+void HexBedWxApp::Knock(const wxString& s) {
+    LOG_DEBUG("got knock <%s>", s.ToStdString());
     if (window_) {
         if (!s.empty()) window_->FileKnock(s, false);
     } else {
@@ -156,8 +195,7 @@ void HexBedWxApp::Knock(const std::string& s) {
 }
 
 bool HexBedWxApp::OnInit() {
-    // clang-format on
-    auto fn = argc > 1 ? argv[1].ToStdString() : "";
+    auto fn = argc > 1 ? stringFromWx(argv[1]) : string();
     setlocale(LC_ALL, "C");
     setlocale(LC_COLLATE, "");
     setlocale(LC_TIME, "");
@@ -170,7 +208,7 @@ bool HexBedWxApp::OnInit() {
 #else
     LOG_ADD_HANDLER(StdLogHandler, LogLevel::TRACE);
 #endif
-    lock = new AppLock([this](const std::string& pass) { this->Knock(pass); });
+    lock = new AppLock([this](const wxString& pass) { this->Knock(pass); });
     if (!lock->acquire(fn)) {
         LOG_DEBUG("lock taken; knocking existing impl");
         return false;
@@ -191,7 +229,7 @@ bool HexBedWxApp::OnInit() {
     hexbed::plugins::loadBuiltinPlugins();
     window_ = new HexBedMainFrame();
     window_->Show(true);
-    for (const std::string& s : openFiles) window_->FileKnock(s, false);
+    for (const wxString& s : openFiles) window_->FileKnock(s, false);
     openFiles.clear();
     return true;
 }
@@ -303,11 +341,12 @@ void HexBedMainFrame::UpdateTabSymbol(std::size_t i) {
     if (!editor.DidUnsavedChange(unsaved)) return;
     if (unsaved) {
         tabs_->SetPageToolTip(
-            i, wxString::Format(_("[unsaved] %s"), document.path()));
+            i, wxString::Format(_("[unsaved] %s"),
+                                pathToWxString(document.path())));
         const wxString& label = tabs_->GetPageText(i);
         if (label[0] != '*') tabs_->SetPageText(i, "*" + label);
     } else {
-        tabs_->SetPageToolTip(i, document.path());
+        tabs_->SetPageToolTip(i, pathToWxString(document.path()));
         const wxString& label = tabs_->GetPageText(i);
         if (label[0] == '*') tabs_->SetPageText(i, label.Mid(1));
     }
@@ -318,41 +357,39 @@ void HexBedMainFrame::UpdateTabSymbol(std::size_t i) {
 bool HexBedMainFrame::FileSave(std::size_t i, bool saveAs) {
     if (i < tabs_->GetPageCount()) {
         hexbed::ui::HexBedEditor* editor = GetEditor(i);
-        std::string sfn;
+        std::filesystem::path sfn;
         HexBedDocument& document = editor->document();
         saveAs = saveAs || !document.filed();
         if (!saveAs && !document.unsaved()) return true;
-        std::string pathdir = "";
-        std::string pathfn = "";
 
-        if (document.filed()) {
-            try {
-                std::filesystem::path p(document.path());
-                pathdir = p.parent_path();
-                pathfn = p.filename();
-            } catch (...) {
-            }
-        }
         if (saveAs) {
-            wxFileDialog dial(this, _("Save a file"), pathdir, pathfn,
+            std::filesystem::path pathdir = document.path().parent_path();
+            std::filesystem::path pathfn = document.path().filename();
+            if (document.filed()) {
+                try {
+                    pathdir = document.path().parent_path();
+                    pathfn = document.path().filename();
+                } catch (...) {
+                }
+            }
+            wxFileDialog dial(this, _("Save a file"), pathToWxString(pathdir),
+                              pathToWxString(pathfn),
                               _("All files (*.*)") + "|*",
                               wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
             if (dial.ShowModal() == wxID_CANCEL) return false;
-            sfn = dial.GetPath();
+            sfn = pathFromWxString(dial.GetPath());
         }
 
         try {
             if (saveAs) {
                 document.commitAs(sfn);
                 try {
-                    sfn = std::filesystem::canonical(sfn).string();
+                    sfn = std::filesystem::canonical(sfn);
                 } catch (...) {
                 }
-                tabs_->SetPageToolTip(i, sfn);
+                tabs_->SetPageToolTip(i, pathToWxString(sfn));
                 try {
-                    tabs_->SetPageText(
-                        i, static_cast<std::string>(
-                               std::filesystem::path(sfn).filename()));
+                    tabs_->SetPageText(i, pathToWxString(sfn.filename()));
                 } catch (...) {
                 }
             } else
@@ -362,8 +399,8 @@ bool HexBedMainFrame::FileSave(std::size_t i, bool saveAs) {
             try {
                 wxMessageBox(wxString::Format(
                                  _("Failed to save file %s: %s"),
-                                 saveAs ? sfn.c_str() : document.path().c_str(),
-                                 currentExceptionAsString().c_str()),
+                                 pathToWxString(saveAs ? sfn : document.path()),
+                                 currentExceptionAsString()),
                              "HexBed", wxOK | wxICON_ERROR);
             } catch (...) {
             }
@@ -408,10 +445,10 @@ void HexBedMainFrame::FileReload(std::size_t i) {
                 break;
             } catch (...) {
                 try {
-                    wxString txt =
-                        wxString::Format(_("Failed to load from file %s:\n%s"),
-                                         editor->document().path().c_str(),
-                                         currentExceptionAsString().c_str());
+                    wxString txt = wxString::Format(
+                        _("Failed to load from file %s:\n%s"),
+                        pathToWxString(editor->document().path()),
+                        currentExceptionAsString());
                     wxMessageDialog dial(
                         this, txt, "HexBed",
                         wxYES_NO | wxNO_DEFAULT | wxICON_ERROR);
@@ -606,12 +643,12 @@ void HexBedMainFrame::AddTab(std::unique_ptr<hexbed::ui::HexBedEditor>&& editor,
 bool HexBedMainFrame::FileNew() {
     try {
         AddTab(MakeEditor(), wxString::Format(_("New-%llu"), ++newFileIndex_),
-               "");
+               wxEmptyString);
         return true;
     } catch (...) {
         try {
             wxMessageBox(wxString::Format(_("Failed to create a new file: %s"),
-                                          currentExceptionAsString().c_str()),
+                                          currentExceptionAsString()),
                          "HexBed", wxOK | wxICON_ERROR);
         } catch (...) {
         }
@@ -621,25 +658,18 @@ bool HexBedMainFrame::FileNew() {
 
 void HexBedMainFrame::OnFileNew(wxCommandEvent& event) { FileNew(); }
 
-void HexBedMainFrame::FileKnock(const std::string& fp, bool readOnly) {
+void HexBedMainFrame::FileKnock(const wxString& fp, bool readOnly) {
     try {
-        auto editor = MakeEditor(fp, readOnly);
-        std::string path = editor->document().path(), fn = path;
-        try {
-            path = std::filesystem::canonical(path).string();
-        } catch (...) {
-        }
-        try {
-            fn = std::filesystem::path(fn).filename();
-        } catch (...) {
-        }
-        AddTab(std::move(editor), fn, path);
+        auto editor = MakeEditor(pathFromWxString(fp), readOnly);
+        std::filesystem::path path =
+            std::filesystem::canonical(editor->document().path());
+        AddTab(std::move(editor), pathToWxString(path.filename()),
+               pathToWxString(path));
     } catch (...) {
         try {
-            wxMessageBox(
-                wxString::Format(_("Failed to open file %s: %s"), fp.c_str(),
-                                 currentExceptionAsString().c_str()),
-                "HexBed", wxOK | wxICON_ERROR);
+            wxMessageBox(wxString::Format(_("Failed to open file %s: %s"), fp,
+                                          currentExceptionAsString()),
+                         "HexBed", wxOK | wxICON_ERROR);
         } catch (...) {
         }
     }
@@ -791,10 +821,9 @@ void HexBedMainFrame::OnEditInsertOrReplace(wxCommandEvent& event) {
                     sel, n, SelectFlags().caretAtBeginning().highlightCaret());
         } catch (...) {
             try {
-                wxMessageBox(
-                    wxString::Format(_("Insert failed: %s"),
-                                     currentExceptionAsString().c_str()),
-                    "HexBed", wxOK | wxICON_ERROR);
+                wxMessageBox(wxString::Format(_("Insert failed: %s"),
+                                              currentExceptionAsString()),
+                             "HexBed", wxOK | wxICON_ERROR);
             } catch (...) {
             }
         }
@@ -818,10 +847,9 @@ void HexBedMainFrame::OnEditBitwiseBinaryOp(wxCommandEvent& event) {
                               const_bytespan{sb, sb + sr}, dial.GetOperation());
         } catch (...) {
             try {
-                wxMessageBox(
-                    wxString::Format(_("Bitwise binary op failed: %s"),
-                                     currentExceptionAsString().c_str()),
-                    "HexBed", wxOK | wxICON_ERROR);
+                wxMessageBox(wxString::Format(_("Bitwise binary op failed: %s"),
+                                              currentExceptionAsString()),
+                             "HexBed", wxOK | wxICON_ERROR);
             } catch (...) {
             }
         }
@@ -839,10 +867,9 @@ void HexBedMainFrame::OnEditBitwiseUnaryOp(wxCommandEvent& event) {
             doBitwiseUnaryOp(ed->document(), sel, seln, dial.GetOperation());
         } catch (...) {
             try {
-                wxMessageBox(
-                    wxString::Format(_("Bitwise unary op failed: %s"),
-                                     currentExceptionAsString().c_str()),
-                    "HexBed", wxOK | wxICON_ERROR);
+                wxMessageBox(wxString::Format(_("Bitwise unary op failed: %s"),
+                                              currentExceptionAsString()),
+                             "HexBed", wxOK | wxICON_ERROR);
             } catch (...) {
             }
         }
@@ -861,10 +888,9 @@ void HexBedMainFrame::OnEditBitwiseShiftOp(wxCommandEvent& event) {
                              dial.GetOperation());
         } catch (...) {
             try {
-                wxMessageBox(
-                    wxString::Format(_("Bitwise shift op failed: %s"),
-                                     currentExceptionAsString().c_str()),
-                    "HexBed", wxOK | wxICON_ERROR);
+                wxMessageBox(wxString::Format(_("Bitwise shift op failed: %s"),
+                                              currentExceptionAsString()),
+                             "HexBed", wxOK | wxICON_ERROR);
             } catch (...) {
             }
         }
@@ -985,7 +1011,7 @@ void HexBedMainFrame::OnFileOpen(wxCommandEvent& event) {
     dial.GetPaths(files);
     wxWindow* check = dial.GetExtraControl();
     if (check) readOnly = dynamic_cast<wxCheckBox*>(check)->GetValue();
-    for (const wxString& file : files) FileKnock(file.ToStdString(), readOnly);
+    for (const wxString& file : files) FileKnock(file, readOnly);
 }
 
 void HexBedMainFrame::OnFileSave(wxCommandEvent& event) {
@@ -1026,7 +1052,7 @@ void HexBedMainFrame::OnFileMenuImport(wxCommandEvent& event) {
                           plugin.getFileFilter(),
                           wxFD_OPEN | wxFD_FILE_MUST_EXIST);
         if (dial.ShowModal() == wxID_CANCEL) return;
-        std::string fn = dial.GetPath().ToStdString();
+        std::filesystem::path fn(pathFromWxString(dial.GetPath()));
         if (plugin.configureImport(this, fn)) {
             if (!FileNew()) return;
             hexbed::ui::HexBedEditor* ed = GetEditor();
@@ -1052,10 +1078,9 @@ void HexBedMainFrame::OnFileMenuImport(wxCommandEvent& event) {
                 }
             } catch (...) {
                 try {
-                    wxMessageBox(
-                        wxString::Format(_("Failed to import:\n%s"),
-                                         currentExceptionAsString().c_str()),
-                        "HexBed", wxOK | wxICON_ERROR);
+                    wxMessageBox(wxString::Format(_("Failed to import:\n%s"),
+                                                  currentExceptionAsString()),
+                                 "HexBed", wxOK | wxICON_ERROR);
                 } catch (...) {
                 }
             }
@@ -1070,14 +1095,14 @@ void HexBedMainFrame::OnFileMenuExport(wxCommandEvent& event) {
         HexBedDocument& doc = ed->document();
         hexbed::plugins::ExportPlugin& plugin =
             hexbed::plugins::exportPluginByIndex(i);
-        std::string pathdir = "";
+        std::filesystem::path pathdir;
         if (doc.filed()) {
             try {
-                pathdir = std::filesystem::path(doc.path()).parent_path();
+                pathdir = doc.path().parent_path();
             } catch (...) {
             }
         }
-        wxFileDialog dial(this, _("Export file"), pathdir, "",
+        wxFileDialog dial(this, _("Export file"), pathToWxString(pathdir), "",
                           plugin.getFileFilter(),
                           wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
         if (dial.ShowModal() == wxID_CANCEL) return;
@@ -1088,8 +1113,8 @@ void HexBedMainFrame::OnFileMenuExport(wxCommandEvent& event) {
             sel = 0;
             seln = doc.size();
         }
-        std::string fn = dial.GetPath().ToStdString();
-        if (plugin.configureExport(this, fn, seln)) {
+        std::filesystem::path fn(pathFromWxString(dial.GetPath()));
+        if (plugin.configureExport(this, fn, sel, seln)) {
             bufsize beg = sel, end = seln;
             try {
                 HexBedTask(&ed->context(), 0, true)
@@ -1107,10 +1132,9 @@ void HexBedMainFrame::OnFileMenuExport(wxCommandEvent& event) {
                     });
             } catch (...) {
                 try {
-                    wxMessageBox(
-                        wxString::Format(_("Failed to export:\n%s"),
-                                         currentExceptionAsString().c_str()),
-                        "HexBed", wxOK | wxICON_ERROR);
+                    wxMessageBox(wxString::Format(_("Failed to export:\n%s"),
+                                                  currentExceptionAsString()),
+                                 "HexBed", wxOK | wxICON_ERROR);
                 } catch (...) {
                 }
             }
@@ -1149,12 +1173,20 @@ void HexBedMainFrame::DoCopy() {
     if (seln > 0) {
         try {
             hexbed::clip::CopyBytes(ed->document(), sel, seln, seltext);
-        } catch (...) {
+        } catch (const hexbed::clip::ClipboardError& e) {
             try {
                 wxMessageBox(
                     wxString::Format(_("Failed to copy:\n%s"),
-                                     currentExceptionAsString().c_str()),
+                                     _("Failed to open the clipboard")),
                     "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+            return;
+        } catch (...) {
+            try {
+                wxMessageBox(wxString::Format(_("Failed to copy:\n%s"),
+                                              currentExceptionAsString()),
+                             "HexBed", wxOK | wxICON_ERROR);
             } catch (...) {
             }
             return;
@@ -1198,12 +1230,20 @@ void HexBedMainFrame::DoPaste() {
                 ed->SelectBytes(sel + len, 0,
                                 SelectFlags().caretAtEnd().highlightCaret());
             }
-        } catch (...) {
+        } catch (const hexbed::clip::ClipboardError& e) {
             try {
                 wxMessageBox(
                     wxString::Format(_("Failed to paste:\n%s"),
-                                     currentExceptionAsString().c_str()),
+                                     _("Failed to open the clipboard")),
                     "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+            return;
+        } catch (...) {
+            try {
+                wxMessageBox(wxString::Format(_("Failed to paste:\n%s"),
+                                              currentExceptionAsString()),
+                             "HexBed", wxOK | wxICON_ERROR);
             } catch (...) {
             }
         }

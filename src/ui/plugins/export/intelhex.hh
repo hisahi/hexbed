@@ -28,18 +28,25 @@ namespace hexbed {
 
 namespace plugins {
 
+enum class ExportPluginIntelHEXMode { I8, I16, I32 };
+enum class ExportPluginIntelHEXOffsetBase { Zero, Real, Custom };
+
 struct ExportPluginIntelHEXSettings {
     unsigned columns{16};
-    bool segmentMode{false};
+    ExportPluginIntelHEXMode mode{ExportPluginIntelHEXMode::I32};
+    ExportPluginIntelHEXOffsetBase offsetBase{
+        ExportPluginIntelHEXOffsetBase::Real};
+    bufsize offsetCustom{0};
 };
 
 class ExportPluginIntelHEX : public LocalizableExportPlugin {
   public:
     ExportPluginIntelHEX(pluginid id);
     wxString getFileFilter() const;
-    bool configureExport(wxWindow* parent, const std::string& filename,
-                         bufsize size);
-    void doExport(HexBedTask& task, const std::string& filename,
+    bool configureExport(wxWindow* parent,
+                         const std::filesystem::path& filename,
+                         bufsize actualOffset, bufsize size);
+    void doExport(HexBedTask& task, const std::filesystem::path& filename,
                   std::function<bufsize(bufsize, bytespan)> read,
                   bufsize actualOffset, bufsize size);
 

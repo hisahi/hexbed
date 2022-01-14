@@ -32,16 +32,16 @@ namespace hexbed {
 int hexDigitToNum(char c);
 // out must have two chars worth of space
 void fastByteConv(char* out, const char* hex, byte b);
-std::string hexFromBytes(bufsize len, const byte* data, bool upper,
-                         bool cont = false);
-bool hexToBytes(bufsize& len, byte* data, const std::string& text);
 
-bool convertBaseFrom(bufsize& out, std::string_view text, unsigned base);
-std::string convertBaseTo(bufsize in, unsigned base, bool upper);
+string hexFromBytes(bufsize len, const byte* data, bool upper,
+                    bool cont = false);
+bool hexToBytes(bufsize& len, byte* data, const string& text);
 
-bool convertBaseFromNeg(bufsize& out, int& neg, std::string_view text,
-                        unsigned base);
-std::string convertBaseToNeg(bufsize in, int neg, unsigned base, bool upper);
+bool convertBaseFrom(bufsize& out, stringview text, unsigned base);
+string convertBaseTo(bufsize in, unsigned base, bool upper);
+
+bool convertBaseFromNeg(bufsize& out, int& neg, stringview text, unsigned base);
+string convertBaseToNeg(bufsize in, int neg, unsigned base, bool upper);
 
 };  // namespace hexbed
 

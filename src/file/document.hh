@@ -23,6 +23,7 @@
 #define HEXBED_FILE_DOCUMENT_HH
 
 #include <deque>
+#include <filesystem>
 #include <functional>
 #include <memory>
 
@@ -46,13 +47,13 @@ class HexBedBuffer {
   public:
     virtual bufsize read(bufoffset offset, bytespan data) = 0;
     virtual void write(HexBedContext& ctx, WriteCallback write,
-                       const std::string& filename) = 0;
+                       const std::filesystem::path& filename) = 0;
     virtual void writeOverlay(HexBedContext& ctx, WriteCallback write,
-                              const std::string& filename) = 0;
+                              const std::filesystem::path& filename) = 0;
     virtual void writeNew(HexBedContext& ctx, WriteCallback write,
-                          const std::string& filename) = 0;
+                          const std::filesystem::path& filename) = 0;
     virtual void writeCopy(HexBedContext& ctx, WriteCallback write,
-                           const std::string& filename) = 0;
+                           const std::filesystem::path& filename) = 0;
 
     virtual bufsize size() noexcept;
     virtual bufsize size() const noexcept = 0;
@@ -166,9 +167,9 @@ class HexBedDocument {
   public:
     HexBedDocument(std::shared_ptr<HexBedContext> context);
     HexBedDocument(std::shared_ptr<HexBedContext> context,
-                   const std::string& filename);
+                   const std::filesystem::path& filename);
     HexBedDocument(std::shared_ptr<HexBedContext> context,
-                   const std::string& filename, bool readOnly);
+                   const std::filesystem::path& filename, bool readOnly);
 
     HexBedDocument(HexBedDocument& copy) = delete;
     HexBedDocument(HexBedDocument&& move) = default;
@@ -220,15 +221,15 @@ class HexBedDocument {
     bufsize size() const noexcept;
     bool filed() const noexcept;
     bool unsaved() const noexcept;
-    std::string path() const;
+    std::filesystem::path path() const;
     bool canUndo() const noexcept;
     bool canRedo() const noexcept;
     bool readOnly() const noexcept;
 
     void discard();
     void commit();
-    void commitAs(const std::string& filename);
-    void commitTo(const std::string& filename);
+    void commitAs(const std::filesystem::path& filename);
+    void commitTo(const std::filesystem::path& filename);
 
     UndoGroupToken undoGroup();
     HexBedRange undo();
@@ -236,7 +237,7 @@ class HexBedDocument {
 
   private:
     std::shared_ptr<HexBedContext> context_;
-    std::string filename_;
+    std::filesystem::path filename_;
     std::unique_ptr<HexBedBuffer> buffer_;
     std::deque<HexBedUndoEntry> undos_;
     bufsize undoDepth_{0};

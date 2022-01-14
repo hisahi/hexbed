@@ -22,6 +22,7 @@
 #include "ui/config.hh"
 
 #include "common/logger.hh"
+#include "ui/string.hh"
 
 namespace hexbed {
 
@@ -37,7 +38,7 @@ static wxFont getDefaultHexFont() {
                   wxFONTWEIGHT_NORMAL);
 }
 
-wxFont getHexFontOrDefault(const std::string& s) {
+wxFont getHexFontOrDefault(const string& s) {
     if (s.empty()) return getDefaultHexFont();
     wxFont fnt(s);
     if (!fnt.IsOk() || !inNumericRange(MINIMUM_HEX_FONTSIZE, fnt.GetPointSize(),
@@ -47,8 +48,8 @@ wxFont getHexFontOrDefault(const std::string& s) {
     return fnt;
 }
 
-std::string hexFontToString(const wxFont& font) {
-    return font.GetNativeFontInfoDesc().ToStdString();
+string hexFontToString(const wxFont& font) {
+    return stringFromWx(font.GetNativeFontInfoDesc());
 }
 
 wxFont configFont() { return getHexFontOrDefault(config().font); }

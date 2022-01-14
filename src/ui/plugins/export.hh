@@ -25,6 +25,7 @@
 #include <wx/string.h>
 #include <wx/window.h>
 
+#include <filesystem>
 #include <functional>
 
 #include "common/types.hh"
@@ -41,9 +42,11 @@ class ExportPlugin : public Plugin {
     inline bool isLocalizable() const noexcept { return localizable_; }
     virtual wxString getFileFilter() const;
 
-    virtual bool configureExport(wxWindow* parent, const std::string& filename,
-                                 bufsize size) = 0;
-    virtual void doExport(HexBedTask& task, const std::string& filename,
+    virtual bool configureExport(wxWindow* parent,
+                                 const std::filesystem::path& filename,
+                                 bufsize actualOffset, bufsize size) = 0;
+    virtual void doExport(HexBedTask& task,
+                          const std::filesystem::path& filename,
                           std::function<bufsize(bufsize, bytespan)> read,
                           bufsize actualOffset, bufsize size) = 0;
 

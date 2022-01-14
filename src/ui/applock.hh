@@ -56,15 +56,15 @@ class AppLockServer : public wxServer {
 
 class AppLock {
   public:
-    AppLock(std::function<void(const std::string&)>);
+    AppLock(std::function<void(const wxString&)>);
 
-    bool acquire(const std::string& token);
+    bool acquire(const wxString& token);
     void release();
-    void knock(const std::string& token);
+    void knock(const wxString& token);
 
   private:
-    std::string mutexName_;
-    std::function<void(const std::string&)> knock_;
+    wxString mutexName_;
+    std::function<void(const wxString&)> knock_;
     wxSingleInstanceChecker single_;
     AppLockServer* server_;
 };

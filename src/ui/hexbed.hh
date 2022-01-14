@@ -30,7 +30,6 @@
 #include <wx/toolbar.h>
 
 #include <memory>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -50,7 +49,7 @@ class HexBedMainFrame : public wxFrame {
   public:
     HexBedMainFrame();
 
-    void FileKnock(const std::string& s, bool readOnly);
+    void FileKnock(const wxString& s, bool readOnly);
     void ApplyConfig();
 
     void UpdateMenuEnabled(hexbed::ui::HexEditorParent& editor);

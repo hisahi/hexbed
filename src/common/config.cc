@@ -92,18 +92,18 @@ void Configuration::saveValues() {
     saveBool("backupFiles", values_.backupFiles);
 }
 
-long Configuration::loadColor(const std::string& key, long def) {
+long Configuration::loadColor(const string& key, long def) {
     return loadIntRange(key, def, 0x000000L, 0xFFFFFFL);
 }
 
-long Configuration::loadIntRange(const std::string& key, long def, long min,
+long Configuration::loadIntRange(const string& key, long def, long min,
                                  long max) {
     long r = loadInt(key, def);
     if (r != def && (r < min || r > max)) r = def;
     return r;
 }
 
-long Configuration::loadIntSet(const std::string& key, long def,
+long Configuration::loadIntSet(const string& key, long def,
                                std::initializer_list<long> pass) {
     long r = loadInt(key, def);
     if (r == def) return r;

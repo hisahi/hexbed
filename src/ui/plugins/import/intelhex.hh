@@ -36,8 +36,9 @@ class ImportPluginIntelHEX : public LocalizableImportPlugin {
   public:
     ImportPluginIntelHEX(pluginid id);
     wxString getFileFilter() const;
-    bool configureImport(wxWindow* parent, const std::string& filename);
-    void doImport(HexBedTask& task, const std::string& filename,
+    bool configureImport(wxWindow* parent,
+                         const std::filesystem::path& filename);
+    void doImport(HexBedTask& task, const std::filesystem::path& filename,
                   std::function<void(bufsize, const_bytespan)> output);
 
   private:
