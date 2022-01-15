@@ -17,39 +17,48 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/menuview.cc -- implementation for the View menu
+// ui/dialog/random.hh -- header for the Insert Random Block dialog
 
-#include "app/config.hh"
-#include "ui/menus.hh"
+#ifndef HEXBED_UI_DIALOG_RANDOM_HH
+#define HEXBED_UI_DIALOG_RANDOM_HH
+
+#include <wx/dialog.h>
+#include <wx/spinctrl.h>
+
+#include "common/random.hh"
+#include "common/types.hh"
+#include "ui/editor-fwd.hh"
+#include "ui/hexbed-fwd.hh"
+#include "ui/saeditor.hh"
 
 namespace hexbed {
-namespace menu {
 
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
-    wxMenu* menuView = new wxMenu;
-    wxMenu* viewColumns = new wxMenu;
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsBoth, _("&Hex and text"),
-                          _("Both columns; hex and text data"))
-        ->Check(config().showColumnTypes == 3);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsHex, _("He&x only"),
-                          _("Show hex column only"))
-        ->Check(config().showColumnTypes == 2);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsText, _("&Text only"),
-                          _("Show text column only"))
-        ->Check(config().showColumnTypes == 1);
-    menuView->AppendSubMenu(viewColumns, _("&Columns"),
-                            _("Controls which columns to show"));
-    menuView->AppendSeparator();
-    addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
-            _("Shows the bit editor"), wxACCEL_CTRL, 'B');
-    addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
-            _("Shows the data inspector"), wxACCEL_CTRL, 'D');
-    menuBar->Append(menuView, _("&View"));
-    return menuView;
-}
+namespace ui {
 
-};  // namespace menu
+class InsertRandomBlockDialog : public wxDialog {
+  public:
+    InsertRandomBlockDialog(HexBedMainFrame* parent, bufsize seln);
+    bufsize GetByteCount() const noexcept;
+    RandomType GetRandomType() const noexcept;
+
+  protected:
+    void OnOK(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+
+  private:
+    void EndDialog(int result);
+
+    HexBedMainFrame* parent_;
+
+    wxSpinCtrl* spinner_;
+    wxButton* okButton_;
+
+    bufsize count_{0};
+    RandomType type_{RandomType::Fast};
+};
+
+};  // namespace ui
+
 };  // namespace hexbed
+
+#endif /* HEXBED_UI_DIALOG_RANDOM_HH */

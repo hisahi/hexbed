@@ -326,9 +326,9 @@ void HexBedEditor::HintByteChanged(bufsize offset) {
 }
 
 void HexBedEditor::HintBytesChanged(bufsize begin) {
-    FileSizeUpdate();
     hexEdit_->HintBytesChanged(begin);
     AddPendingEvent(wxCommandEvent(HEX_EDIT_EVENT));
+    FileSizeUpdate();
 }
 
 void HexBedEditor::HintBytesChanged(bufsize begin, bufsize end) {

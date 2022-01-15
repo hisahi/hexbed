@@ -31,7 +31,9 @@
 
 #include "app/bitop.hh"
 #include "app/config.hh"
+#include "common/buffer.hh"
 #include "common/logger.hh"
+#include "common/random.hh"
 #include "common/version.hh"
 #include "file/document.hh"
 #include "file/task.hh"
@@ -43,6 +45,7 @@
 #include "ui/dialogs/find.hh"
 #include "ui/dialogs/goto.hh"
 #include "ui/dialogs/insert.hh"
+#include "ui/dialogs/random.hh"
 #include "ui/dialogs/replace.hh"
 #include "ui/dialogs/selectblock.hh"
 #include "ui/editor.hh"
@@ -103,6 +106,8 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
              HexBedMainFrame::OnEditSelectBlock)
     EVT_MENU(hexbed::menu::MenuEdit_InsertOrReplace,
              HexBedMainFrame::OnEditInsertOrReplace)
+    EVT_MENU(hexbed::menu::MenuEdit_InsertRandom,
+              HexBedMainFrame::OnEditInsertRandom)
     EVT_MENU(hexbed::menu::MenuEdit_BitwiseBinaryOp,
              HexBedMainFrame::OnEditBitwiseBinaryOp)
     EVT_MENU(hexbed::menu::MenuEdit_BitwiseUnaryOp,
@@ -584,6 +589,7 @@ void HexBedMainFrame::UpdateMenuEnabled(hexbed::ui::HexEditorParent& ed) {
     wxMenuBar& mbar = *GetMenuBar();
     bool writable = !ed.document().readOnly();
     mbar.Enable(hexbed::menu::MenuEdit_InsertOrReplace, writable);
+    mbar.Enable(hexbed::menu::MenuEdit_InsertRandom, writable);
     if (findDialog_) findDialog_->AllowReplace(writable);
     UpdateMenuEnabledSelect(ed);
     OnEditorCopy(ed);
@@ -821,6 +827,43 @@ void HexBedMainFrame::OnEditInsertOrReplace(wxCommandEvent& event) {
             byte* sb = sb_.get();
             bufsize sr = insertDocument_->read(0, bytespan{sb, sb + sn});
             if (ed->document().replace(sel, seln, n, sr, sb))
+                ed->SelectBytes(
+                    sel, n, SelectFlags().caretAtBeginning().highlightCaret());
+        } catch (...) {
+            try {
+                wxMessageBox(wxString::Format(_("Insert failed: %s"),
+                                              currentExceptionAsString()),
+                             "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+        }
+    }
+}
+
+void HexBedMainFrame::OnEditInsertRandom(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    ed->GetSelection(sel, seln, seltext);
+    InsertRandomBlockDialog insertRandomDialog(this, seln);
+    if (ed && insertRandomDialog.ShowModal() == wxID_OK) {
+        bufsize n = insertRandomDialog.GetByteCount();
+        RandomType type = insertRandomDialog.GetRandomType();
+        try {
+            if (ed->document().pry(
+                    sel, seln,
+                    [n, type](HexBedTask& task,
+                              std::function<void(const_bytespan)> outp) {
+                        byte blk[BUFFER_SIZE];
+                        for (bufsize i = 0; !task.isCancelled() && i < n;) {
+                            task.progress(i);
+                            bufsize r = std::min<bufsize>(sizeof(blk), n - i);
+                            randomizeBuffer(type, blk, r);
+                            outp(const_bytespan{blk, r});
+                            i += r;
+                        }
+                    },
+                    n))
                 ed->SelectBytes(
                     sel, n, SelectFlags().caretAtBeginning().highlightCaret());
         } catch (...) {

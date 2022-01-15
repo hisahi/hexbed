@@ -45,6 +45,7 @@ enum {
     MenuEdit_InsertMode,
     MenuEdit_SelectRange,
     MenuEdit_InsertOrReplace,
+    MenuEdit_InsertRandom,
     MenuEdit_BitwiseBinaryOp,
     MenuEdit_BitwiseUnaryOp,
     MenuEdit_BitwiseShiftOp,

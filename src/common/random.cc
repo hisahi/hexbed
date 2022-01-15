@@ -17,39 +17,27 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/menuview.cc -- implementation for the View menu
+// common/random.cc -- impl for randomization utilities
 
-#include "app/config.hh"
-#include "ui/menus.hh"
+#include "common/random.hh"
+
+#include <random>
 
 namespace hexbed {
-namespace menu {
 
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
-    wxMenu* menuView = new wxMenu;
-    wxMenu* viewColumns = new wxMenu;
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsBoth, _("&Hex and text"),
-                          _("Both columns; hex and text data"))
-        ->Check(config().showColumnTypes == 3);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsHex, _("He&x only"),
-                          _("Show hex column only"))
-        ->Check(config().showColumnTypes == 2);
-    viewColumns
-        ->AppendRadioItem(MenuView_ShowColumnsText, _("&Text only"),
-                          _("Show text column only"))
-        ->Check(config().showColumnTypes == 1);
-    menuView->AppendSubMenu(viewColumns, _("&Columns"),
-                            _("Controls which columns to show"));
-    menuView->AppendSeparator();
-    addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
-            _("Shows the bit editor"), wxACCEL_CTRL, 'B');
-    addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
-            _("Shows the data inspector"), wxACCEL_CTRL, 'D');
-    menuBar->Append(menuView, _("&View"));
-    return menuView;
+static std::random_device randdev;
+static std::default_random_engine randeng(randdev());
+static std::uniform_int_distribution<byte> randbyte(0, 255);
+
+void randomizeBuffer(RandomType type, byte* buffer, std::size_t size) {
+    switch (type) {
+    case RandomType::Fast:
+        for (std::size_t i = 0; i < size; ++i) buffer[i] = randbyte(randdev);
+        break;
+    case RandomType::Good:
+        for (std::size_t i = 0; i < size; ++i) buffer[i] = randbyte(randeng);
+        break;
+    }
 }
 
-};  // namespace menu
 };  // namespace hexbed

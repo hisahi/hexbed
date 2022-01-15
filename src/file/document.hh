@@ -121,6 +121,10 @@ class UndoToken {
     inline UndoToken(std::deque<HexBedUndoEntry>* undos, size_t x)
         : undos_(undos), index_(x), stored_(false) {}
     inline void commit() noexcept { stored_ = true; }
+    inline void rollback(HexBedDocument& document) {
+        (undos_->begin() + index_)->undo(document);
+        stored_ = false;
+    }
     HexBedUndoEntry& entry() noexcept;
 
     UndoToken(const UndoToken& copy) = delete;
@@ -200,7 +204,8 @@ class HexBedDocument {
              std::function<bool(bufoffset, bytespan)> mapper, bufsize mul = 1);
     bool pry(
         bufoffset offset, bufsize size,
-        std::function<void(HexBedTask&, std::function<void(const_bytespan)>)>);
+        std::function<void(HexBedTask&, std::function<void(const_bytespan)>)>,
+        bufsize sizehint = 0);
     // destroys undo history!
     bool romp(std::function<
               void(HexBedTask&, std::function<void(bufsize, const_bytespan)>)>);

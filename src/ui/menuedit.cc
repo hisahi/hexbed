@@ -57,6 +57,9 @@ wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
         addItem(menuEdit, MenuEdit_InsertOrReplace, _("Ins&ert or replace..."),
                 _("Inserts or replaces the selection with a block of bytes"),
                 wxACCEL_CTRL, 'I'));
+    fileOnly.push_back(addItem(
+        menuEdit, MenuEdit_InsertRandom, _("Insert rando&m..."),
+        _("Inserts or replaces the selection with a random block of bytes")));
     wxMenu* editOps = new wxMenu;
     wxMenu* editSwapOps = new wxMenu;
     fileOnly.push_back(addItem(

@@ -97,6 +97,7 @@ class HexBedMainFrame : public wxFrame {
     void OnEditSelectBlock(wxCommandEvent& event);
     void OnEditInsertToggle(wxCommandEvent& event);
     void OnEditInsertOrReplace(wxCommandEvent& event);
+    void OnEditInsertRandom(wxCommandEvent& event);
     void OnEditBitwiseBinaryOp(wxCommandEvent& event);
     void OnEditBitwiseUnaryOp(wxCommandEvent& event);
     void OnEditBitwiseShiftOp(wxCommandEvent& event);

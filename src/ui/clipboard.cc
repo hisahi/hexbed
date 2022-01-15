@@ -25,6 +25,7 @@
 #include <wx/intl.h>
 
 #include "app/config.hh"
+#include "common/buffer.hh"
 #include "common/charconv.hh"
 #include "common/hexconv.hh"
 #include "ui/string.hh"
@@ -44,7 +45,7 @@ bool HasClipboard() {
 void CopyBytes(HexBedDocument& document, bufsize off, bufsize cnt, bool text) {
     if (!wxTheClipboard->Open()) throw ClipboardError();
     bufsize q = 0, qq;
-    byte buf[256];
+    byte buf[BUFFER_SIZE];
     if (text) {
         std::wstring result;
 

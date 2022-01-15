@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "app/sbcs.hh"
+#include "common/buffer.hh"
 #include "common/caseconv.hh"
 #include "common/logger.hh"
 #include "common/memory.hh"
@@ -67,7 +68,7 @@ static std::u32string readU32String(const HexBedDocument& document,
                                     bufsize offset, bufsize wantedLength,
                                     bufsize& readBytes,
                                     CaseInsensitivePattern& pattern) {
-    byte buf[512];
+    byte buf[BUFFER_SIZE];
     bufsize r;
     u32ostringstream us;
     bufsize readchars = 0;

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-15 23:41+0200\n"
+"POT-Creation-Date: 2022-01-16 00:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -110,103 +110,111 @@ msgstr ""
 msgid "Inserts or replaces the selection with a block of bytes"
 msgstr ""
 
-#: src/ui/menuedit.cc:63
-msgid "Bitwise &binary operation..."
+#: src/ui/menuedit.cc:61
+msgid "Insert rand&om..."
 msgstr ""
 
-#: src/ui/menuedit.cc:64
-msgid "Performs a binary bitwise operation on the selected block"
+#: src/ui/menuedit.cc:62
+msgid "Inserts or replaces the selection with a random block of bytes"
 msgstr ""
 
 #: src/ui/menuedit.cc:66
-msgid "Bitwise &unary operation..."
+msgid "Bitwise &binary operation..."
 msgstr ""
 
 #: src/ui/menuedit.cc:67
-msgid "Performs a unary bitwise operation on the selected block"
+msgid "Performs a binary bitwise operation on the selected block"
 msgstr ""
 
 #: src/ui/menuedit.cc:69
-msgid "Bitwise &shift operation..."
+msgid "Bitwise &unary operation..."
 msgstr ""
 
 #: src/ui/menuedit.cc:70
-msgid "Performs a bitwise shift operation on the selected block"
+msgid "Performs a unary bitwise operation on the selected block"
+msgstr ""
+
+#: src/ui/menuedit.cc:72
+msgid "Bitwise &shift operation..."
 msgstr ""
 
 #: src/ui/menuedit.cc:73
-msgid "Byte swap (&2-byte words)"
-msgstr ""
-
-#: src/ui/menuedit.cc:74
-msgid "Swaps the byte order in the selected block of 2-byte words"
+msgid "Performs a bitwise shift operation on the selected block"
 msgstr ""
 
 #: src/ui/menuedit.cc:76
-msgid "Byte swap (&4-byte words)"
+msgid "Byte swap (&2-byte words)"
 msgstr ""
 
 #: src/ui/menuedit.cc:77
-msgid "Swaps the byte order in the selected block of 4-byte words"
+msgid "Swaps the byte order in the selected block of 2-byte words"
 msgstr ""
 
 #: src/ui/menuedit.cc:79
-msgid "Byte swap (&8-byte words)"
+msgid "Byte swap (&4-byte words)"
 msgstr ""
 
 #: src/ui/menuedit.cc:80
-msgid "Swaps the byte order in the selected block of 8-byte words"
+msgid "Swaps the byte order in the selected block of 4-byte words"
 msgstr ""
 
 #: src/ui/menuedit.cc:82
-msgid "Byte swap (1&6-byte words)"
+msgid "Byte swap (&8-byte words)"
 msgstr ""
 
 #: src/ui/menuedit.cc:83
-msgid "Swaps the byte order in the selected block of 16-byte words"
-msgstr ""
-
-#: src/ui/menuedit.cc:84
-msgid "Byte s&wap"
+msgid "Swaps the byte order in the selected block of 8-byte words"
 msgstr ""
 
 #: src/ui/menuedit.cc:85
-msgid "Performs byte order swaps on the selection"
+msgid "Byte swap (1&6-byte words)"
+msgstr ""
+
+#: src/ui/menuedit.cc:86
+msgid "Swaps the byte order in the selected block of 16-byte words"
+msgstr ""
+
+#: src/ui/menuedit.cc:87
+msgid "Byte s&wap"
 msgstr ""
 
 #: src/ui/menuedit.cc:88
-msgid "&Reverse"
-msgstr ""
-
-#: src/ui/menuedit.cc:89
-msgid "Reverses the order of bytes within the selection"
-msgstr ""
-
-#: src/ui/menuedit.cc:90
-msgid "&Operations"
+msgid "Performs byte order swaps on the selection"
 msgstr ""
 
 #: src/ui/menuedit.cc:91
-msgid "Performs operations on the selection"
+msgid "&Reverse"
+msgstr ""
+
+#: src/ui/menuedit.cc:92
+msgid "Reverses the order of bytes within the selection"
+msgstr ""
+
+#: src/ui/menuedit.cc:93
+msgid "&Operations"
 msgstr ""
 
 #: src/ui/menuedit.cc:94
+msgid "Performs operations on the selection"
+msgstr ""
+
+#: src/ui/menuedit.cc:97
 msgid "&Insert mode"
 msgstr ""
 
-#: src/ui/menuedit.cc:95
+#: src/ui/menuedit.cc:98
 msgid "Inserts bytes typed in instead of overwriting existing ones"
 msgstr ""
 
-#: src/ui/menuedit.cc:98
+#: src/ui/menuedit.cc:101
 msgid "&Options"
 msgstr ""
 
-#: src/ui/menuedit.cc:99
+#: src/ui/menuedit.cc:102
 msgid "Opens the dialog for editing options or preferences"
 msgstr ""
 
-#: src/ui/menuedit.cc:101
+#: src/ui/menuedit.cc:104
 msgid "&Edit"
 msgstr ""
 
@@ -448,7 +456,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/context.cc:162 src/ui/hexbed.cc:459
+#: src/ui/context.cc:162 src/ui/hexbed.cc:464
 msgid "&Retry"
 msgstr ""
 
@@ -468,127 +476,127 @@ msgstr ""
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 
-#: src/ui/hexbed.cc:348
+#: src/ui/hexbed.cc:353
 #, c-format
 msgid "[unsaved] %s"
 msgstr ""
 
 #. / main window title bar
-#: src/ui/hexbed.cc:358 src/ui/hexbed.cc:531
+#: src/ui/hexbed.cc:363 src/ui/hexbed.cc:536
 #, c-format
 msgid "%s - %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:379
+#: src/ui/hexbed.cc:384
 msgid "Save a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:381 src/ui/hexbed.cc:1009 src/ui/plugins/export.cc:67
+#: src/ui/hexbed.cc:386 src/ui/hexbed.cc:1052 src/ui/plugins/export.cc:67
 #: src/ui/plugins/import.cc:52
 msgid "All files (*.*)"
 msgstr ""
 
-#: src/ui/hexbed.cc:405
+#: src/ui/hexbed.cc:410
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:433
+#: src/ui/hexbed.cc:438
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr ""
 
-#: src/ui/hexbed.cc:453
+#: src/ui/hexbed.cc:458
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:459
+#: src/ui/hexbed.cc:464
 msgid "&Cancel"
 msgstr ""
 
-#: src/ui/hexbed.cc:461
+#: src/ui/hexbed.cc:466
 msgid "Retry?"
 msgstr ""
 
-#: src/ui/hexbed.cc:485
+#: src/ui/hexbed.cc:490
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr ""
 
-#: src/ui/hexbed.cc:639
+#: src/ui/hexbed.cc:645
 #, c-format
 msgid "[read-only] %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:649
+#: src/ui/hexbed.cc:655
 #, c-format
 msgid "New-%llu"
 msgstr ""
 
-#: src/ui/hexbed.cc:654
+#: src/ui/hexbed.cc:660
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:674
+#: src/ui/hexbed.cc:680
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:683
+#: src/ui/hexbed.cc:689
 msgid "Read only"
 msgstr ""
 
-#: src/ui/hexbed.cc:721
+#: src/ui/hexbed.cc:727
 msgid "No more results found for this search."
 msgstr ""
 
-#: src/ui/hexbed.cc:727
+#: src/ui/hexbed.cc:733
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/hexbed.cc:828
+#: src/ui/hexbed.cc:834 src/ui/hexbed.cc:871
 #, c-format
 msgid "Insert failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:854
+#: src/ui/hexbed.cc:897
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:874
+#: src/ui/hexbed.cc:917
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:895
+#: src/ui/hexbed.cc:938
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1008
+#: src/ui/hexbed.cc:1051
 msgid "Open a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1055
+#: src/ui/hexbed.cc:1098
 msgid "Import file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1075
+#: src/ui/hexbed.cc:1118
 #, c-format
 msgid ""
 "Error on line %llu:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1077
+#: src/ui/hexbed.cc:1120
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -596,55 +604,55 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1085
+#: src/ui/hexbed.cc:1128
 #, c-format
 msgid ""
 "Failed to import:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1109
+#: src/ui/hexbed.cc:1152
 msgid "Export file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1146
+#: src/ui/hexbed.cc:1189
 #, c-format
 msgid ""
 "Failed to export:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1190 src/ui/hexbed.cc:1198
+#: src/ui/hexbed.cc:1233 src/ui/hexbed.cc:1241
 #, c-format
 msgid ""
 "Failed to copy:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1191 src/ui/hexbed.cc:1248
+#: src/ui/hexbed.cc:1234 src/ui/hexbed.cc:1291
 msgid "Failed to open the clipboard"
 msgstr ""
 
-#: src/ui/hexbed.cc:1231
+#: src/ui/hexbed.cc:1274
 msgid ""
 "Cannot paste the current clipboard contents, because it contains characters "
 "that the currently selected character encoding cannot represent."
 msgstr ""
 
-#: src/ui/hexbed.cc:1234
+#: src/ui/hexbed.cc:1277
 msgid ""
 "Cannot paste the current clipboard contents, because it does not contain "
 "valid hexadecimal data. Text data should be a string of hexadecimal bytes."
 msgstr ""
 
-#: src/ui/hexbed.cc:1247 src/ui/hexbed.cc:1255
+#: src/ui/hexbed.cc:1290 src/ui/hexbed.cc:1298
 #, c-format
 msgid ""
 "Failed to paste:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1304
+#: src/ui/hexbed.cc:1347
 msgid "A hex editor."
 msgstr ""
 
@@ -784,12 +792,28 @@ msgstr ""
 msgid "Find and replace"
 msgstr ""
 
-#: src/ui/dialogs/insert.cc:36
-msgid "Insert or replace"
+#: src/ui/dialogs/random.cc:35
+msgid "Insert random"
 msgstr ""
 
-#: src/ui/dialogs/insert.cc:64
+#: src/ui/dialogs/random.cc:59 src/ui/dialogs/insert.cc:64
 msgid "Number of bytes:"
+msgstr ""
+
+#: src/ui/dialogs/random.cc:61
+msgid "Randomness source"
+msgstr ""
+
+#: src/ui/dialogs/random.cc:62
+msgid "Fast, but low quality"
+msgstr ""
+
+#: src/ui/dialogs/random.cc:67
+msgid "Slow, but high quality"
+msgstr ""
+
+#: src/ui/dialogs/insert.cc:36
+msgid "Insert or replace"
 msgstr ""
 
 #: src/ui/dialogs/insert.cc:67 src/ui/dialogs/bitopbinary.cc:73

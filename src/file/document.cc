@@ -25,6 +25,7 @@
 #include <new>
 
 #include "app/config.hh"
+#include "common/buffer.hh"
 #include "common/memory.hh"
 #include "file/bfile.hh"
 //#include "file/bmmap.hh"
@@ -670,7 +671,7 @@ bool HexBedDocument::map(bufoffset offset, bufsize size,
     bufsize z = HexBedDocument::size();
     if (offset + size > z) return false;
     bool ok = true;
-    alignas(std::max_align_t) byte bstack[256];
+    alignas(std::max_align_t) byte bstack[BUFFER_SIZE];
     bufsize bs = sizeof(bstack);
     bufsize bc = std::bit_ceil<bufsize>(std::min<bufsize>(size, 1UL << 20));
     auto alignedDeleter = [](byte* ptr) {
@@ -710,10 +711,10 @@ bool HexBedDocument::map(bufoffset offset, bufsize size,
                 n -= r;
                 task.progress(task.progress() + r);
             }
-            token.commit();
             if (!ok)
-                undo();
+                token.rollback(*this);
             else {
+                token.commit();
                 dirty_ = true;
                 context_->announceUndoChange(this);
                 context_->announceBytesChanged(this, offset, size);
@@ -725,7 +726,8 @@ bool HexBedDocument::map(bufoffset offset, bufsize size,
 bool HexBedDocument::pry(
     bufoffset offset, bufsize size,
     std::function<void(HexBedTask&, std::function<void(const_bytespan)>)>
-        source) {
+        source,
+    bufsize sizehint) {
     auto token = addUndoReplaceDiffSize(offset, size, 0);
     if (size) treble_.remove(offset, size);
     Treble& treble = treble_;
@@ -738,13 +740,17 @@ bool HexBedDocument::pry(
         off += n;
         *sz += n;
     };
-    HexBedTask task = HexBedTask(context_.get(), 0, true);
+    HexBedTask task = HexBedTask(context_.get(), sizehint, true);
     task.run(
         [this, &source, &insert](HexBedTask& task) { source(task, insert); });
-    if (!task.isCancelled()) token.commit();
-    dirty_ = true;
-    context_->announceUndoChange(this);
-    context_->announceBytesChanged(this, offset);
+    if (task.isCancelled())
+        token.rollback(*this);
+    else {
+        token.commit();
+        dirty_ = true;
+        context_->announceUndoChange(this);
+        context_->announceBytesChanged(this, offset);
+    }
     return !task.isCancelled();
 }
 
@@ -782,7 +788,7 @@ bool HexBedDocument::reverse(bufoffset offset, bufsize size) {
     bufsize z = HexBedDocument::size();
     if (offset + size > z) return false;
     bool ok = true;
-    alignas(std::max_align_t) byte bstack[256];
+    alignas(std::max_align_t) byte bstack[BUFFER_SIZE];
     bufsize bs = sizeof(bstack);
     bufsize bc = std::bit_ceil<bufsize>(std::min<bufsize>(size, 1UL << 20));
     auto alignedDeleter = [](byte* ptr) {
@@ -821,10 +827,10 @@ bool HexBedDocument::reverse(bufoffset offset, bufsize size) {
                 treble_.replace(o, alloc, b + alloc);
                 o += alloc;
             }
-            token.commit();
             if (!ok)
-                undo();
+                token.rollback(*this);
             else {
+                token.commit();
                 dirty_ = true;
                 context_->announceUndoChange(this);
                 context_->announceBytesChanged(this, offset, size);
