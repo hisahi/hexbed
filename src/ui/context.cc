@@ -27,6 +27,7 @@
 #include <wx/progdlg.h>
 
 #include "app/config.hh"
+#include "common/logger.hh"
 #include "ui/editor.hh"
 #include "ui/hexbed.hh"
 
@@ -74,7 +75,7 @@ class HexBedTaskHandlerMain : public HexBedTaskHandler, wxEvtHandler {
         if (task_) return;
         bufsize bw = std::bit_width(complete) + 1;
         constexpr bufsize mbw =
-            std::bit_width<bufsize>(std::numeric_limits<int>::max());
+            std::bit_width<bufsize>(std::numeric_limits<short>::max());
         shift_ = bw > mbw ? bw - mbw : 0;
         end_ = (complete >> shift_) + 1;
         task_ = task;
@@ -88,7 +89,10 @@ class HexBedTaskHandlerMain : public HexBedTaskHandler, wxEvtHandler {
             if (task_->canCancel()) flags |= wxPD_CAN_ABORT;
             dialog_ = std::make_unique<wxProgressDialog>(
                 "HexBed", _("Action in progress"), end_ - 1, main_, flags);
-            if (prog_) dialog_->Update(prog_);
+            if (prog_ && prog_ < end_) {
+                if (!dialog_->Update(prog_))
+                    task_->cancel();
+            }
         } catch (...) {
         }
     }
@@ -100,7 +104,7 @@ class HexBedTaskHandlerMain : public HexBedTaskHandler, wxEvtHandler {
             if (!dialog_) timer_.Stop();
             dialog_ = nullptr;
             task_ = nullptr;
-        } else if (dialog_ && !dialog_->Update(x) && x < end_)
+        } else if (dialog_ && x < end_ && !dialog_->Update(x))
             task_->cancel();
     }
 
@@ -110,6 +114,9 @@ class HexBedTaskHandlerMain : public HexBedTaskHandler, wxEvtHandler {
             while (task_) {
                 wxTheApp->Dispatch();
             }
+            timer_.Stop();
+            dialog_ = nullptr;
+            prog_ = 0;
         }
     }
 
