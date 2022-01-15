@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 00:25+0200\n"
+"POT-Creation-Date: 2022-01-16 01:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -111,7 +111,7 @@ msgid "Inserts or replaces the selection with a block of bytes"
 msgstr ""
 
 #: src/ui/menuedit.cc:61
-msgid "Insert rand&om..."
+msgid "Insert rando&m..."
 msgstr ""
 
 #: src/ui/menuedit.cc:62
@@ -348,6 +348,36 @@ msgstr ""
 msgid "The entered text cannot be represented in the selected encoding."
 msgstr ""
 
+#: src/ui/hexedit.cc:287 src/ui/hexedit.cc:295
+#, c-format
+msgid ""
+"Failed to copy:\n"
+"%s"
+msgstr ""
+
+#: src/ui/hexedit.cc:288 src/ui/hexedit.cc:344
+msgid "Failed to open the clipboard"
+msgstr ""
+
+#: src/ui/hexedit.cc:327
+msgid ""
+"Cannot paste the current clipboard contents, because it contains characters "
+"that the currently selected character encoding cannot represent."
+msgstr ""
+
+#: src/ui/hexedit.cc:330
+msgid ""
+"Cannot paste the current clipboard contents, because it does not contain "
+"valid hexadecimal data. Text data should be a string of hexadecimal bytes."
+msgstr ""
+
+#: src/ui/hexedit.cc:343 src/ui/hexedit.cc:351
+#, c-format
+msgid ""
+"Failed to paste:\n"
+"%s"
+msgstr ""
+
 #: src/ui/menuview.cc:32
 msgid "&Hex and text"
 msgstr ""
@@ -445,34 +475,34 @@ msgstr ""
 msgid "&Search"
 msgstr ""
 
-#: src/ui/context.cc:90
+#: src/ui/context.cc:91
 msgid "Action in progress"
 msgstr ""
 
-#: src/ui/context.cc:160
+#: src/ui/context.cc:166
 #, c-format
 msgid ""
 "Backup failed:\n"
 "%s"
 msgstr ""
 
-#: src/ui/context.cc:162 src/ui/hexbed.cc:464
+#: src/ui/context.cc:168 src/ui/hexbed.cc:464
 msgid "&Retry"
 msgstr ""
 
-#: src/ui/context.cc:162
+#: src/ui/context.cc:168
 msgid "&Ignore"
 msgstr ""
 
-#: src/ui/context.cc:162
+#: src/ui/context.cc:168
 msgid "&Abort"
 msgstr ""
 
-#: src/ui/context.cc:164
+#: src/ui/context.cc:170
 msgid "'Retry' to try again, 'Ignore' to save anyway or 'Abort' to cancel."
 msgstr ""
 
-#: src/ui/context.cc:168
+#: src/ui/context.cc:174
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 
@@ -622,37 +652,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1233 src/ui/hexbed.cc:1241
-#, c-format
-msgid ""
-"Failed to copy:\n"
-"%s"
-msgstr ""
-
-#: src/ui/hexbed.cc:1234 src/ui/hexbed.cc:1291
-msgid "Failed to open the clipboard"
-msgstr ""
-
-#: src/ui/hexbed.cc:1274
-msgid ""
-"Cannot paste the current clipboard contents, because it contains characters "
-"that the currently selected character encoding cannot represent."
-msgstr ""
-
-#: src/ui/hexbed.cc:1277
-msgid ""
-"Cannot paste the current clipboard contents, because it does not contain "
-"valid hexadecimal data. Text data should be a string of hexadecimal bytes."
-msgstr ""
-
-#: src/ui/hexbed.cc:1290 src/ui/hexbed.cc:1298
-#, c-format
-msgid ""
-"Failed to paste:\n"
-"%s"
-msgstr ""
-
-#: src/ui/hexbed.cc:1347
+#: src/ui/hexbed.cc:1255
 msgid "A hex editor."
 msgstr ""
 

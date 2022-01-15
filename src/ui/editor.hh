@@ -148,6 +148,7 @@ class HexEditorParent {
     virtual void OnCaretMoved() = 0;
     virtual void OnSelectChanged() = 0;
     virtual void OnEditorCopy() = 0;
+    virtual void OnUndoRedo() = 0;
 
     virtual void ReloadConfig() = 0;
     virtual void ReloadFile() = 0;
@@ -159,6 +160,13 @@ class HexEditorParent {
     virtual void HintByteChanged(bufsize offset) = 0;
     virtual void HintBytesChanged(bufsize begin) = 0;
     virtual void HintBytesChanged(bufsize begin, bufsize end) = 0;
+
+    virtual void DoCtrlCut() = 0;
+    virtual void DoCtrlCopy() = 0;
+    virtual void DoCtrlPasteInsert() = 0;
+    virtual void DoCtrlPasteOverwrite() = 0;
+    virtual void DoCtrlUndo() = 0;
+    virtual void DoCtrlRedo() = 0;
 };
 
 class HexBedEditor : public wxPanel, public HexEditorParent {
@@ -194,6 +202,7 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     void OnCaretMoved() override;
     void OnSelectChanged() override;
     void OnEditorCopy() override;
+    void OnUndoRedo() override;
 
     void SelectBytes(bufsize start, bufsize length, SelectFlags flags) override;
     void SelectNone() override;
@@ -202,6 +211,13 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     void HintByteChanged(bufsize offset) override;
     void HintBytesChanged(bufsize begin) override;
     void HintBytesChanged(bufsize begin, bufsize end) override;
+
+    void DoCtrlCut();
+    void DoCtrlCopy();
+    void DoCtrlPasteInsert();
+    void DoCtrlPasteOverwrite();
+    void DoCtrlUndo();
+    void DoCtrlRedo();
 
     void FocusEditor();
 

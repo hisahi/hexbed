@@ -209,6 +209,8 @@ void HexBedEditor::FullUpdate() {
 
 void HexBedEditor::OnEditorCopy() { frame_->OnEditorCopy(*this); }
 
+void HexBedEditor::OnUndoRedo() { frame_->OnUndoRedo(*this); }
+
 void HexBedEditor::LayoutUpdate() {
     group_ = config().groupSize;
     if (!config().autoFit) {
@@ -335,6 +337,18 @@ void HexBedEditor::HintBytesChanged(bufsize begin, bufsize end) {
     hexEdit_->HintBytesChanged(begin, end);
     AddPendingEvent(wxCommandEvent(HEX_EDIT_EVENT));
 }
+
+void HexBedEditor::DoCtrlCut() { hexEdit_->DoCtrlCut(); }
+
+void HexBedEditor::DoCtrlCopy() { hexEdit_->DoCtrlCopy(); }
+
+void HexBedEditor::DoCtrlPasteInsert() { hexEdit_->DoCtrlPasteInsert(); }
+
+void HexBedEditor::DoCtrlPasteOverwrite() { hexEdit_->DoCtrlPasteOverwrite(); }
+
+void HexBedEditor::DoCtrlUndo() { hexEdit_->DoCtrlUndo(); }
+
+void HexBedEditor::DoCtrlRedo() { hexEdit_->DoCtrlRedo(); }
 
 void HexBedEditor::FocusEditor() { hexEdit_->SetFocus(); }
 

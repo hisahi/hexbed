@@ -103,6 +103,8 @@ void HexBedStandaloneEditor::FullUpdate() {
 
 void HexBedStandaloneEditor::OnEditorCopy() {}
 
+void HexBedStandaloneEditor::OnUndoRedo() {}
+
 void HexBedStandaloneEditor::LayoutUpdate() {
     group_ = config().groupSize;
     rowHeight_ = hexEdit_->GetLineHeight();
@@ -241,6 +243,22 @@ void HexBedStandaloneEditor::HintBytesChanged(bufsize begin, bufsize end) {
     hexEdit_->HintBytesChanged(begin, end);
     AddPendingEvent(wxCommandEvent(HEX_EDIT_EVENT));
 }
+
+void HexBedStandaloneEditor::DoCtrlCut() { hexEdit_->DoCtrlCut(); }
+
+void HexBedStandaloneEditor::DoCtrlCopy() { hexEdit_->DoCtrlCopy(); }
+
+void HexBedStandaloneEditor::DoCtrlPasteInsert() {
+    hexEdit_->DoCtrlPasteInsert();
+}
+
+void HexBedStandaloneEditor::DoCtrlPasteOverwrite() {
+    hexEdit_->DoCtrlPasteOverwrite();
+}
+
+void HexBedStandaloneEditor::DoCtrlUndo() { hexEdit_->DoCtrlUndo(); }
+
+void HexBedStandaloneEditor::DoCtrlRedo() { hexEdit_->DoCtrlRedo(); }
 
 };  // namespace ui
 };  // namespace hexbed

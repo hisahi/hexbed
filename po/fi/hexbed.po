@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 00:25+0200\n"
+"POT-Creation-Date: 2022-01-16 01:30+0200\n"
 "PO-Revision-Date: 2021-12-23 21:14+0200\n"
 "Last-Translator: Sampo Hippeläinen <sampo.hippelainen@gmail.com>\n"
 "Language-Team: fi\n"
@@ -110,7 +110,7 @@ msgid "Inserts or replaces the selection with a block of bytes"
 msgstr "Lisää tai korvaa valinnan lohkolla tavuja"
 
 #: src/ui/menuedit.cc:61
-msgid "Insert rand&om..."
+msgid "Insert rando&m..."
 msgstr "Lisää sat&unnaistavuja..."
 
 #: src/ui/menuedit.cc:62
@@ -347,6 +347,44 @@ msgstr "Asetuksissa määritelty koodaus (%s)"
 msgid "The entered text cannot be represented in the selected encoding."
 msgstr "Syötettyä tekstiä ei voi esittää valitulla merkistökoodauksella."
 
+#: src/ui/hexedit.cc:287 src/ui/hexedit.cc:295
+#, c-format
+msgid ""
+"Failed to copy:\n"
+"%s"
+msgstr ""
+"Kopiointi epäonnistui:\n"
+"%s"
+
+#: src/ui/hexedit.cc:288 src/ui/hexedit.cc:344
+msgid "Failed to open the clipboard"
+msgstr "Leikepöydän avaaminen epäonnistui"
+
+#: src/ui/hexedit.cc:327
+msgid ""
+"Cannot paste the current clipboard contents, because it contains characters "
+"that the currently selected character encoding cannot represent."
+msgstr ""
+"Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä on merkkejä, joita "
+"valittu merkistökoodaus ei tue."
+
+#: src/ui/hexedit.cc:330
+msgid ""
+"Cannot paste the current clipboard contents, because it does not contain "
+"valid hexadecimal data. Text data should be a string of hexadecimal bytes."
+msgstr ""
+"Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä ei ole kelvollista "
+"heksadesimaalimuotoista tietoa. Tekstin tulisi olla heksadesimaalisia tavuja."
+
+#: src/ui/hexedit.cc:343 src/ui/hexedit.cc:351
+#, c-format
+msgid ""
+"Failed to paste:\n"
+"%s"
+msgstr ""
+"Liittäminen epäonnistui:\n"
+"%s"
+
 #: src/ui/menuview.cc:32
 msgid "&Hex and text"
 msgstr "&Molemmat"
@@ -444,11 +482,11 @@ msgstr "Siirtyy haluttuun kohtaan tiedostoa"
 msgid "&Search"
 msgstr "&Etsi"
 
-#: src/ui/context.cc:90
+#: src/ui/context.cc:91
 msgid "Action in progress"
 msgstr "Toimintoa suoritetaan"
 
-#: src/ui/context.cc:160
+#: src/ui/context.cc:166
 #, c-format
 msgid ""
 "Backup failed:\n"
@@ -457,25 +495,25 @@ msgstr ""
 "Varmuuskopiointi epäonnistui:\n"
 "%s"
 
-#: src/ui/context.cc:162 src/ui/hexbed.cc:464
+#: src/ui/context.cc:168 src/ui/hexbed.cc:464
 msgid "&Retry"
 msgstr "&Uudelleen"
 
-#: src/ui/context.cc:162
+#: src/ui/context.cc:168
 msgid "&Ignore"
 msgstr "&Ohita"
 
-#: src/ui/context.cc:162
+#: src/ui/context.cc:168
 msgid "&Abort"
 msgstr "&Keskeytä"
 
-#: src/ui/context.cc:164
+#: src/ui/context.cc:170
 msgid "'Retry' to try again, 'Ignore' to save anyway or 'Abort' to cancel."
 msgstr ""
 "'Uudelleen' yrittää uudelleen, 'Ohita' tallentaa joka tapauksessa ja "
 "'Keskeytä' peruuttaa tallennuksen."
 
-#: src/ui/context.cc:168
+#: src/ui/context.cc:174
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 "Yritetäänkö uudelleen? 'Ei' tallentaa silti ja 'Peruuta' peruuttaa "
@@ -638,45 +676,7 @@ msgstr ""
 "Vienti epäonnistui:\n"
 "%s"
 
-#: src/ui/hexbed.cc:1233 src/ui/hexbed.cc:1241
-#, c-format
-msgid ""
-"Failed to copy:\n"
-"%s"
-msgstr ""
-"Kopiointi epäonnistui:\n"
-"%s"
-
-#: src/ui/hexbed.cc:1234 src/ui/hexbed.cc:1291
-msgid "Failed to open the clipboard"
-msgstr "Leikepöydän avaaminen epäonnistui"
-
-#: src/ui/hexbed.cc:1274
-msgid ""
-"Cannot paste the current clipboard contents, because it contains characters "
-"that the currently selected character encoding cannot represent."
-msgstr ""
-"Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä on merkkejä, joita "
-"valittu merkistökoodaus ei tue."
-
-#: src/ui/hexbed.cc:1277
-msgid ""
-"Cannot paste the current clipboard contents, because it does not contain "
-"valid hexadecimal data. Text data should be a string of hexadecimal bytes."
-msgstr ""
-"Nykyistä leikepöydän sisältöä ei voi liittää, koska siinä ei ole kelvollista "
-"heksadesimaalimuotoista tietoa. Tekstin tulisi olla heksadesimaalisia tavuja."
-
-#: src/ui/hexbed.cc:1290 src/ui/hexbed.cc:1298
-#, c-format
-msgid ""
-"Failed to paste:\n"
-"%s"
-msgstr ""
-"Liittäminen epäonnistui:\n"
-"%s"
-
-#: src/ui/hexbed.cc:1347
+#: src/ui/hexbed.cc:1255
 msgid "A hex editor."
 msgstr "Tavumuokkain."
 

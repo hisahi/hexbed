@@ -1197,119 +1197,27 @@ void HexBedMainFrame::OnFileMenuExport(wxCommandEvent& event) {
 }
 
 void HexBedMainFrame::OnEditUndo(wxCommandEvent& event) {
-    hexbed::ui::HexBedEditor* ed = GetEditor();
-    if (ed->document().canUndo()) {
-        HexBedRange sel = ed->document().undo();
-        ed->HintBytesChanged(0);
-        OnUndoRedo(*ed);
-        ed->SelectBytes(sel.offset, sel.length,
-                        SelectFlags().caretAtEnd().highlightCaret());
-    }
+    GetEditor()->DoCtrlUndo();
 }
 
 void HexBedMainFrame::OnEditRedo(wxCommandEvent& event) {
-    hexbed::ui::HexBedEditor* ed = GetEditor();
-    if (ed->document().canRedo()) {
-        HexBedRange sel = ed->document().redo();
-        ed->HintBytesChanged(0);
-        OnUndoRedo(*ed);
-        ed->SelectBytes(sel.offset, sel.length,
-                        SelectFlags().caretAtEnd().highlightCaret());
-    }
+    GetEditor()->DoCtrlRedo();
 }
 
-template <bool cut>
-void HexBedMainFrame::DoCopy() {
-    hexbed::ui::HexBedEditor* ed = GetEditor();
-    bufsize sel, seln;
-    bool seltext;
-    ed->GetSelection(sel, seln, seltext);
-    if (seln > 0) {
-        try {
-            hexbed::clip::CopyBytes(ed->document(), sel, seln, seltext);
-        } catch (const hexbed::clip::ClipboardError& e) {
-            try {
-                wxMessageBox(
-                    wxString::Format(_("Failed to copy:\n%s"),
-                                     _("Failed to open the clipboard")),
-                    "HexBed", wxOK | wxICON_ERROR);
-            } catch (...) {
-            }
-            return;
-        } catch (...) {
-            try {
-                wxMessageBox(wxString::Format(_("Failed to copy:\n%s"),
-                                              currentExceptionAsString()),
-                             "HexBed", wxOK | wxICON_ERROR);
-            } catch (...) {
-            }
-            return;
-        }
-        if constexpr (cut) {
-            if (ed->document().remove(sel, seln)) {
-                ed->SelectBytes(sel, 0, SelectFlags().highlightCaret());
-                ed->HintBytesChanged(sel);
-            }
-        }
-    }
+void HexBedMainFrame::OnEditCut(wxCommandEvent& event) {
+    GetEditor()->DoCtrlCut();
 }
 
-void HexBedMainFrame::OnEditCut(wxCommandEvent& event) { DoCopy<true>(); }
-
-void HexBedMainFrame::OnEditCopy(wxCommandEvent& event) { DoCopy<false>(); }
-
-template <bool insert>
-void HexBedMainFrame::DoPaste() {
-    if (hexbed::clip::HasClipboard()) {
-        hexbed::ui::HexBedEditor* ed = GetEditor();
-        bufsize sel, seln;
-        bool seltext;
-        ed->GetSelection(sel, seln, seltext);
-        try {
-            bufsize len;
-            if (!hexbed::clip::PasteBytes(ed->document(), insert, sel, seln,
-                                          seltext, len)) {
-                wxMessageBox(
-                    seltext
-                        ? _("Cannot paste the current clipboard contents, "
-                            "because it contains characters that the currently "
-                            "selected character encoding cannot represent.")
-                        : _("Cannot paste the current clipboard contents, "
-                            "because it does not contain valid hexadecimal "
-                            "data. Text data should be a string of hexadecimal "
-                            "bytes."),
-                    "HexBed", wxOK | wxICON_ERROR);
-            } else {
-                ed->HintBytesChanged(sel);
-                ed->SelectBytes(sel + len, 0,
-                                SelectFlags().caretAtEnd().highlightCaret());
-            }
-        } catch (const hexbed::clip::ClipboardError& e) {
-            try {
-                wxMessageBox(
-                    wxString::Format(_("Failed to paste:\n%s"),
-                                     _("Failed to open the clipboard")),
-                    "HexBed", wxOK | wxICON_ERROR);
-            } catch (...) {
-            }
-            return;
-        } catch (...) {
-            try {
-                wxMessageBox(wxString::Format(_("Failed to paste:\n%s"),
-                                              currentExceptionAsString()),
-                             "HexBed", wxOK | wxICON_ERROR);
-            } catch (...) {
-            }
-        }
-    }
+void HexBedMainFrame::OnEditCopy(wxCommandEvent& event) {
+    GetEditor()->DoCtrlCopy();
 }
 
 void HexBedMainFrame::OnEditPasteInsert(wxCommandEvent& event) {
-    DoPaste<true>();
+    GetEditor()->DoCtrlPasteInsert();
 }
 
 void HexBedMainFrame::OnEditPasteReplace(wxCommandEvent& event) {
-    DoPaste<false>();
+    GetEditor()->DoCtrlPasteOverwrite();
 }
 
 void HexBedMainFrame::OnEditDelete(wxCommandEvent& event) {

@@ -90,8 +90,7 @@ class HexBedTaskHandlerMain : public HexBedTaskHandler, wxEvtHandler {
             dialog_ = std::make_unique<wxProgressDialog>(
                 "HexBed", _("Action in progress"), end_ - 1, main_, flags);
             if (prog_ && prog_ < end_) {
-                if (!dialog_->Update(prog_))
-                    task_->cancel();
+                if (!dialog_->Update(prog_)) task_->cancel();
             }
         } catch (...) {
         }

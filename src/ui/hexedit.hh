@@ -81,6 +81,13 @@ class HexEditor : public wxWindow {
     void HintBytesChanged(bufsize begin);
     void HintBytesChanged(bufsize begin, bufsize end);
 
+    void DoCtrlCut();
+    void DoCtrlCopy();
+    void DoCtrlPasteInsert();
+    void DoCtrlPasteOverwrite();
+    void DoCtrlUndo();
+    void DoCtrlRedo();
+
     HexEditor(HexEditor& copy) = delete;
     HexEditor(HexEditor&& move) = delete;
     HexEditor& operator=(HexEditor& copy) = delete;
@@ -140,6 +147,9 @@ class HexEditor : public wxWindow {
     bool TestVisibility() const noexcept;
 
     void OnEditorCopy();
+    void OnUndoRedo();
+    bool DoEditorCopy();
+    void DoEditorPaste(bool insert);
 
     HexEditorParent* parent_;
     wxMemoryDC* dc_{nullptr};

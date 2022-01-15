@@ -133,11 +133,6 @@ class HexBedMainFrame : public wxFrame {
     void AddTab(std::unique_ptr<hexbed::ui::HexBedEditor>&& editor,
                 const wxString& fn, const wxString& path);
 
-    template <bool cut>
-    void DoCopy();
-    template <bool insert>
-    void DoPaste();
-
     bool FileNew();
     void FileReload(std::size_t i);
     bool FileSave(std::size_t i, bool saveAs);

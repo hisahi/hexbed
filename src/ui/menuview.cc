@@ -44,7 +44,7 @@ wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
                             _("Controls which columns to show"));
     menuView->AppendSeparator();
     addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
-            _("Shows the bit editor"), wxACCEL_CTRL, 'B');
+            _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
     addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
             _("Shows the data inspector"), wxACCEL_CTRL, 'D');
     menuBar->Append(menuView, _("&View"));

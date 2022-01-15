@@ -21,6 +21,8 @@
 
 #include "ui/hexedit.hh"
 
+#include <wx/msgdlg.h>
+
 #include <cstring>
 #include <new>
 #include <utility>
@@ -32,6 +34,7 @@
 #include "common/logger.hh"
 #include "common/memory.hh"
 #include "common/specs.hh"
+#include "ui/clipboard.hh"
 
 namespace hexbed {
 namespace ui {
@@ -269,6 +272,114 @@ void HexEditor::WhenVisible() {
 }
 
 void HexEditor::OnEditorCopy() { parent_->OnEditorCopy(); }
+
+void HexEditor::OnUndoRedo() { parent_->OnUndoRedo(); }
+
+bool HexEditor::DoEditorCopy() {
+    bufsize sel = seln_ ? sel_ : cur_;
+    bufsize seln = seldown_ ? 0 : seln_;
+    bool seltext = curtext_;
+    try {
+        hexbed::clip::CopyBytes(document(), sel, seln, seltext);
+        return true;
+    } catch (const hexbed::clip::ClipboardError& e) {
+        try {
+            wxMessageBox(wxString::Format(_("Failed to copy:\n%s"),
+                                          _("Failed to open the clipboard")),
+                         "HexBed", wxOK | wxICON_ERROR);
+        } catch (...) {
+        }
+        return false;
+    } catch (...) {
+        try {
+            wxMessageBox(wxString::Format(_("Failed to copy:\n%s"),
+                                          currentExceptionAsString()),
+                         "HexBed", wxOK | wxICON_ERROR);
+        } catch (...) {
+        }
+        return false;
+    }
+}
+
+void HexEditor::DoCtrlCut() {
+    bufsize sel = seln_ ? sel_ : cur_;
+    bufsize seln = seldown_ ? 0 : seln_;
+    if (!DoEditorCopy()) return;
+    if (document().remove(sel, seln)) {
+        SelectBytes(sel, 0, SelectFlags().highlightCaret());
+        HintBytesChanged(sel);
+    }
+}
+
+void HexEditor::DoCtrlCopy() { DoEditorCopy(); }
+
+void HexEditor::DoEditorPaste(bool insert) {
+    if (hexbed::clip::HasClipboard()) {
+        bufsize sel = seln_ ? sel_ : cur_;
+        bufsize seln = seldown_ ? 0 : seln_;
+        bool seltext = curtext_;
+        try {
+            bufsize len;
+            if (!hexbed::clip::PasteBytes(document(), insert, sel, seln,
+                                          seltext, len)) {
+                wxMessageBox(
+                    seltext
+                        ? _("Cannot paste the current clipboard contents, "
+                            "because it contains characters that the currently "
+                            "selected character encoding cannot represent.")
+                        : _("Cannot paste the current clipboard contents, "
+                            "because it does not contain valid hexadecimal "
+                            "data. Text data should be a string of hexadecimal "
+                            "bytes."),
+                    "HexBed", wxOK | wxICON_ERROR);
+            } else {
+                HintBytesChanged(sel);
+                SelectBytes(sel + len, 0,
+                            SelectFlags().caretAtEnd().highlightCaret());
+            }
+        } catch (const hexbed::clip::ClipboardError& e) {
+            try {
+                wxMessageBox(
+                    wxString::Format(_("Failed to paste:\n%s"),
+                                     _("Failed to open the clipboard")),
+                    "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+            return;
+        } catch (...) {
+            try {
+                wxMessageBox(wxString::Format(_("Failed to paste:\n%s"),
+                                              currentExceptionAsString()),
+                             "HexBed", wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+        }
+    }
+}
+
+void HexEditor::DoCtrlPasteInsert() { DoEditorPaste(true); }
+
+void HexEditor::DoCtrlPasteOverwrite() { DoEditorPaste(false); }
+
+void HexEditor::DoCtrlUndo() {
+    if (document().canUndo()) {
+        HexBedRange sel = document().undo();
+        HintBytesChanged(0);
+        OnUndoRedo();
+        SelectBytes(sel.offset, sel.length,
+                    SelectFlags().caretAtEnd().highlightCaret());
+    }
+}
+
+void HexEditor::DoCtrlRedo() {
+    if (document().canRedo()) {
+        HexBedRange sel = document().redo();
+        HintBytesChanged(0);
+        OnUndoRedo();
+        SelectBytes(sel.offset, sel.length,
+                    SelectFlags().caretAtEnd().highlightCaret());
+    }
+}
 
 void HexEditor::InitDraw() {
     dc_->SetFont(GetFont());
@@ -770,6 +881,40 @@ void HexEditor::OnChar(wxKeyEvent& e) {
                     HandleTextInput((byte)v);
                     break;
                 }
+            }
+        } else if (e.ControlDown() && !e.AltDown() && !e.ShiftDown()) {
+            // try handling Undo, Redo, Cut, Copy, Paste
+            switch (kc) {
+            case WXK_CONTROL_B:
+            case 'b':
+            case 'B':  // paste overwrite
+                DoCtrlPasteOverwrite();
+                return;
+            case WXK_CONTROL_C:
+            case 'c':
+            case 'C':  // copy
+                DoCtrlCopy();
+                return;
+            case WXK_CONTROL_V:
+            case 'v':
+            case 'V':  // paste insert
+                DoCtrlPasteInsert();
+                return;
+            case WXK_CONTROL_X:
+            case 'x':
+            case 'X':  // cut
+                DoCtrlCut();
+                return;
+            case WXK_CONTROL_Y:
+            case 'y':
+            case 'Y':  // redo
+                DoCtrlRedo();
+                return;
+            case WXK_CONTROL_Z:
+            case 'z':
+            case 'Z':  // undo
+                DoCtrlUndo();
+                return;
             }
         }
         e.Skip();

@@ -50,6 +50,7 @@ class HexBedStandaloneEditor : public wxPanel, public HexEditorParent {
     void OnCaretMoved() override;
     void OnSelectChanged() override;
     void OnEditorCopy() override;
+    void OnUndoRedo() override;
 
     inline void ReloadConfig() override { FullUpdate(); }
     void ReloadFile() override;
@@ -61,6 +62,13 @@ class HexBedStandaloneEditor : public wxPanel, public HexEditorParent {
     void HintByteChanged(bufsize offset) override;
     void HintBytesChanged(bufsize begin) override;
     void HintBytesChanged(bufsize begin, bufsize end) override;
+
+    void DoCtrlCut();
+    void DoCtrlCopy();
+    void DoCtrlPasteInsert();
+    void DoCtrlPasteOverwrite();
+    void DoCtrlUndo();
+    void DoCtrlRedo();
 
     void FocusEditor();
 
