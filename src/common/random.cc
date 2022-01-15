@@ -32,10 +32,10 @@ static std::uniform_int_distribution<byte> randbyte(0, 255);
 void randomizeBuffer(RandomType type, byte* buffer, std::size_t size) {
     switch (type) {
     case RandomType::Fast:
-        for (std::size_t i = 0; i < size; ++i) buffer[i] = randbyte(randdev);
+        for (std::size_t i = 0; i < size; ++i) buffer[i] = randbyte(randeng);
         break;
     case RandomType::Good:
-        for (std::size_t i = 0; i < size; ++i) buffer[i] = randbyte(randeng);
+        for (std::size_t i = 0; i < size; ++i) buffer[i] = randbyte(randdev);
         break;
     }
 }
