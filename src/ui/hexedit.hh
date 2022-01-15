@@ -54,6 +54,7 @@ class HexEditor : public wxWindow {
     inline HexBedDocument& document() { return parent_->document(); }
     inline HexBedContextMain& context() { return parent_->context(); }
 
+    unsigned GetColumns() const;
     void SetOffset(bufsize offset);
     void SetRows(unsigned rows);
     void SetColumns(unsigned columns);

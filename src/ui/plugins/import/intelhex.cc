@@ -62,7 +62,7 @@ class ImportPluginIntelHEXDialog : public wxDialog {
                                 wxDefaultPosition, wxDefaultSize, 0,
                                 wxGenericValidator(&settings.checksums)),
                  wxSizerFlags().Proportion(1));
-        top->Add(buttons);
+        top->Add(buttons, wxSizerFlags().Expand());
 
         SetSizer(top);
         Fit();

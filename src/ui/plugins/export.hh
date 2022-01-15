@@ -36,6 +36,11 @@ namespace hexbed {
 
 namespace plugins {
 
+struct ExportDetails {
+    bufsize columns{16};
+    string filename{""};
+};
+
 class ExportPlugin : public Plugin {
   public:
     inline const wxString& getTitle() const noexcept { return title_; }
@@ -44,11 +49,13 @@ class ExportPlugin : public Plugin {
 
     virtual bool configureExport(wxWindow* parent,
                                  const std::filesystem::path& filename,
-                                 bufsize actualOffset, bufsize size) = 0;
+                                 bufsize actualOffset, bufsize size,
+                                 const ExportDetails& details) = 0;
     virtual void doExport(HexBedTask& task,
                           const std::filesystem::path& filename,
                           std::function<bufsize(bufsize, bytespan)> read,
-                          bufsize actualOffset, bufsize size) = 0;
+                          bufsize actualOffset, bufsize size,
+                          const ExportDetails& details) = 0;
 
   protected:
     inline ExportPlugin(pluginid id, const wxString& title,

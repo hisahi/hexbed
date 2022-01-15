@@ -115,18 +115,20 @@ std::u32string latin1 =
     std::u32string name = std::initializer_list<char32_t>
 #include "common/charsets.inc"
 
-#define CHARSETS_EXTRA_INCLUDE_SET(x) {#x, x},
+#define CHARSETS_EXTRA_INCLUDE_SET(x) {STRING(#x), x},
 static std::unordered_map<string, std::u32string> sbcsTable = {
-    {"ascii", ascii}, {"latin1", latin1}, CHARSETS_EXTRA_INCLUDE()};
+    {STRING("ascii"), ascii},
+    {STRING("latin1"), latin1},
+    CHARSETS_EXTRA_INCLUDE()};
 #else
 static std::unordered_map<string, std::u32string> sbcsTable = {
-    {"ascii", ascii}, {"latin1", latin1}};
+    {STRING("ascii"), ascii}, {STRING("latin1"), latin1}};
 #endif
 
-SingleByteCharacterSet getSbcsByName(const string& name) {
+SingleByteCharacterSet getBuiltinSbcsByName(const string& name) {
     auto s = sbcsTable.find(name);
     if (s == sbcsTable.end()) {
-        LOG_WARN("unrecognized SBCS encoding name '%s'", name);
+        LOG_WARN("unrecognized SBCS encoding name");
         return SingleByteCharacterSet(ascii);
     }
     return SingleByteCharacterSet(s->second);

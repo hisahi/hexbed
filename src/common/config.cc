@@ -62,11 +62,6 @@ void Configuration::loadValues() {
     values_.backupFiles = loadBool("backupFiles", true);
 }
 
-void Configuration::applySettings() {
-    sbcs = getSbcsByName(values_.charset);
-    // ...
-}
-
 void Configuration::saveValues() {
     saveString("language", values_.language);
     saveInt("backgroundColor", values_.backgroundColor);

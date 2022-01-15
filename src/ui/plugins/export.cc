@@ -26,8 +26,13 @@
 #include <memory>
 #include <vector>
 
+#include "ui/plugins/export/carray.hh"
+#include "ui/plugins/export/csharp.hh"
+#include "ui/plugins/export/html.hh"
 #include "ui/plugins/export/intelhex.hh"
+#include "ui/plugins/export/java.hh"
 #include "ui/plugins/export/srec.hh"
+#include "ui/plugins/export/text.hh"
 
 namespace hexbed {
 
@@ -40,6 +45,16 @@ void loadBuiltinExportPlugins() {
         std::make_unique<ExportPluginIntelHEX>(nextBuiltinPluginId()));
     exportPlugins.push_back(
         std::make_unique<ExportPluginMotorolaSREC>(nextBuiltinPluginId()));
+    exportPlugins.push_back(
+        std::make_unique<ExportPluginC>(nextBuiltinPluginId()));
+    exportPlugins.push_back(
+        std::make_unique<ExportPluginCSharp>(nextBuiltinPluginId()));
+    exportPlugins.push_back(
+        std::make_unique<ExportPluginJava>(nextBuiltinPluginId()));
+    exportPlugins.push_back(
+        std::make_unique<ExportPluginText>(nextBuiltinPluginId()));
+    exportPlugins.push_back(
+        std::make_unique<ExportPluginHTML>(nextBuiltinPluginId()));
 }
 
 std::size_t exportPluginCount() { return exportPlugins.size(); }

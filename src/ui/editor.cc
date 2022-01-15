@@ -528,5 +528,7 @@ bool HexBedEditor::ScrollPage(int dir) {
     return old != now;
 }
 
+bufsize HexBedEditor::GetColumnCount() const { return hexEdit_->GetColumns(); }
+
 };  // namespace ui
 };  // namespace hexbed

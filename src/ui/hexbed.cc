@@ -186,7 +186,7 @@ static std::filesystem::path pathFromWxString(const wxString& s) {
 }
 
 void HexBedWxApp::Knock(const wxString& s) {
-    LOG_DEBUG("got knock <%s>", s.ToStdString());
+    LOG_DEBUG("got knock <%" FMT_STR ">", stringFromWx(s));
     if (window_) {
         if (!s.empty()) window_->FileKnock(s, false);
     } else {
@@ -203,6 +203,9 @@ bool HexBedWxApp::OnInit() {
     setlocale(LC_MESSAGES, "");
 #endif
     logger_ok = true;
+    hexbed::plugins::executableDirectory =
+        std::filesystem::weakly_canonical(pathFromWxString(argv[0]))
+            .parent_path();
 #if NDEBUG
     LOG_ADD_HANDLER(StdLogHandler, LogLevel::WARN);
 #else
@@ -227,6 +230,7 @@ bool HexBedWxApp::OnInit() {
         LOG_WARN("translation: could not load the hexbed catalog");
     wxTranslations::Set(trans);
     hexbed::plugins::loadBuiltinPlugins();
+    hexbed::plugins::loadExternalPlugins();
     window_ = new HexBedMainFrame();
     window_->Show(true);
     for (const wxString& s : openFiles) window_->FileKnock(s, false);
@@ -1114,11 +1118,18 @@ void HexBedMainFrame::OnFileMenuExport(wxCommandEvent& event) {
             seln = doc.size();
         }
         std::filesystem::path fn(pathFromWxString(dial.GetPath()));
-        if (plugin.configureExport(this, fn, sel, seln)) {
+        hexbed::plugins::ExportDetails details{.columns = ed->GetColumnCount()};
+        try {
+            details.filename =
+                stringFromWx(pathToWxString(doc.path().filename()));
+        } catch (...) {
+        }
+        if (plugin.configureExport(this, fn, sel, seln, details)) {
             bufsize beg = sel, end = seln;
             try {
                 HexBedTask(&ed->context(), 0, true)
-                    .run([&plugin, &doc, &fn, beg, end](HexBedTask& task) {
+                    .run([&plugin, &doc, &fn, beg, end,
+                          &details](HexBedTask& task) {
                         plugin.doExport(
                             task, fn,
                             [&doc, beg, end](bufsize off,
@@ -1128,7 +1139,7 @@ void HexBedMainFrame::OnFileMenuExport(wxCommandEvent& event) {
                                 return doc.read(off + beg,
                                                 bytespan{arr.data(), read});
                             },
-                            beg, end);
+                            beg, end, details);
                     });
             } catch (...) {
                 try {

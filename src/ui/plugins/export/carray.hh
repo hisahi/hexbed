@@ -17,50 +17,49 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// common/types.hh -- header for common types
+// ui/plugins/export/carray.hh -- header for builtin C source code exporter
 
-#ifndef HEXBED_COMMON_TYPES_HH
-#define HEXBED_COMMON_TYPES_HH
+#ifndef HEXBED_UI_PLUGINS_EXPORT_CARRAY_HH
+#define HEXBED_UI_PLUGINS_EXPORT_CARRAY_HH
 
-#include <cstdint>
-#include <limits>
-#include <span>
-#include <string>
-#include <string_view>
+#include "ui/plugins/export.hh"
 
 namespace hexbed {
 
-#define USE_WIDE_STRINGS 0
+namespace plugins {
 
-typedef std::uint8_t byte;
-typedef std::span<byte> bytespan;
-typedef std::span<byte const> const_bytespan;
-typedef byte* byteptr;
-typedef const byte* const_byteptr;
-typedef long long bufdiff;
-typedef unsigned long long bufsize;
-typedef bufsize bufoffset;
+struct ExportPluginCSettings {
+    std::string variableName{"data"};
+    bool signedChar{false};
+    bool stdint{false};
+    unsigned columns{80};
+    unsigned bytesPerLine{16};
+    bool useBytesPerLine{false};
+    unsigned indentSpace{4};
+    bool indentTabs{false};
+    bool useHex{true};
+    bool isStatic{false};
+};
 
-#if USE_WIDE_STRINGS
-typedef wchar_t strchar;
-typedef std::basic_string<strchar> string;
-typedef std::basic_string_view<strchar> stringview;
-#define CHAR(c) L##c
-#define STRING(s) L##s
-#define FMT_CHR "lc"
-#define FMT_STR "ls"
-#else
-typedef char strchar;
-typedef std::basic_string<strchar> string;
-typedef std::basic_string_view<strchar> stringview;
-#define CHAR(c) c
-#define STRING(s) s
-#define FMT_CHR "c"
-#define FMT_STR "s"
-#endif
+class ExportPluginC : public LocalizableExportPlugin {
+  public:
+    ExportPluginC(pluginid id);
+    wxString getFileFilter() const;
+    bool configureExport(wxWindow* parent,
+                         const std::filesystem::path& filename,
+                         bufsize actualOffset, bufsize size,
+                         const ExportDetails& details);
+    void doExport(HexBedTask& task, const std::filesystem::path& filename,
+                  std::function<bufsize(bufsize, bytespan)> read,
+                  bufsize actualOffset, bufsize size,
+                  const ExportDetails& details);
 
-constexpr bufsize BUFSIZE_MAX = std::numeric_limits<bufsize>::max();
+  private:
+    ExportPluginCSettings settings_;
+};
+
+};  // namespace plugins
 
 };  // namespace hexbed
 
-#endif /* HEXBED_COMMON_TYPES_HH */
+#endif /* HEXBED_UI_PLUGINS_EXPORT_CARRAY_HH */

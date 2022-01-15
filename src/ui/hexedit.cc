@@ -192,6 +192,8 @@ void HexEditor::SetRows(unsigned rows) {
     Redraw();
 }
 
+unsigned HexEditor::GetColumns() const { return columns_; }
+
 void HexEditor::SetColumns(unsigned columns) {
     size_t oldSize = bufc_, newSize;
     columns_ = columns;

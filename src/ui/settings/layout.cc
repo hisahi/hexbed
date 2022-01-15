@@ -21,6 +21,7 @@
 
 #include "ui/settings/layout.hh"
 
+#include "app/sbcs.hh"
 #include "ui/config.hh"
 #include "ui/encoding.hh"
 #include "ui/settings/controls.hh"
@@ -75,9 +76,23 @@ HexBedPrefsLayout::HexBedPrefsLayout(wxWindow* parent, ConfigurationValues* cfg)
     PREFS_SETTING_CHOICE(col, _("Offset radix"), offsetRadix, long,
                          {_("8 (octal)"), _("10 (decimal)"), _("16 (hex)")},
                          {8L, 10L, 16L});
-    /// character encodings
-    PREFS_SETTING_CHOICE(col, _("Text encoding"), charset, string,
-                         {SBCS_ENCODING_NAMES()}, {SBCS_ENCODING_KEYS()});
+    std::pair<std::vector<wxString>, std::vector<string>> encodingChoices = {
+        {SBCS_ENCODING_NAMES()}, {SBCS_ENCODING_KEYS()}};
+    HEXBED_ASSERT(encodingChoices.first.size() ==
+                  encodingChoices.second.size());
+    for (std::size_t i = 0, e = hexbed::plugins::charsetPluginCount(); i < e;
+         ++i) {
+        const auto& pair = hexbed::plugins::charsetPluginByIndex(i);
+        encodingChoices.second.push_back(pair.first);
+        encodingChoices.first.push_back(pair.second);
+    }
+    wxChoice* encodingChoice = new wxChoice(
+        col_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+        encodingChoices.first.size(), encodingChoices.first.data(), 0,
+        ChoiceValidator<string>(&cfg->charset,
+                                std::move(encodingChoices.second)));
+    PREFS_SETTING_FRAME(col, _("Text encoding"), encodingChoice);
+
     PREFS_FINISHCOLUMN(col);
 }
 

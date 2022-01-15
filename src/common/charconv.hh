@@ -30,6 +30,8 @@
 
 namespace hexbed {
 
+constexpr char32_t UCHAR32_MAX = 0x10FFFFUL;
+
 class SingleByteCharacterSet {
   public:
     SingleByteCharacterSet();
@@ -52,7 +54,7 @@ extern SingleByteCharacterSet sbcs;
 
 enum class TextEncoding { SBCS, UTF8, UTF16LE, UTF16BE, UTF32LE, UTF32BE };
 
-SingleByteCharacterSet getSbcsByName(const string& name);
+SingleByteCharacterSet getBuiltinSbcsByName(const string& name);
 
 std::wstring sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
                            const byte* data);

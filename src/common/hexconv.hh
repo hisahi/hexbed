@@ -29,9 +29,11 @@
 
 namespace hexbed {
 
+int decDigitToNum(char c);
 int hexDigitToNum(char c);
 // out must have two chars worth of space
 void fastByteConv(char* out, const char* hex, byte b);
+void fastByteConvX(strchar* out, const strchar* hex, byte b);
 
 string hexFromBytes(bufsize len, const byte* data, bool upper,
                     bool cont = false);

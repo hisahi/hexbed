@@ -17,20 +17,23 @@ A graphical hex editor, still a work in progress.
 * Data inspector and editor (integers, etc.)
 * Search for text (including with case insensitivity)
 * Search for integers, floats, etc.
-* Import/export data
+* Import data (Intel HEX, Motorola SREC)
+* Export data (Intel HEX, Motorola SREC)
+* Export into programming languages (C, C#, Java)
+* Export into Text, HTML
+* Plugin system for loading extra charset definitions
 
 ## Planned features
 * Stability
 * Performance
 * Not losing data
 * Not having bugs
-* Support for more import/export formats
-* Support for more text encodings
 * Bookmarks
 * Multiple windows/views
+* Plugin system for data inspector
+* Plugin system for import/export
 * File compare
-* Plugin system for data inspector and import/export
-* Macros
+* Scripting system
 * Bells and whistles
 
 ## Platforms

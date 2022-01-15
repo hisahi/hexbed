@@ -22,34 +22,8 @@
 #ifndef HEXBED_UI_PLUGINS_PLUGIN_HH
 #define HEXBED_UI_PLUGINS_PLUGIN_HH
 
-#include "common/types.hh"
-
-namespace hexbed {
-
-namespace plugins {
+#include "app/plugin.hh"
 
 #define TAG(x) wxTRANSLATE(x)
-
-using pluginid = unsigned long;
-
-class Plugin {
-  public:
-    inline pluginid id() const noexcept { return id_; }
-
-  protected:
-    inline Plugin(pluginid id) : id_(id) {}
-
-  private:
-    pluginid id_;
-};
-
-void loadBuiltinPlugins();
-pluginid nextBuiltinPluginId();
-void resetExternalPluginIds();
-pluginid nextExternalPluginId();
-
-};  // namespace plugins
-
-};  // namespace hexbed
 
 #endif /* HEXBED_UI_PLUGINS_PLUGIN_HH */

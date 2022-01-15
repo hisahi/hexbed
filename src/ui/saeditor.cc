@@ -194,6 +194,10 @@ bool HexBedStandaloneEditor::ScrollPage(int dir) {
     return old != now;
 }
 
+bufsize HexBedStandaloneEditor::GetColumnCount() const {
+    return hexEdit_->GetColumns();
+}
+
 void HexBedStandaloneEditor::SelectBytes(bufsize start, bufsize length,
                                          SelectFlags flags) {
     hexEdit_->SelectBytes(start, length, flags);

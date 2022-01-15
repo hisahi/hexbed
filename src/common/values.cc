@@ -25,5 +25,7 @@ namespace hexbed {
 
 const char* const HEX_UPPERCASE = "0123456789ABCDEF";
 const char* const HEX_LOWERCASE = "0123456789abcdef";
+const strchar* const HEX_UPPERCASE_X = STRING("0123456789ABCDEF");
+const strchar* const HEX_LOWERCASE_X = STRING("0123456789abcdef");
 
 };  // namespace hexbed

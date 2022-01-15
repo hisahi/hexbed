@@ -96,30 +96,30 @@ class ExportPluginIntelHEXDialog : public PluginConfigureDialog<true> {
 
         top->Add(new wxStaticText(this, wxID_ANY, _("Mode"), wxDefaultPosition,
                                   wxDefaultSize, wxST_ELLIPSIZE_END),
-                 wxSizerFlags().Center());
+                 wxSizerFlags().Expand());
         top->Add(new wxRadioButton(
                      this, wxID_ANY, _("I8 (8080)"), wxDefaultPosition,
                      wxDefaultSize, wxRB_GROUP,
                      hexbed::ui::RadioValidator<ExportPluginIntelHEXMode>(
                          &settings.mode, ExportPluginIntelHEXMode::I8)),
-                 wxSizerFlags());
+                 wxSizerFlags().Expand());
         top->Add(new wxRadioButton(
                      this, wxID_ANY, _("I16 (8086)"), wxDefaultPosition,
                      wxDefaultSize, 0,
                      hexbed::ui::RadioValidator<ExportPluginIntelHEXMode>(
                          &settings.mode, ExportPluginIntelHEXMode::I16)),
-                 wxSizerFlags());
+                 wxSizerFlags().Expand());
         top->Add(new wxRadioButton(
                      this, wxID_ANY, _("I32 (80386)"), wxDefaultPosition,
                      wxDefaultSize, 0,
                      hexbed::ui::RadioValidator<ExportPluginIntelHEXMode>(
                          &settings.mode, ExportPluginIntelHEXMode::I32)),
-                 wxSizerFlags());
+                 wxSizerFlags().Expand());
 
         top->Add(new wxStaticText(this, wxID_ANY, _("Offset base"),
                                   wxDefaultPosition, wxDefaultSize,
                                   wxST_ELLIPSIZE_END),
-                 wxSizerFlags().Center());
+                 wxSizerFlags().Expand());
         row = new wxBoxSizer(wxHORIZONTAL);
         top->Add(new wxRadioButton(
                      this, wxID_ANY, _("Zero"), wxDefaultPosition,
@@ -127,7 +127,7 @@ class ExportPluginIntelHEXDialog : public PluginConfigureDialog<true> {
                      hexbed::ui::RadioValidator<ExportPluginIntelHEXOffsetBase>(
                          &settings.offsetBase,
                          ExportPluginIntelHEXOffsetBase::Zero)),
-                 wxSizerFlags());
+                 wxSizerFlags().Expand());
         top->Add(new wxRadioButton(
                      this, wxID_ANY,
                      wxString::Format(_("Selection (%s)"),
@@ -136,7 +136,7 @@ class ExportPluginIntelHEXDialog : public PluginConfigureDialog<true> {
                      hexbed::ui::RadioValidator<ExportPluginIntelHEXOffsetBase>(
                          &settings.offsetBase,
                          ExportPluginIntelHEXOffsetBase::Real)),
-                 wxSizerFlags());
+                 wxSizerFlags().Expand());
         row->Add(new wxRadioButton(
                      this, wxID_ANY, _("Custom:"), wxDefaultPosition,
                      wxDefaultSize, 0,
@@ -157,7 +157,7 @@ class ExportPluginIntelHEXDialog : public PluginConfigureDialog<true> {
         spin2->SetBase(config().offsetRadix);
         top->Add(row, wxSizerFlags().Expand());
 
-        top->Add(buttons);
+        top->Add(buttons, wxSizerFlags().Expand());
 
         SetSizer(top);
         Fit();
@@ -214,7 +214,7 @@ wxString ExportPluginIntelHEX::getFileFilter() const {
 
 bool ExportPluginIntelHEX::configureExport(
     wxWindow* parent, const std::filesystem::path& filename,
-    bufsize actualOffset, bufsize size) {
+    bufsize actualOffset, bufsize size, const ExportDetails& details) {
     if (size >> 32) {
         wxMessageBox(_("The exported section is 4 GiB (2^32 bytes) or longer, "
                        "which is too long for Intel HEX files."),
@@ -264,7 +264,7 @@ static std::size_t prepareHiOffRow(byte* row, bufsize address) {
 void ExportPluginIntelHEX::doExport(
     HexBedTask& task, const std::filesystem::path& filename,
     std::function<bufsize(bufsize, bytespan)> read, bufsize actualOffset,
-    bufsize size) {
+    bufsize size, const ExportDetails& details) {
     using enum ExportPluginIntelHEXMode;
     using enum ExportPluginIntelHEXOffsetBase;
     bool segmented = settings_.mode == I16 && size < SEGMENTED_MAX_LENGTH;

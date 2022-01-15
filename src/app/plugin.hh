@@ -17,50 +17,45 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// common/types.hh -- header for common types
+// app/plugin.hh -- header for the generic plugin system
 
-#ifndef HEXBED_COMMON_TYPES_HH
-#define HEXBED_COMMON_TYPES_HH
+#ifndef HEXBED_APP_PLUGIN_HH
+#define HEXBED_APP_PLUGIN_HH
 
-#include <cstdint>
-#include <limits>
-#include <span>
-#include <string>
-#include <string_view>
+#include <filesystem>
+
+#include "common/types.hh"
 
 namespace hexbed {
 
-#define USE_WIDE_STRINGS 0
+namespace plugins {
 
-typedef std::uint8_t byte;
-typedef std::span<byte> bytespan;
-typedef std::span<byte const> const_bytespan;
-typedef byte* byteptr;
-typedef const byte* const_byteptr;
-typedef long long bufdiff;
-typedef unsigned long long bufsize;
-typedef bufsize bufoffset;
+using pluginid = unsigned long;
 
-#if USE_WIDE_STRINGS
-typedef wchar_t strchar;
-typedef std::basic_string<strchar> string;
-typedef std::basic_string_view<strchar> stringview;
-#define CHAR(c) L##c
-#define STRING(s) L##s
-#define FMT_CHR "lc"
-#define FMT_STR "ls"
-#else
-typedef char strchar;
-typedef std::basic_string<strchar> string;
-typedef std::basic_string_view<strchar> stringview;
-#define CHAR(c) c
-#define STRING(s) s
-#define FMT_CHR "c"
-#define FMT_STR "s"
-#endif
+class Plugin {
+  public:
+    inline pluginid id() const noexcept { return id_; }
 
-constexpr bufsize BUFSIZE_MAX = std::numeric_limits<bufsize>::max();
+  protected:
+    inline Plugin(pluginid id) : id_(id) {}
+
+  private:
+    pluginid id_;
+};
+
+void loadBuiltinPlugins();
+pluginid nextBuiltinPluginId();
+
+void loadExternalPlugins();
+void resetExternalPluginIds();
+pluginid nextExternalPluginId();
+
+extern std::filesystem::path executableDirectory;
+bool checkCaseInsensitiveFileExtension(const std::filesystem::path& fn,
+                                       const string& suffix);
+
+};  // namespace plugins
 
 };  // namespace hexbed
 
-#endif /* HEXBED_COMMON_TYPES_HH */
+#endif /* HEXBED_APP_PLUGIN_HH */

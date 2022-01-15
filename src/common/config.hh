@@ -28,6 +28,9 @@
 
 namespace hexbed {
 
+/* careful! increasing this limit breaks octal offsets because 64 - 1 = 63 is
+   the largest number that can be represented in octal only with two digits,
+   and HexBed currently assumes all column offsets to meet this requirement */
 constexpr unsigned MAX_COLUMNS = 64;
 
 struct ConfigurationValues {
@@ -64,7 +67,6 @@ class Configuration {
 
     void loadValues();
     void saveValues();
-    void applySettings();
 
     long loadIntRange(const string& key, long def, long min, long max);
     long loadIntSet(const string& key, long def,

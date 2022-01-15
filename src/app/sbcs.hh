@@ -17,50 +17,30 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// common/types.hh -- header for common types
+// app/sbcs.hh -- header for charset plugins
 
-#ifndef HEXBED_COMMON_TYPES_HH
-#define HEXBED_COMMON_TYPES_HH
+#ifndef HEXBED_APP_SBCS_HH
+#define HEXBED_APP_SBCS_HH
 
-#include <cstdint>
-#include <limits>
-#include <span>
-#include <string>
-#include <string_view>
+#include <utility>
+
+#include "app/plugin.hh"
+#include "common/charconv.hh"
 
 namespace hexbed {
 
-#define USE_WIDE_STRINGS 0
+namespace plugins {
 
-typedef std::uint8_t byte;
-typedef std::span<byte> bytespan;
-typedef std::span<byte const> const_bytespan;
-typedef byte* byteptr;
-typedef const byte* const_byteptr;
-typedef long long bufdiff;
-typedef unsigned long long bufsize;
-typedef bufsize bufoffset;
+struct CharsetPluginNamesIterator;
 
-#if USE_WIDE_STRINGS
-typedef wchar_t strchar;
-typedef std::basic_string<strchar> string;
-typedef std::basic_string_view<strchar> stringview;
-#define CHAR(c) L##c
-#define STRING(s) L##s
-#define FMT_CHR "lc"
-#define FMT_STR "ls"
-#else
-typedef char strchar;
-typedef std::basic_string<strchar> string;
-typedef std::basic_string_view<strchar> stringview;
-#define CHAR(c) c
-#define STRING(s) s
-#define FMT_CHR "c"
-#define FMT_STR "s"
-#endif
+void loadCharsetPluginFrom(const std::filesystem::path& p);
+std::size_t charsetPluginCount();
+const std::pair<string, string>& charsetPluginByIndex(std::size_t);
 
-constexpr bufsize BUFSIZE_MAX = std::numeric_limits<bufsize>::max();
+};  // namespace plugins
+
+SingleByteCharacterSet getSbcsByName(const string& name);
 
 };  // namespace hexbed
 
-#endif /* HEXBED_COMMON_TYPES_HH */
+#endif /* HEXBED_APP_SBCS_HH */

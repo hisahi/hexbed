@@ -17,50 +17,41 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// common/types.hh -- header for common types
+// ui/plugins/export/html.hh -- header for builtin HTML exporter
 
-#ifndef HEXBED_COMMON_TYPES_HH
-#define HEXBED_COMMON_TYPES_HH
+#ifndef HEXBED_UI_PLUGINS_EXPORT_HTML_HH
+#define HEXBED_UI_PLUGINS_EXPORT_HTML_HH
 
-#include <cstdint>
-#include <limits>
-#include <span>
-#include <string>
-#include <string_view>
+#include "ui/plugins/export.hh"
 
 namespace hexbed {
 
-#define USE_WIDE_STRINGS 0
+namespace plugins {
 
-typedef std::uint8_t byte;
-typedef std::span<byte> bytespan;
-typedef std::span<byte const> const_bytespan;
-typedef byte* byteptr;
-typedef const byte* const_byteptr;
-typedef long long bufdiff;
-typedef unsigned long long bufsize;
-typedef bufsize bufoffset;
+struct ExportPluginHTMLSettings {
+    bool customColumns{false};
+    unsigned columns{16};
+};
 
-#if USE_WIDE_STRINGS
-typedef wchar_t strchar;
-typedef std::basic_string<strchar> string;
-typedef std::basic_string_view<strchar> stringview;
-#define CHAR(c) L##c
-#define STRING(s) L##s
-#define FMT_CHR "lc"
-#define FMT_STR "ls"
-#else
-typedef char strchar;
-typedef std::basic_string<strchar> string;
-typedef std::basic_string_view<strchar> stringview;
-#define CHAR(c) c
-#define STRING(s) s
-#define FMT_CHR "c"
-#define FMT_STR "s"
-#endif
+class ExportPluginHTML : public LocalizableExportPlugin {
+  public:
+    ExportPluginHTML(pluginid id);
+    wxString getFileFilter() const;
+    bool configureExport(wxWindow* parent,
+                         const std::filesystem::path& filename,
+                         bufsize actualOffset, bufsize size,
+                         const ExportDetails& details);
+    void doExport(HexBedTask& task, const std::filesystem::path& filename,
+                  std::function<bufsize(bufsize, bytespan)> read,
+                  bufsize actualOffset, bufsize size,
+                  const ExportDetails& details);
 
-constexpr bufsize BUFSIZE_MAX = std::numeric_limits<bufsize>::max();
+  private:
+    ExportPluginHTMLSettings settings_;
+};
+
+};  // namespace plugins
 
 };  // namespace hexbed
 
-#endif /* HEXBED_COMMON_TYPES_HH */
+#endif /* HEXBED_UI_PLUGINS_EXPORT_HTML_HH */

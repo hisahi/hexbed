@@ -26,6 +26,7 @@
 #include <cstring>
 
 #include "app/config.hh"
+#include "app/sbcs.hh"
 #include "common/charconv.hh"
 
 #if HAS_ICU

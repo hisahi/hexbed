@@ -22,10 +22,14 @@
 #ifndef HEXBED_COMMON_VALUES_HH
 #define HEXBED_COMMON_VALUES_HH
 
+#include "common/types.hh"
+
 namespace hexbed {
 
 extern const char* const HEX_UPPERCASE;
 extern const char* const HEX_LOWERCASE;
+extern const strchar* const HEX_UPPERCASE_X;
+extern const strchar* const HEX_LOWERCASE_X;
 constexpr char32_t CHAR32_INVALID = static_cast<char32_t>(-1);
 
 };  // namespace hexbed

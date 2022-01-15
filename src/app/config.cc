@@ -28,6 +28,8 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "app/sbcs.hh"
+#include "common/charconv.hh"
 #include "common/logger.hh"
 #include "common/types.hh"
 
@@ -110,18 +112,18 @@ static std::filesystem::path getConfigPath() {
 #endif
         if (!home) home = ".";
         cfgp = std::filesystem::path(home);
-        cfgp /= ".config";
+        cfgp /= STRING(".config");
     } else
         cfgp = std::filesystem::path(home);
-    cfgp /= "hexbed";
-    cfgp /= "hexbed.conf";
+    cfgp /= STRING("hexbed");
+    cfgp /= STRING("hexbed.conf");
 #elif OS_MACOS
     char home[PATH_MAX];
     FSRef ref;
     FSFindFolder(kUserDomain, kApplicationSupportFolderType, kCreateFolder,
                  &ref);
     FSRefMakePath(&ref, (UInt8*)&home, PATH_MAX);
-    cfgp = std::filesystem::path(home) / "hexbed.conf";
+    cfgp = std::filesystem::path(home) / STRING("hexbed.conf");
 #elif OS_WINDOWS
     char adata[MAX_PATH];
     std::filesystem::path adatas;
@@ -129,8 +131,8 @@ static std::filesystem::path getConfigPath() {
         adatas = std::filesystem::path(adata);
     else
         adatas = ".";
-    cfgp = std::filesystem::path(adatas) / "hexbed";
-    cfgp /= "hexbed.conf";
+    cfgp = std::filesystem::path(adatas) / STRING("hexbed");
+    cfgp /= STRING("hexbed.conf");
 #else
 #error config path not implemented on your platform
 #endif
@@ -163,21 +165,20 @@ static double stringToFloat(const string& s) {
 }
 
 static string stringFromBool(bool value) {
-    return stringFormat("%d", value ? 1 : 0);
+    return xstringFormat("%d", value ? 1 : 0);
 }
 
-static string stringFromInt(long value) { return stringFormat("%ld", value); }
+static string stringFromInt(long value) { return xstringFormat("%ld", value); }
 
 static string stringFromFloat(double value) {
-    return stringFormat("%.*lf", DECIMAL_DIG, value);
+    return xstringFormat("%.*lf", DECIMAL_DIG, value);
 }
 
 void HexBedConfiguration::load() {
     try {
         string cpath = getConfigPath();
-        LOG_DEBUG("config path is %s", cpath);
         std::basic_ifstream<strchar> cfg(cpath, std::ios::in);
-        cfg.exceptions(std::ios::failbit | std::ios::badbit);
+        cfg.exceptions(std::ios::badbit);
         string line;
         while (std::getline(cfg, line)) {
             if (line.empty()) continue;
@@ -201,7 +202,7 @@ void HexBedConfiguration::load() {
                     break;
                 }
             } catch (const convert_error& exc) {
-                LOG_WARN("invalid config value: %s (%s)", key,
+                LOG_WARN("invalid config value: %" FMT_STR " (%s)", key,
                          currentExceptionAsString());
             }
         }
@@ -225,15 +226,14 @@ void HexBedConfiguration::save() {
         outStream_ = new std::basic_ofstream<strchar>(cpath, std::ios::out);
         outStream_->exceptions(std::ios::failbit | std::ios::badbit);
         saveValues();
-        delete outStream_;
-        outStream_ = nullptr;
+        delete std::exchange(outStream_, nullptr);
     } catch (...) {
         LOG_ERROR("could not (fully) save config: %s",
                   currentExceptionAsString());
     }
 }
 
-void HexBedConfiguration::apply() { applySettings(); }
+void HexBedConfiguration::apply() { sbcs = getSbcsByName(values_.charset); }
 
 bool HexBedConfiguration::loadBool(const string& key, bool def) {
     auto s = loadedBool_.find(key);

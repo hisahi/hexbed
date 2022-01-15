@@ -23,6 +23,7 @@
 
 #include <sstream>
 
+#include "app/sbcs.hh"
 #include "common/caseconv.hh"
 #include "common/logger.hh"
 #include "common/memory.hh"

@@ -17,40 +17,41 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/plugins/plugin.cc -- impl for the generic plugin system
+// ui/plugins/export/text.hh -- header for builtin text exporter
 
-#include "ui/plugins/plugin.hh"
+#ifndef HEXBED_UI_PLUGINS_EXPORT_TEXT_HH
+#define HEXBED_UI_PLUGINS_EXPORT_TEXT_HH
 
 #include "ui/plugins/export.hh"
-#include "ui/plugins/import.hh"
-#include "ui/plugins/inspector.hh"
 
 namespace hexbed {
 
 namespace plugins {
 
-void loadBuiltinPlugins() {
-    loadBuiltinDataInspectorPlugins();
-    loadBuiltinImportPlugins();
-    loadBuiltinExportPlugins();
-}
+struct ExportPluginTextSettings {
+    bool customColumns{false};
+    unsigned columns{16};
+};
 
-pluginid nextPluginId_ = 0;
-pluginid firstPluginIdCustom_ = 0;
-pluginid nextPluginIdCustom_ = 0;
+class ExportPluginText : public LocalizableExportPlugin {
+  public:
+    ExportPluginText(pluginid id);
+    wxString getFileFilter() const;
+    bool configureExport(wxWindow* parent,
+                         const std::filesystem::path& filename,
+                         bufsize actualOffset, bufsize size,
+                         const ExportDetails& details);
+    void doExport(HexBedTask& task, const std::filesystem::path& filename,
+                  std::function<bufsize(bufsize, bytespan)> read,
+                  bufsize actualOffset, bufsize size,
+                  const ExportDetails& details);
 
-pluginid nextBuiltinPluginId() { return nextPluginId_++; }
-
-void resetExternalPluginIds() { nextPluginIdCustom_ = firstPluginIdCustom_; }
-
-pluginid nextExternalPluginId() {
-    if (firstPluginIdCustom_ < nextPluginId_)
-        firstPluginIdCustom_ = nextPluginId_;
-    if (nextPluginIdCustom_ < firstPluginIdCustom_)
-        nextPluginIdCustom_ = firstPluginIdCustom_;
-    return nextPluginIdCustom_++;
-}
+  private:
+    ExportPluginTextSettings settings_;
+};
 
 };  // namespace plugins
 
 };  // namespace hexbed
+
+#endif /* HEXBED_UI_PLUGINS_EXPORT_TEXT_HH */

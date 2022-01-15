@@ -28,6 +28,7 @@
 #include <wx/valtext.h>
 
 #include "app/config.hh"
+#include "app/sbcs.hh"
 #include "common/logger.hh"
 #include "file/document.hh"
 #include "ui/encoding.hh"
@@ -95,6 +96,11 @@ void HexBedTextInput::UpdateConfig() {
         validate->AddItem(mbcsKeys_.begin()[i], mbcsNames_.begin()[i]);
     for (std::size_t i = 0; i < sbcsKeys_.size(); ++i)
         validate->AddItem(sbcsKeys_.begin()[i], sbcsNames_.begin()[i]);
+    for (std::size_t i = 0, e = hexbed::plugins::charsetPluginCount(); i < e;
+         ++i) {
+        const auto& pair = hexbed::plugins::charsetPluginByIndex(i);
+        validate->AddItem(pair.first, pair.second);
+    }
 
     std::size_t n = sbcsKeys_.size();
     std::size_t i = 0;
@@ -102,10 +108,10 @@ void HexBedTextInput::UpdateConfig() {
     for (i = 0; i < n; ++i) {
         if (encoding == sbcsKeys_.begin()[i]) break;
     }
-    if (i < n)
-        choice_->SetString(
-            0, wxString::Format(_("Configured character encoding (%s)"),
-                                sbcsNames_.begin()[i]));
+    if (i >= n) i = 0;
+    choice_->SetString(0,
+                       wxString::Format(_("Configured character encoding (%s)"),
+                                        sbcsNames_.begin()[i]));
     TransferDataToWindow();
 }
 

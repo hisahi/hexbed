@@ -39,7 +39,7 @@
 #include <limits>
 
 #include "app/config.hh"
-#include "common/ctype.hh"
+#include "app/plugin.hh"
 #include "common/hexconv.hh"
 #include "common/intconv.hh"
 #include "common/logger.hh"
@@ -49,8 +49,6 @@
 namespace hexbed {
 
 namespace plugins {
-
-constexpr bufsize SEGMENTED_MAX_LENGTH = 0x10FFF0;
 
 class ExportPluginMotorolaSRECDialog : public PluginConfigureDialog<true> {
   private:
@@ -98,25 +96,25 @@ class ExportPluginMotorolaSRECDialog : public PluginConfigureDialog<true> {
 
         top->Add(new wxStaticText(this, wxID_ANY, _("Mode"), wxDefaultPosition,
                                   wxDefaultSize, wxST_ELLIPSIZE_END),
-                 wxSizerFlags().Center());
+                 wxSizerFlags().Expand());
         top->Add(new wxRadioButton(
                      this, wxID_ANY, _("S19 (16-bit)"), wxDefaultPosition,
                      wxDefaultSize, wxRB_GROUP,
                      hexbed::ui::RadioValidator<ExportPluginMotorolaSRECMode>(
                          &settings.mode, ExportPluginMotorolaSRECMode::S19)),
-                 wxSizerFlags());
+                 wxSizerFlags().Expand());
         top->Add(new wxRadioButton(
                      this, wxID_ANY, _("S28 (24-bit)"), wxDefaultPosition,
                      wxDefaultSize, 0,
                      hexbed::ui::RadioValidator<ExportPluginMotorolaSRECMode>(
                          &settings.mode, ExportPluginMotorolaSRECMode::S28)),
-                 wxSizerFlags());
+                 wxSizerFlags().Expand());
         top->Add(new wxRadioButton(
                      this, wxID_ANY, _("S37 (32-bit)"), wxDefaultPosition,
                      wxDefaultSize, 0,
                      hexbed::ui::RadioValidator<ExportPluginMotorolaSRECMode>(
                          &settings.mode, ExportPluginMotorolaSRECMode::S37)),
-                 wxSizerFlags());
+                 wxSizerFlags().Expand());
 
         top->Add(new wxStaticText(this, wxID_ANY, _("Offset base"),
                                   wxDefaultPosition, wxDefaultSize,
@@ -129,7 +127,7 @@ class ExportPluginMotorolaSRECDialog : public PluginConfigureDialog<true> {
                 hexbed::ui::RadioValidator<ExportPluginMotorolaSRECOffsetBase>(
                     &settings.offsetBase,
                     ExportPluginMotorolaSRECOffsetBase::Zero)),
-            wxSizerFlags());
+            wxSizerFlags().Expand());
         top->Add(
             new wxRadioButton(
                 this, wxID_ANY,
@@ -139,7 +137,7 @@ class ExportPluginMotorolaSRECDialog : public PluginConfigureDialog<true> {
                 hexbed::ui::RadioValidator<ExportPluginMotorolaSRECOffsetBase>(
                     &settings.offsetBase,
                     ExportPluginMotorolaSRECOffsetBase::Real)),
-            wxSizerFlags());
+            wxSizerFlags().Expand());
         row = new wxBoxSizer(wxHORIZONTAL);
         row->Add(
             new wxRadioButton(
@@ -162,7 +160,7 @@ class ExportPluginMotorolaSRECDialog : public PluginConfigureDialog<true> {
         spin2->SetBase(config().offsetRadix);
         top->Add(row, wxSizerFlags().Expand());
 
-        top->Add(buttons);
+        top->Add(buttons, wxSizerFlags().Expand());
 
         SetSizer(top);
         Fit();
@@ -217,25 +215,9 @@ wxString ExportPluginMotorolaSREC::getFileFilter() const {
            "|*.s19;*.s28;*.s37|" + ExportPlugin::getFileFilter();
 }
 
-static bool caseInsCheckChar(strchar a, strchar b) {
-    return c_toupper(a) == c_toupper(b);
-}
-
-static bool caseInsCheck(const strchar* f, const strchar* s) {
-    while (*f && *s)
-        if (!caseInsCheckChar(*f++, *s++)) return false;
-    return !*f && !*s;
-}
-
-static bool isExtensionCaseIns(const std::filesystem::path& fn,
-                               const string& suffix) {
-    auto ext = fn.extension();
-    return caseInsCheck(ext.c_str(), suffix.c_str());
-}
-
 bool ExportPluginMotorolaSREC::configureExport(
     wxWindow* parent, const std::filesystem::path& filename,
-    bufsize actualOffset, bufsize size) {
+    bufsize actualOffset, bufsize size, const ExportDetails& details) {
     if (size >> 32) {
         wxMessageBox(_("The exported section is 4 GiB (2^32 bytes) or longer, "
                        "which is too long for Motorola S-record files."),
@@ -243,11 +225,11 @@ bool ExportPluginMotorolaSREC::configureExport(
         return false;
     }
     ExportPluginMotorolaSRECDialog dial(parent, settings_, actualOffset, size);
-    if (isExtensionCaseIns(filename, STRING(".s19")))
+    if (checkCaseInsensitiveFileExtension(filename, STRING(".s19")))
         settings_.mode = ExportPluginMotorolaSRECMode::S19;
-    else if (isExtensionCaseIns(filename, STRING(".s28")))
+    else if (checkCaseInsensitiveFileExtension(filename, STRING(".s28")))
         settings_.mode = ExportPluginMotorolaSRECMode::S28;
-    else if (isExtensionCaseIns(filename, STRING(".s37")))
+    else if (checkCaseInsensitiveFileExtension(filename, STRING(".s37")))
         settings_.mode = ExportPluginMotorolaSRECMode::S37;
     dial.TransferDataToWindow();
     int result = dial.ShowModal();
@@ -308,7 +290,7 @@ static void outRowRecord(std::ofstream& f, std::size_t records) {
 void ExportPluginMotorolaSREC::doExport(
     HexBedTask& task, const std::filesystem::path& filename,
     std::function<bufsize(bufsize, bytespan)> read, bufsize actualOffset,
-    bufsize size) {
+    bufsize size, const ExportDetails& details) {
     using enum ExportPluginMotorolaSRECMode;
     using enum ExportPluginMotorolaSRECOffsetBase;
     std::ofstream f(filename);

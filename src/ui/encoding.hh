@@ -45,6 +45,7 @@ bool textDecode(const string& encoding, wxString& text, const_bytespan data);
     STRING("m_utf32le"),                                                       \
     STRING("m_utf32be"),                                                       \
 
+/// multibyte character encodings
 #define MBCS_ENCODING_NAMES()                                                  \
     _("Unicode, UTF-8"),                                                       \
     _("Unicode, UTF-16LE (little-endian)"),                                    \
@@ -59,6 +60,7 @@ bool textDecode(const string& encoding, wxString& text, const_bytespan data);
     STRING("cp437"),                                                           \
     STRING("cp850"),                                                           \
 
+/// single-byte character encodings
 #define SBCS_ENCODING_NAMES()                                                  \
     _("ASCII"),                                                                \
     _("Latin-1 (ISO 8859-1)"),                                                 \

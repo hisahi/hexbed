@@ -46,7 +46,7 @@ static int octDigitToNum(char c) {
     // clang-format on
 }
 
-static int decDigitToNum(char c) {
+int decDigitToNum(char c) {
     // clang-format off
     switch (c) {
     case '0': return 0;
@@ -93,14 +93,19 @@ void fastByteConv(char* out, const char* hex, byte b) {
     out[1] = hex[b & 15];
 }
 
-std::string hexFromBytes(bufsize len, const byte* data, bool upper, bool cont) {
-    const char* hex = upper ? HEX_UPPERCASE : HEX_LOWERCASE;
-    char hexbuf[4] = " 00";
+void fastByteConvX(strchar* out, const strchar* hex, byte b) {
+    out[0] = hex[(b >> 4) & 15];
+    out[1] = hex[b & 15];
+}
+
+string hexFromBytes(bufsize len, const byte* data, bool upper, bool cont) {
+    const strchar* hex = upper ? HEX_UPPERCASE_X : HEX_LOWERCASE_X;
+    strchar hexbuf[4] = STRING(" 00");
     unsigned offset = cont ? 0 : 1;
-    std::string hexstr = "";
+    string hexstr = STRING("");
 
     for (bufsize j = 0; j < len; ++j) {
-        fastByteConv(&hexbuf[1], hex, data[j]);
+        fastByteConvX(&hexbuf[1], hex, data[j]);
         hexstr += &hexbuf[offset];
         offset = 0;
     }
@@ -108,7 +113,7 @@ std::string hexFromBytes(bufsize len, const byte* data, bool upper, bool cont) {
     return hexstr;
 }
 
-bool hexToBytes(bufsize& len, byte* data, const std::string& text) {
+bool hexToBytes(bufsize& len, byte* data, const string& text) {
     bufsize l = 0, ll = len;
     byte next;
     bool nibble = false;
@@ -129,7 +134,7 @@ bool hexToBytes(bufsize& len, byte* data, const std::string& text) {
     return true;
 }
 
-bool convertBaseFrom(bufsize& out, std::string_view text, unsigned base) {
+bool convertBaseFrom(bufsize& out, stringview text, unsigned base) {
     bufsize o = 0, oo = 0;
     if (text.empty()) return false;
     switch (base) {
@@ -168,10 +173,10 @@ bool convertBaseFrom(bufsize& out, std::string_view text, unsigned base) {
     return true;
 }
 
-std::string convertBaseTo(bufsize in, unsigned base, bool upper) {
-    if (!in) return "0";
-    std::string s;
-    const char* hex = upper ? HEX_UPPERCASE : HEX_LOWERCASE;
+string convertBaseTo(bufsize in, unsigned base, bool upper) {
+    if (!in) return STRING("0");
+    string s;
+    const strchar* hex = upper ? HEX_UPPERCASE_X : HEX_LOWERCASE_X;
     switch (base) {
     case 8:
         while (in) {
@@ -198,14 +203,14 @@ std::string convertBaseTo(bufsize in, unsigned base, bool upper) {
     return s;
 }
 
-bool convertBaseFromNeg(bufsize& out, int& neg, std::string_view text,
+bool convertBaseFromNeg(bufsize& out, int& neg, stringview text,
                         unsigned base) {
     switch (text[0]) {
-    case '-':
+    case CHAR('-'):
         neg = -1;
         text.remove_prefix(1);
         break;
-    case '+':
+    case CHAR('+'):
         neg = 1;
         text.remove_prefix(1);
         break;
@@ -215,13 +220,13 @@ bool convertBaseFromNeg(bufsize& out, int& neg, std::string_view text,
     return convertBaseFrom(out, text, base);
 }
 
-std::string convertBaseToNeg(bufsize in, int neg, unsigned base, bool upper) {
-    std::string s = convertBaseTo(in, base, upper);
+string convertBaseToNeg(bufsize in, int neg, unsigned base, bool upper) {
+    string s = convertBaseTo(in, base, upper);
     switch (neg) {
     case -1:
-        return '-' + s;
+        return CHAR('-') + s;
     case 1:
-        return '+' + s;
+        return CHAR('+') + s;
     default:
         return s;
     }

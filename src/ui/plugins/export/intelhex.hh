@@ -45,10 +45,12 @@ class ExportPluginIntelHEX : public LocalizableExportPlugin {
     wxString getFileFilter() const;
     bool configureExport(wxWindow* parent,
                          const std::filesystem::path& filename,
-                         bufsize actualOffset, bufsize size);
+                         bufsize actualOffset, bufsize size,
+                         const ExportDetails& details);
     void doExport(HexBedTask& task, const std::filesystem::path& filename,
                   std::function<bufsize(bufsize, bytespan)> read,
-                  bufsize actualOffset, bufsize size);
+                  bufsize actualOffset, bufsize size,
+                  const ExportDetails& details);
 
   private:
     ExportPluginIntelHEXSettings settings_;
