@@ -58,7 +58,7 @@ class HexBedBuffer {
     virtual bufsize size() noexcept;
     virtual bufsize size() const noexcept = 0;
 
-    virtual ~HexBedBuffer() noexcept;
+    virtual inline ~HexBedBuffer() noexcept {}
 };
 
 class HexBedDocument;
@@ -268,7 +268,7 @@ class HexBedDocument {
     UndoToken addUndoRemove(bufsize off, bufsize cnt);
     void truncateUndo();
 
-    friend class HexBedUndoEntry;
+    friend struct HexBedUndoEntry;
 };
 
 };  // namespace hexbed

@@ -29,7 +29,8 @@ template <typename T>
 static constexpr T byteswap(const T&);
 
 template <>
-constexpr std::uint32_t byteswap<std::uint32_t>(const std::uint32_t& vv) {
+[[maybe_unused]] constexpr std::uint32_t byteswap<std::uint32_t>(
+    const std::uint32_t& vv) {
     std::uint32_t v = vv;
     v = (v & 0xFFFF0000UL) >> 16 | (v & 0x0000FFFFUL) << 16;
     v = (v & 0xFF00FF00UL) >> 8 | (v & 0x00FF00FFUL) << 8;
@@ -37,7 +38,8 @@ constexpr std::uint32_t byteswap<std::uint32_t>(const std::uint32_t& vv) {
 }
 
 template <>
-constexpr std::uint64_t byteswap<std::uint64_t>(const std::uint64_t& vv) {
+[[maybe_unused]] constexpr std::uint64_t byteswap<std::uint64_t>(
+    const std::uint64_t& vv) {
     std::uint64_t v = vv;
     v = (v & 0xFFFFFFFF00000000ULL) >> 32 | (v & 0x00000000FFFFFFFFULL) << 32;
     v = (v & 0xFFFF0000FFFF0000ULL) >> 16 | (v & 0x0000FFFF0000FFFFULL) << 16;

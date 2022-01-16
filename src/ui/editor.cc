@@ -43,7 +43,7 @@ LongScrollBar::scroll_t LongScrollBar::GetPageSizeLong() const {
 }
 
 LongScrollBar::scroll_t LongScrollBar::GetRangeLong() const {
-    return (GetRangeLong() << shift_) | rangeRem_;
+    return (GetRange() << shift_) | rangeRem_;
 }
 
 LongScrollBar::scroll_t LongScrollBar::GetThumbPositionLong() const {

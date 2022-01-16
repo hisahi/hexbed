@@ -38,8 +38,6 @@ const T* const_this(T* p) {
     return static_cast<const T*>(p);
 }
 
-HexBedBuffer::~HexBedBuffer() {}
-
 bufsize HexBedBuffer::size() noexcept { return const_this(this)->size(); }
 
 static std::unique_ptr<HexBedBuffer> bufferNew() {
@@ -86,7 +84,7 @@ HexBedDocument::HexBedDocument(std::shared_ptr<HexBedContext> ctx,
       buffer_(bufferOpen(filename)),
       treble_(buffer_->size()),
       readOnly_(readOnly) {
-    LOG_TRACE("opened file as %s", typeid(*buffer_.get()).name());
+    // LOG_TRACE("opened file as %s", typeid(*buffer_.get()).name());
 }
 
 HexBedDocument::~HexBedDocument() {}
@@ -741,8 +739,7 @@ bool HexBedDocument::pry(
         *sz += n;
     };
     HexBedTask task = HexBedTask(context_.get(), sizehint, true);
-    task.run(
-        [this, &source, &insert](HexBedTask& task) { source(task, insert); });
+    task.run([&source, &insert](HexBedTask& task) { source(task, insert); });
     if (task.isCancelled())
         token.rollback(*this);
     else {
@@ -775,8 +772,7 @@ bool HexBedDocument::romp(
         }
     };
     HexBedTask task = HexBedTask(context_.get(), 0, true);
-    task.run(
-        [this, &source, &impose](HexBedTask& task) { source(task, impose); });
+    task.run([&source, &impose](HexBedTask& task) { source(task, impose); });
     dirty_ = true;
     context_->announceUndoChange(this);
     context_->announceBytesChanged(this, 0);

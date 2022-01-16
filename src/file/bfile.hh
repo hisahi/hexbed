@@ -74,8 +74,6 @@ class HexBedBufferFile : public HexBedBuffer {
 
   private:
     bufsize sz_;
-    bufsize page_;
-    bufsize pagesz_;
     FILE_unique_ptr f_;
     void updateSize();
 };

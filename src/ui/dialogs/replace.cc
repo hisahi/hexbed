@@ -223,23 +223,23 @@ bool ReplaceDialog::replaceAll(HexEditorParent* ed, bufsize& count) {
     UndoGroupToken ugt = doc.undoGroup();
     bufsize cur = sel;
     HexBedTask task(&ed->context(), 0, true);
-    task.run([&ugt, &doc, search, replace, sn, rn, sel, &repls,
-              &cur](HexBedTask& task) {
-        SearchResult res;
-        bufsize rat = 0;
-        while (!task.isCancelled() &&
-               (res = doc.searchForwardFull(task, rat, false, search))) {
-            bufsize so = res.offset;
-            ++repls;
-            if (so < cur && sn != rn) {
-                cur = cur >= sn ? cur - sn : 0;
-                cur += rn;
+    task.run(
+        [&ugt, &doc, search, replace, sn, rn, &repls, &cur](HexBedTask& task) {
+            SearchResult res;
+            bufsize rat = 0;
+            while (!task.isCancelled() &&
+                   (res = doc.searchForwardFull(task, rat, false, search))) {
+                bufsize so = res.offset;
+                ++repls;
+                if (so < cur && sn != rn) {
+                    cur = cur >= sn ? cur - sn : 0;
+                    cur += rn;
+                }
+                doc.replace(so, sn, replace);
+                ugt.tick();
+                rat = so + rn;
             }
-            doc.replace(so, sn, replace);
-            ugt.tick();
-            rat = so + rn;
-        }
-    });
+        });
     ed->SelectBytes(cur, 0, SelectFlags());
     count = repls;
     if (task.isCancelled()) return false;

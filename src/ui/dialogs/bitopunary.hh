@@ -47,8 +47,6 @@ class BitwiseUnaryOpDialog : public wxDialog {
   private:
     void EndDialog(int result);
 
-    HexBedMainFrame* parent_;
-
     wxChoice* opChoice_;
 
     BitwiseUnaryOp choice_{BitwiseUnaryOp::Not};

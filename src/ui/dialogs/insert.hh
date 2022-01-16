@@ -50,8 +50,6 @@ class InsertBlockDialog : public wxDialog {
     bool CheckInput();
     void OnChangedInput(wxCommandEvent& event);
 
-    HexBedMainFrame* parent_;
-
     std::shared_ptr<HexBedContextMain> context_;
     std::shared_ptr<HexBedDocument> document_;
     HexBedEditorRegistration registration_;

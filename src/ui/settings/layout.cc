@@ -61,10 +61,9 @@ HexBedPrefsLayout::HexBedPrefsLayout(wxWindow* parent, ConfigurationValues* cfg)
         wxDefaultPosition, wxDefaultSize, wxCHK_2STATE,
         wxGenericValidator(static_cast<bool*>(&cfg->autoFit)));
     col->Add(check, wxSizerFlags().Expand());
-    check->Bind(wxEVT_CHECKBOX,
-                [picker, check, cfg](wxCommandEvent& event) -> void {
-                    picker->Enable(!check->GetValue());
-                });
+    check->Bind(wxEVT_CHECKBOX, [picker, check](wxCommandEvent& event) -> void {
+        picker->Enable(!check->GetValue());
+    });
     PREFS_SETTING_FRAME(col, _("Number of columns"), picker);
 
     /// group sizes

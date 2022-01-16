@@ -57,14 +57,11 @@ static constexpr unsigned CSHARP_MAX_BYTES_PER_LINE = 256;
 class ExportPluginCSharpDialog : public PluginConfigureDialog<true> {
   private:
     ExportPluginCSharpSettings* settings_;
-    bufsize off_;
-    bufsize sz_;
     wxString variableNameWx_;
 
   public:
     ExportPluginCSharpDialog(wxWindow* parent,
-                             ExportPluginCSharpSettings& settings,
-                             bufsize actualOffset, bufsize size)
+                             ExportPluginCSharpSettings& settings)
         : PluginConfigureDialog<true>(parent, wxID_ANY, _("C# source code"),
                                       wxDefaultPosition, wxDefaultSize,
                                       wxDEFAULT_DIALOG_STYLE),
@@ -228,7 +225,7 @@ bool ExportPluginCSharp::configureExport(wxWindow* parent,
                                          const std::filesystem::path& filename,
                                          bufsize actualOffset, bufsize size,
                                          const ExportDetails& details) {
-    ExportPluginCSharpDialog dial(parent, settings_, actualOffset, size);
+    ExportPluginCSharpDialog dial(parent, settings_);
     dial.TransferDataToWindow();
     int result = dial.ShowModal();
     if (result != wxID_OK) return false;

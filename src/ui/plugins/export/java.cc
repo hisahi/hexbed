@@ -57,13 +57,10 @@ static constexpr unsigned JAVA_MAX_BYTES_PER_LINE = 256;
 class ExportPluginJavaDialog : public PluginConfigureDialog<true> {
   private:
     ExportPluginJavaSettings* settings_;
-    bufsize off_;
-    bufsize sz_;
     wxString variableNameWx_;
 
   public:
-    ExportPluginJavaDialog(wxWindow* parent, ExportPluginJavaSettings& settings,
-                           bufsize actualOffset, bufsize size)
+    ExportPluginJavaDialog(wxWindow* parent, ExportPluginJavaSettings& settings)
         : PluginConfigureDialog<true>(parent, wxID_ANY, _("Java source code"),
                                       wxDefaultPosition, wxDefaultSize,
                                       wxDEFAULT_DIALOG_STYLE),
@@ -227,7 +224,7 @@ bool ExportPluginJava::configureExport(wxWindow* parent,
                                        const std::filesystem::path& filename,
                                        bufsize actualOffset, bufsize size,
                                        const ExportDetails& details) {
-    ExportPluginJavaDialog dial(parent, settings_, actualOffset, size);
+    ExportPluginJavaDialog dial(parent, settings_);
     dial.TransferDataToWindow();
     int result = dial.ShowModal();
     if (result != wxID_OK) return false;

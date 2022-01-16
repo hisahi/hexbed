@@ -33,7 +33,7 @@ class HexBedPrefsGeneralPage : public wxStockPreferencesPage {
   public:
     HexBedPrefsGeneralPage(ConfigurationValues* cfg);
 
-    wxWindow* CreateWindow(wxWindow* parent);
+    wxWindow* CreateWindow(wxWindow* parent) override;
 
   private:
     ConfigurationValues* cfg_;

@@ -62,6 +62,8 @@ class ImportPlugin : public Plugin {
         HexBedTask& task, const std::filesystem::path& filename,
         std::function<void(bufsize, const_bytespan)> output) = 0;
 
+    virtual inline ~ImportPlugin() {}
+
   protected:
     inline ImportPlugin(pluginid id, const wxString& title,
                         std::size_t maxDataLen, std::size_t maxStrLen)
@@ -72,7 +74,6 @@ class ImportPlugin : public Plugin {
 
   private:
     wxString title_;
-    bool readOnly_;
     bool localizable_;
 };
 

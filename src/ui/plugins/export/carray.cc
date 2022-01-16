@@ -57,13 +57,10 @@ static constexpr unsigned C_MAX_BYTES_PER_LINE = 256;
 class ExportPluginCDialog : public PluginConfigureDialog<true> {
   private:
     ExportPluginCSettings* settings_;
-    bufsize off_;
-    bufsize sz_;
     wxString variableNameWx_;
 
   public:
-    ExportPluginCDialog(wxWindow* parent, ExportPluginCSettings& settings,
-                        bufsize actualOffset, bufsize size)
+    ExportPluginCDialog(wxWindow* parent, ExportPluginCSettings& settings)
         : PluginConfigureDialog<true>(parent, wxID_ANY, _("C source code"),
                                       wxDefaultPosition, wxDefaultSize,
                                       wxDEFAULT_DIALOG_STYLE),
@@ -226,7 +223,7 @@ bool ExportPluginC::configureExport(wxWindow* parent,
                                     const std::filesystem::path& filename,
                                     bufsize actualOffset, bufsize size,
                                     const ExportDetails& details) {
-    ExportPluginCDialog dial(parent, settings_, actualOffset, size);
+    ExportPluginCDialog dial(parent, settings_);
     dial.TransferDataToWindow();
     int result = dial.ShowModal();
     if (result != wxID_OK) return false;

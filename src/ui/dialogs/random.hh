@@ -48,8 +48,6 @@ class InsertRandomBlockDialog : public wxDialog {
   private:
     void EndDialog(int result);
 
-    HexBedMainFrame* parent_;
-
     wxSpinCtrl* spinner_;
     wxButton* okButton_;
 

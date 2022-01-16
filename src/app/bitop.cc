@@ -217,7 +217,8 @@ static constexpr T byteswap(const T&);
 
 #ifdef UINT8_MAX
 template <>
-constexpr std::uint8_t byteswap<std::uint8_t>(const std::uint8_t& v) {
+[[maybe_unused]] constexpr std::uint8_t byteswap<std::uint8_t>(
+    const std::uint8_t& v) {
     return v;
 }
 #endif

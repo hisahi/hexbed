@@ -26,8 +26,8 @@
 
 namespace hexbed {
 
-struct HexBedDocument;
-struct HexBedTaskHandler;
+class HexBedDocument;
+class HexBedTaskHandler;
 
 enum class FailureResponse { Abort, Retry, Ignore };
 
@@ -48,6 +48,8 @@ class HexBedContext {
     inline virtual void announceBytesChanged(HexBedDocument* doc, bufsize start,
                                              bufsize length) {}
     inline virtual void announceUndoChange(HexBedDocument* doc) {}
+
+    inline virtual ~HexBedContext() {}
 };
 
 };  // namespace hexbed

@@ -60,6 +60,8 @@ class DataInspectorPlugin : public Plugin {
         return convertToBytes(outdata_n, outdata, instr.c_str(), settings);
     }
 
+    virtual inline ~DataInspectorPlugin() {}
+
   protected:
     inline DataInspectorPlugin(pluginid id, const wxString& title,
                                std::size_t maxDataLen, std::size_t maxStrLen)

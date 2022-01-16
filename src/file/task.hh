@@ -74,6 +74,8 @@ class HexBedTaskHandler {
     virtual void onTaskWait(HexBedTask* task) = 0;
     // called from subthread
     virtual void onTaskEnd(HexBedTask* task) = 0;
+
+    virtual inline ~HexBedTaskHandler() {}
 };
 
 };  // namespace hexbed

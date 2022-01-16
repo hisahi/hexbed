@@ -54,16 +54,12 @@ namespace hexbed {
 namespace plugins {
 
 class ExportPluginTextDialog : public PluginConfigureDialog<true> {
-  private:
-    ExportPluginTextSettings* settings_;
-
   public:
     ExportPluginTextDialog(wxWindow* parent, ExportPluginTextSettings& settings,
                            bufsize columns)
         : PluginConfigureDialog<true>(parent, wxID_ANY, _("Text"),
                                       wxDefaultPosition, wxDefaultSize,
-                                      wxDEFAULT_DIALOG_STYLE),
-          settings_(&settings) {
+                                      wxDEFAULT_DIALOG_STYLE) {
         SetReturnCode(wxID_CANCEL);
 
         wxBoxSizer* top = new wxBoxSizer(wxVERTICAL);

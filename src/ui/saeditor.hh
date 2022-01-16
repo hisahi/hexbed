@@ -63,12 +63,12 @@ class HexBedStandaloneEditor : public wxPanel, public HexEditorParent {
     void HintBytesChanged(bufsize begin) override;
     void HintBytesChanged(bufsize begin, bufsize end) override;
 
-    void DoCtrlCut();
-    void DoCtrlCopy();
-    void DoCtrlPasteInsert();
-    void DoCtrlPasteOverwrite();
-    void DoCtrlUndo();
-    void DoCtrlRedo();
+    void DoCtrlCut() override;
+    void DoCtrlCopy() override;
+    void DoCtrlPasteInsert() override;
+    void DoCtrlPasteOverwrite() override;
+    void DoCtrlUndo() override;
+    void DoCtrlRedo() override;
 
     void FocusEditor();
 

@@ -35,7 +35,7 @@ class HexBedPrefsLayoutPage : public wxPreferencesPage {
 
     wxString GetName() const override;
     wxBitmap GetLargeIcon() const override;
-    wxWindow* CreateWindow(wxWindow* parent);
+    wxWindow* CreateWindow(wxWindow* parent) override;
 
   private:
     ConfigurationValues* cfg_;

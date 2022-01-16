@@ -57,6 +57,8 @@ class ExportPlugin : public Plugin {
                           bufsize actualOffset, bufsize size,
                           const ExportDetails& details) = 0;
 
+    virtual inline ~ExportPlugin() {}
+
   protected:
     inline ExportPlugin(pluginid id, const wxString& title,
                         std::size_t maxDataLen, std::size_t maxStrLen)
@@ -67,7 +69,6 @@ class ExportPlugin : public Plugin {
 
   private:
     wxString title_;
-    bool readOnly_;
     bool localizable_;
 };
 
