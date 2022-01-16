@@ -1,8 +1,8 @@
 
 # main makefile
 
-CC = gcc
-CXX = g++
+CC ?= gcc
+CXX ?= g++
 LD := $(CXX)
 RM=rm -f
 
