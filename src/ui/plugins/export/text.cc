@@ -132,6 +132,14 @@ bool ExportPluginText::configureExport(wxWindow* parent,
     return true;
 }
 
+static void encodeOneUTF8Char(char* buf, char32_t c) {
+    buf[mbcs_utf8
+            .encode(
+                charEncodeFromArray(1, &c),
+                charEncodeToArray(MBCS_CHAR_MAX, reinterpret_cast<byte*>(buf)))
+            .wroteBytes] = 0;
+}
+
 void ExportPluginText::doExport(HexBedTask& task,
                                 const std::filesystem::path& filename,
                                 std::function<bufsize(bufsize, bytespan)> read,
@@ -232,9 +240,7 @@ void ExportPluginText::doExport(HexBedTask& task,
                     if (!c)
                         f << '.';
                     else {
-                        utfBuffer[encodeCharMbcsOrSbcs(
-                            TextEncoding::UTF8, sbcs, c, sizeof(utfBuffer),
-                            reinterpret_cast<byte*>(utfBuffer))] = 0;
+                        encodeOneUTF8Char(utfBuffer, c);
                         f << utfBuffer;
                     }
                 }

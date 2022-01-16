@@ -26,7 +26,7 @@
 #include <cstring>
 
 #include "app/config.hh"
-#include "app/sbcs.hh"
+#include "app/encoding.hh"
 #include "common/charconv.hh"
 
 #if HAS_ICU
@@ -45,31 +45,18 @@ bool textEncode_(const T& buf, bufsize& outp, HexBedDocument* doc) {
 
 bool textEncode(const string& encoding, const wxString& text, bufsize& outp,
                 HexBedDocument* doc) {
-    if (encoding.size() > 2 &&
-        stringview(encoding.c_str(), 2) == STRING("m_")) {
-        if (encoding == STRING("m_utf8")) {
-            return textEncode_(text.utf8_str(), outp, doc);
-        } else if (encoding == STRING("m_utf16le")) {
-            return textEncode_(text.mb_str(wxMBConvUTF16LE()), outp, doc);
-        } else if (encoding == STRING("m_utf16be")) {
-            return textEncode_(text.mb_str(wxMBConvUTF16BE()), outp, doc);
-        } else if (encoding == STRING("m_utf32le")) {
-            return textEncode_(text.mb_str(wxMBConvUTF32LE()), outp, doc);
-        } else if (encoding == STRING("m_utf32be")) {
-            return textEncode_(text.mb_str(wxMBConvUTF32BE()), outp, doc);
-        }
-    }
-    SingleByteCharacterSet sbcs =
-        getSbcsByName(!encoding.empty() ? encoding : config().charset);
-    std::wstring wstr = text.ToStdWstring();
-    if (!sbcsToBytes(sbcs, outp, nullptr, wstringToU32string(wstr)))
-        return false;
-    if (doc) {
-        auto buffer = std::make_unique<byte[]>(outp);
-        if (!sbcsToBytes(sbcs, outp, buffer.get(), wstringToU32string(wstr)))
-            return false;
-        doc->replace(0, doc->size(), const_bytespan{buffer.get(), outp});
-    }
+    CharEncodeStatus status;
+    bool ok = doc->pry(
+        0, doc->size(),
+        [&encoding, &text, &status](HexBedTask& task,
+                                    std::function<void(const_bytespan)> out) {
+            status = getCharacterEncodingByName(encoding).encode(
+                charEncodeFromString(wstringToU32string(text.ToStdWstring())),
+                out);
+            if (!status.ok) task.cancel();
+        });
+    if (!ok) return false;
+    outp = status.wroteBytes;
     return true;
 }
 
@@ -78,28 +65,11 @@ bool textDecode(const string& encoding, wxString& text, const_bytespan data) {
         text = wxEmptyString;
         return true;
     }
-    if (encoding.size() > 2 &&
-        stringview(encoding.c_str(), 2) == STRING("m_")) {
-        const char* c = reinterpret_cast<const char*>(data.data());
-        if (encoding == STRING("m_utf8")) {
-            return !(text = wxString::FromUTF8(c, data.size())).empty();
-        } else if (encoding == STRING("m_utf16le")) {
-            return !(text = wxString(c, wxMBConvUTF16LE(), data.size()))
-                        .empty();
-        } else if (encoding == STRING("m_utf16be")) {
-            return !(text = wxString(c, wxMBConvUTF16BE(), data.size()))
-                        .empty();
-        } else if (encoding == STRING("m_utf32le")) {
-            return !(text = wxString(c, wxMBConvUTF32LE(), data.size()))
-                        .empty();
-        } else if (encoding == STRING("m_utf32be")) {
-            return !(text = wxString(c, wxMBConvUTF32BE(), data.size()))
-                        .empty();
-        }
-    }
-    SingleByteCharacterSet sbcs =
-        getSbcsByName(!encoding.empty() ? encoding : config().charset);
-    text = u32stringToWstring(sbcsFromBytes(sbcs, data.size(), data.data()));
+    u32ostringstream ss;
+    CharDecodeStatus status = getCharacterEncodingByName(encoding).decode(
+        charDecodeFromArray(data.size(), data.data()), charDecodeToStream(ss));
+    if (!status.ok) return false;
+    text = u32stringToWstring(ss.str());
     return true;
 }
 

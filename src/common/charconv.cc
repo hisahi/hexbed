@@ -26,8 +26,10 @@
 #include <string>
 #include <unordered_map>
 
+#include "common/buffer.hh"
 #include "common/intconv.hh"
 #include "common/logger.hh"
+#include "common/memory.hh"
 #include "common/values.hh"
 
 namespace hexbed {
@@ -126,10 +128,427 @@ static std::unordered_map<string, std::u32string> sbcsTable = {
 SingleByteCharacterSet getBuiltinSbcsByName(const string& name) {
     auto s = sbcsTable.find(name);
     if (s == sbcsTable.end()) {
-        LOG_WARN("unrecognized SBCS encoding name");
+        LOG_WARN("unrecognized SBCS encoding name '%" FMT_STR "'", name);
         return SingleByteCharacterSet(ascii);
     }
     return SingleByteCharacterSet(s->second);
+}
+
+CharEncodeStatus mbcsEncodeNull(CharEncodeInputFunction,
+                                CharEncodeOutputFunction) {
+    return CharEncodeStatus{};
+};
+
+CharDecodeStatus mbcsDecodeNull(CharDecodeInputFunction,
+                                CharDecodeOutputFunction) {
+    return CharDecodeStatus{};
+};
+
+static MultiByteCharacterSet mbcs_null{mbcsEncodeNull, mbcsDecodeNull};
+
+static std::size_t encodeCharUTF8(byte* out, char32_t c) {
+    bufsize i = 0;
+    if (c < 0x80UL) {
+        out[i++] = static_cast<byte>(c & 0x7F);
+    } else if (c < 0x800UL) {
+        out[i++] = static_cast<byte>(0xC0 | ((c >> 6) & 0x1F));
+        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
+    } else if (c < 0x10000UL) {
+        out[i++] = static_cast<byte>(0xE0 | ((c >> 12) & 0x0F));
+        out[i++] = static_cast<byte>(0x80 | ((c >> 6) & 0x3F));
+        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
+    } else if (c < 0x110000UL) {
+        out[i++] = static_cast<byte>(0xF0 | ((c >> 18) & 0x07));
+        out[i++] = static_cast<byte>(0x80 | ((c >> 12) & 0x3F));
+        out[i++] = static_cast<byte>(0x80 | ((c >> 6) & 0x3F));
+        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
+    }
+    return i;
+}
+
+// 0 = OK
+// > 0 = truncated
+// < 0 = invalid
+static int decodeCharUTF8(const byte* p, std::size_t n, char32_t& u,
+                          std::size_t& rc) {
+    if (!n) return 1;
+    byte c = *p;
+    char32_t t;
+    std::size_t j;
+    if (!(c & 0x80)) {
+        rc = 1;
+        u = c;
+        return 0;
+    } else if ((c & 0xE0) == 0xC0) {
+        t = c & 0x1F;
+        j = 2;
+    } else if ((c & 0xF0) == 0xE0) {
+        t = c & 0x0F;
+        j = 3;
+    } else if ((c & 0xF8) == 0xF0) {
+        t = c & 0x07;
+        j = 4;
+    } else {
+        return -1;
+    }
+    if (j > n) return 1;
+    for (std::size_t i = 1; i < j; ++i) {
+        c = p[i];
+        if ((c & 0xC0) != 0x80) return -1;
+        t = (t << 6) | (c & 0x3F);
+    }
+    rc = j;
+    if (t > UCHAR32_MAX || (0xD800UL <= t && t <= 0xDFFFUL)) return -1;
+    u = t;
+    return 0;
+}
+
+CharEncodeStatus mbcsEncodeUTF8(CharEncodeInputFunction input,
+                                CharEncodeOutputFunction output) {
+    constexpr std::size_t ubuf_n = BUFFER_SIZE / sizeof(char32_t);
+    char32_t ubuf[ubuf_n];
+    byte buf[4];
+    bufsize n, n_in = 0, n_out = 0;
+    while ((n = input(u32span{ubuf, ubuf_n}))) {
+        n_in += n;
+        for (std::size_t i = 0; i < n; ++i) {
+            std::size_t c = encodeCharUTF8(buf, ubuf[i]);
+            n_out += c;
+            output(const_bytespan{buf, c});
+        }
+        if (n < ubuf_n) break;
+    }
+    return CharEncodeStatus{true, n_in, n_out};
+}
+
+CharDecodeStatus mbcsDecodeUTF8(CharDecodeInputFunction input,
+                                CharDecodeOutputFunction output) {
+    byte buf[BUFFER_SIZE];
+    char32_t ubuf[BUFFER_SIZE / sizeof(char32_t)];
+    bufsize n, n_in = 0, n_out = 0, n_outu = 0;
+    std::size_t lo = 0;
+    while ((n = lo + input(bytespan{buf + lo, sizeof(buf) - lo}))) {
+        const byte* si = buf;
+        int result;
+        char32_t u;
+        std::size_t q = n, rc;
+        while (q && 0 == (result = decodeCharUTF8(si, q, u, rc))) {
+            ubuf[n_outu++] = u;
+            n_in += rc;
+            si += rc;
+            q -= rc;
+        }
+        if (n_outu) {
+            n_out += n_outu;
+            output(const_u32span{ubuf, n_outu});
+            n_outu = 0;
+        }
+        if (result < 0) return CharDecodeStatus{false, n_in, n_out};
+        if (result > 0 && q) {
+            lo = q;
+            memCopy(buf, buf + n - lo, lo);
+        } else
+            lo = 0;
+    }
+    return CharDecodeStatus{true, n_in, n_out};
+}
+
+template <bool LittleEndian>
+CharEncodeStatus mbcsEncodeUTF16(CharEncodeInputFunction input,
+                                 CharEncodeOutputFunction output) {
+    constexpr std::size_t ubuf_n = BUFFER_SIZE / sizeof(char32_t);
+    char32_t ubuf[ubuf_n];
+    byte buf[4];
+    bufsize n, n_in = 0, n_out = 0;
+    while ((n = input(u32span{ubuf, ubuf_n}))) {
+        n_in += n;
+        for (std::size_t i = 0; i < n; ++i) {
+            char32_t u = ubuf[i];
+            if (u >= 0x10000) {
+                u -= 0x10000;
+                uintToBytes<std::uint16_t>(
+                    2, buf,
+                    static_cast<std::uint16_t>(0xD800UL |
+                                               ((u >> 10) & 0x3FFUL)),
+                    LittleEndian);
+                uintToBytes<std::uint16_t>(
+                    2, buf + 2,
+                    static_cast<std::uint16_t>(0xDC00UL | (u & 0x3FFUL)),
+                    LittleEndian);
+                n_out += 4;
+                output(const_bytespan{buf, 4});
+            } else {
+                uintToBytes<std::uint16_t>(
+                    2, buf, static_cast<std::uint16_t>(u), LittleEndian);
+                n_out += 2;
+                output(const_bytespan{buf, 2});
+            }
+        }
+        if (n < ubuf_n) break;
+    }
+    return CharEncodeStatus{true, n_in, n_out};
+}
+
+template <bool LittleEndian>
+CharEncodeStatus mbcsEncodeUTF32(CharEncodeInputFunction input,
+                                 CharEncodeOutputFunction output) {
+    constexpr std::size_t ubuf_n = BUFFER_SIZE / sizeof(char32_t);
+    char32_t ubuf[ubuf_n];
+    byte buf[4];
+    bufsize n, n_in = 0, n_out = 0;
+    while ((n = input(u32span{ubuf, ubuf_n}))) {
+        n_in += n;
+        for (std::size_t i = 0; i < n; ++i) {
+            uintToBytes<std::uint32_t>(
+                4, buf, static_cast<std::uint32_t>(ubuf[i]), LittleEndian);
+            n_out += 4;
+            output(const_bytespan{buf, 4});
+        }
+        if (n < ubuf_n) break;
+    }
+    return CharEncodeStatus{true, n_in, n_out};
+}
+
+template <bool LittleEndian>
+CharDecodeStatus mbcsDecodeUTF16(CharDecodeInputFunction input,
+                                 CharDecodeOutputFunction output) {
+    constexpr std::size_t buf_n = BUFFER_SIZE & ~1;
+    byte buf[buf_n];
+    char32_t ubuf[buf_n / 2];
+    bufsize n, n_in = 0, n_out = 0, n_outu = 0;
+    while ((n = input(bytespan{buf, buf_n}))) {
+        n = n & ~1;
+        std::size_t i = 0;
+        while (i < n) {
+            char32_t u = uintFromBytes<std::uint16_t>(2, &buf[i], LittleEndian);
+            if ((u & 0xD800U) == 0xD800U) {
+                if ((u & 0xDC00U) == 0xD800U && i + 2 < n) {
+                    u = (u & 0x3FFUL) << 10;
+                    i += 2;
+                    char32_t u2 =
+                        uintFromBytes<std::uint16_t>(2, &buf[i], LittleEndian);
+                    if ((u2 & 0xDC00U) == 0xDC00U) {
+                        u += (u2 & 0x3FFUL) + 0x10000UL;
+                    } else
+                        u = 0xFFFDU;
+                } else
+                    u = 0xFFFDU;
+            }
+            ubuf[n_outu++] = u;
+            i += 2;
+        }
+        n_in += i;
+        n_out += n_outu;
+        output(const_u32span{ubuf, n_outu});
+        n_outu = 0;
+        if (n < buf_n) break;
+    }
+    return CharDecodeStatus{true, n_in, n_out};
+}
+
+template <bool LittleEndian>
+CharDecodeStatus mbcsDecodeUTF32(CharDecodeInputFunction input,
+                                 CharDecodeOutputFunction output) {
+    constexpr std::size_t buf_n = BUFFER_SIZE & ~3;
+    byte buf[buf_n];
+    char32_t ubuf[buf_n / 4];
+    bufsize n, n_in = 0, n_out = 0, n_outu = 0;
+    while ((n = input(bytespan{buf, buf_n}))) {
+        n = n & ~3;
+        std::size_t i = 0;
+        while (i < n) {
+            char32_t u = uintFromBytes<std::uint32_t>(4, &buf[i], LittleEndian);
+            if (u > UCHAR32_MAX) return CharDecodeStatus{false, n_in, n_out};
+            ubuf[n_outu++] = u;
+            i += 4;
+        }
+        n_in += i;
+        n_out += n_outu;
+        output(const_u32span{ubuf, n_outu});
+        n_outu = 0;
+        if (n < buf_n) break;
+    }
+    return CharDecodeStatus{true, n_in, n_out};
+}
+
+CharEncodeStatus mbcsEncodeUTF16LE(CharEncodeInputFunction input,
+                                   CharEncodeOutputFunction output) {
+    return mbcsEncodeUTF16<true>(input, output);
+}
+
+CharEncodeStatus mbcsEncodeUTF16BE(CharEncodeInputFunction input,
+                                   CharEncodeOutputFunction output) {
+    return mbcsEncodeUTF16<false>(input, output);
+}
+
+CharEncodeStatus mbcsEncodeUTF32LE(CharEncodeInputFunction input,
+                                   CharEncodeOutputFunction output) {
+    return mbcsEncodeUTF32<true>(input, output);
+}
+
+CharEncodeStatus mbcsEncodeUTF32BE(CharEncodeInputFunction input,
+                                   CharEncodeOutputFunction output) {
+    return mbcsEncodeUTF32<false>(input, output);
+}
+
+CharDecodeStatus mbcsDecodeUTF16LE(CharDecodeInputFunction input,
+                                   CharDecodeOutputFunction output) {
+    return mbcsDecodeUTF16<true>(input, output);
+}
+
+CharDecodeStatus mbcsDecodeUTF16BE(CharDecodeInputFunction input,
+                                   CharDecodeOutputFunction output) {
+    return mbcsDecodeUTF16<false>(input, output);
+}
+
+CharDecodeStatus mbcsDecodeUTF32LE(CharDecodeInputFunction input,
+                                   CharDecodeOutputFunction output) {
+    return mbcsDecodeUTF32<true>(input, output);
+}
+
+CharDecodeStatus mbcsDecodeUTF32BE(CharDecodeInputFunction input,
+                                   CharDecodeOutputFunction output) {
+    return mbcsDecodeUTF32<false>(input, output);
+}
+
+MultiByteCharacterSet mbcs_utf8{mbcsEncodeUTF8, mbcsDecodeUTF8};
+
+static std::unordered_map<string, MultiByteCharacterSet> mbcsTable = {
+    {STRING("m_utf8"), mbcs_utf8},
+    {STRING("m_utf16le"), {mbcsEncodeUTF16LE, mbcsDecodeUTF16LE}},
+    {STRING("m_utf16be"), {mbcsEncodeUTF16BE, mbcsDecodeUTF16BE}},
+    {STRING("m_utf32le"), {mbcsEncodeUTF32LE, mbcsDecodeUTF32LE}},
+    {STRING("m_utf32be"), {mbcsEncodeUTF32BE, mbcsDecodeUTF32BE}}};
+
+MultiByteCharacterSet getBuiltinMbcsByName(const string& name) {
+    auto s = mbcsTable.find(name);
+    if (s == mbcsTable.end()) {
+        LOG_WARN("unrecognized MBCS encoding name '%" FMT_STR "'", name);
+        return mbcs_null;
+    }
+    return s->second;
+}
+
+CharacterEncoding::CharacterEncoding(const SingleByteCharacterSet& sbcs)
+    : enc_(sbcs) {}
+CharacterEncoding::CharacterEncoding(const MultiByteCharacterSet& mbcs)
+    : enc_(mbcs) {}
+
+CharEncodeStatus doSbcsEncode(const SingleByteCharacterSet& sbcs,
+                              CharEncodeInputFunction input,
+                              CharEncodeOutputFunction output) {
+    constexpr std::size_t ubuf_n = BUFFER_SIZE / sizeof(char32_t);
+    char32_t ubuf[ubuf_n];
+    byte buf[ubuf_n];
+    bufsize n, n_in = 0, n_out = 0;
+    while ((n = input(u32span{ubuf, ubuf_n}))) {
+        n_in += n;
+        for (std::size_t i = 0; i < n; ++i) {
+            int c = sbcs.fromChar(ubuf[i]);
+            if (c < 0) return CharEncodeStatus{false, n_in, n_out};
+            buf[i] = static_cast<byte>(c);
+        }
+        output(const_bytespan{buf, n});
+        n_out += n;
+        if (n < ubuf_n) break;
+    }
+    return CharEncodeStatus{true, n_in, n_out};
+}
+
+CharDecodeStatus doSbcsDecode(const SingleByteCharacterSet& sbcs,
+                              CharDecodeInputFunction input,
+                              CharDecodeOutputFunction output) {
+    byte buf[BUFFER_SIZE];
+    char32_t ubuf[sizeof(buf)];
+    bufsize n, n_in = 0, n_out = 0, n_outu = 0;
+    while ((n = input(bytespan{buf, sizeof(buf)}))) {
+        for (std::size_t i = 0; i < n; ++i) {
+            char32_t u = sbcs.toChar(buf[i]);
+            ubuf[n_outu++] =
+                u != CHAR32_INVALID && (u || !buf[i]) ? u : 0xFFFDU;
+        }
+        n_in += n;
+        n_out += n_outu;
+        output(const_u32span{ubuf, n_outu});
+        n_outu = 0;
+        if (n < sizeof(buf)) break;
+    }
+    return CharDecodeStatus{true, n_in, n_out};
+}
+
+CharEncodeStatus CharacterEncoding::encode(
+    CharEncodeInputFunction input, CharEncodeOutputFunction output) const {
+    if (std::holds_alternative<SingleByteCharacterSet>(enc_))
+        return doSbcsEncode(std::get<SingleByteCharacterSet>(enc_), input,
+                            output);
+    else if (std::holds_alternative<MultiByteCharacterSet>(enc_))
+        return std::get<MultiByteCharacterSet>(enc_).encode(input, output);
+    else
+        return CharEncodeStatus{};
+}
+
+CharDecodeStatus CharacterEncoding::decode(
+    CharDecodeInputFunction input, CharDecodeOutputFunction output) const {
+    if (std::holds_alternative<SingleByteCharacterSet>(enc_))
+        return doSbcsDecode(std::get<SingleByteCharacterSet>(enc_), input,
+                            output);
+    else if (std::holds_alternative<MultiByteCharacterSet>(enc_))
+        return std::get<MultiByteCharacterSet>(enc_).decode(input, output);
+    else
+        return CharDecodeStatus{};
+}
+
+CharacterEncoding getBuiltinCharacterEncodingByName(const string& name) {
+    auto s = mbcsTable.find(name);
+    if (s == mbcsTable.end())
+        return CharacterEncoding(getBuiltinSbcsByName(name));
+    return CharacterEncoding(s->second);
+}
+
+CharEncodeInputFunction charEncodeFromArray(std::size_t n,
+                                            const char32_t* arr) {
+    return [&n, &arr](u32span s) -> bufsize {
+        std::size_t r = std::min<std::size_t>(n, s.size());
+        for (std::size_t i = 0; i < r; ++i, --n) s[i] = *arr++;
+        return r;
+    };
+}
+
+CharEncodeInputFunction charEncodeFromString(std::u32string s) {
+    std::size_t n = s.size();
+    const char32_t* arr = s.data();
+    return [&n, &arr](u32span s) -> bufsize {
+        std::size_t r = std::min<std::size_t>(n, s.size());
+        for (std::size_t i = 0; i < r; ++i, --n) s[i] = *arr++;
+        return r;
+    };
+}
+
+CharEncodeOutputFunction charEncodeToNull() {
+    return [](const_bytespan s) {};
+}
+
+CharEncodeOutputFunction charEncodeToArray(std::size_t n, byte* arr) {
+    return [&n, &arr](const_bytespan s) {
+        std::size_t r = std::min<std::size_t>(n, s.size());
+        for (std::size_t i = 0; i < r; ++i, --n) *arr++ = s[i];
+    };
+}
+
+CharDecodeInputFunction charDecodeFromArray(std::size_t n, const byte* arr) {
+    return [&n, &arr](bytespan s) -> bufsize {
+        std::size_t r = std::min<std::size_t>(n, s.size());
+        for (std::size_t i = 0; i < r; ++i, --n) s[i] = *arr++;
+        return r;
+    };
+}
+
+CharDecodeOutputFunction charDecodeToNull() {
+    return [](const_u32span s) {};
+}
+
+CharDecodeOutputFunction charDecodeToStream(u32ostringstream& stream) {
+    return [&stream](const_u32span s) { stream.write(s.data(), s.size()); };
 }
 
 std::u32string sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
@@ -162,194 +581,6 @@ std::u32string sbcsFromBytes(bufsize len, const byte* data) {
 
 bool sbcsToBytes(bufsize& len, byte* data, const std::u32string& text) {
     return sbcsToBytes(sbcs, len, data, text);
-}
-
-static std::size_t encodeCharUTF8(byte* out, char32_t c) {
-    bufsize i = 0;
-    if (c < 0x80UL) {
-        out[i++] = static_cast<byte>(c & 0x7F);
-    } else if (c < 0x800UL) {
-        out[i++] = static_cast<byte>(0xC0 | ((c >> 6) & 0x1F));
-        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
-    } else if (c < 0x10000UL) {
-        out[i++] = static_cast<byte>(0xE0 | ((c >> 12) & 0x0F));
-        out[i++] = static_cast<byte>(0x80 | ((c >> 6) & 0x3F));
-        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
-    } else if (c < 0x110000UL) {
-        out[i++] = static_cast<byte>(0xF0 | ((c >> 18) & 0x07));
-        out[i++] = static_cast<byte>(0x80 | ((c >> 12) & 0x3F));
-        out[i++] = static_cast<byte>(0x80 | ((c >> 6) & 0x3F));
-        out[i++] = static_cast<byte>(0x80 | (c & 0x3F));
-    }
-    return i;
-}
-
-std::size_t encodeCharMbcsOrSbcs(TextEncoding enc,
-                                 const SingleByteCharacterSet& sbcs, char32_t c,
-                                 std::size_t size, byte* out) {
-    if (!size) return 0;
-    byte outbuf[MBCS_CHAR_MAX];
-    std::size_t outlen = 0;
-    bool little = false;
-    switch (enc) {
-    case TextEncoding::SBCS: {
-        int i = sbcs.fromChar(c);
-        if (i >= 0) outbuf[outlen++] = i;
-        break;
-    }
-    case TextEncoding::UTF8:
-        outlen = encodeCharUTF8(outbuf, c);
-        break;
-    case TextEncoding::UTF16LE:
-        little = true;
-        [[fallthrough]];
-    case TextEncoding::UTF16BE:
-        if (c >= 0x10000UL) {
-            c -= 0x10000UL;
-            outlen += uintToBytes<std::uint16_t>(
-                sizeof(outbuf), outbuf,
-                static_cast<std::uint16_t>(0xD800UL | ((c >> 10) & 0x3FF)),
-                little);
-            outlen += uintToBytes<std::uint16_t>(
-                sizeof(outbuf) - outlen, outbuf + outlen,
-                static_cast<std::uint16_t>(0xDC00UL | (c & 0x3FF)), little);
-        } else
-            outlen = uintToBytes<std::uint16_t>(
-                sizeof(outbuf), outbuf, static_cast<std::uint16_t>(c), little);
-        break;
-    case TextEncoding::UTF32LE:
-        little = true;
-        [[fallthrough]];
-    case TextEncoding::UTF32BE:
-        outlen = uintToBytes<std::uint32_t>(
-            sizeof(outbuf), outbuf, static_cast<std::uint32_t>(c), little);
-        break;
-    default:
-        return 0;
-    }
-    return memCopy(out, outbuf, std::min(outlen, size));
-}
-
-// 0 = OK
-// > 0 = truncated
-// < 0 = invalid
-int decodeCharUTF8(const byte* p, std::size_t n, char32_t& u, std::size_t& rc) {
-    if (!n) return 1;
-    byte c = *p;
-    char32_t t;
-    std::size_t j;
-    if (!(c & 0x80)) {
-        rc = 1;
-        u = c;
-        return 0;
-    } else if ((c & 0xE0) == 0xC0) {
-        t = c & 0x1F;
-        j = 2;
-    } else if ((c & 0xF0) == 0xE0) {
-        t = c & 0x0F;
-        j = 3;
-    } else if ((c & 0xF8) == 0xF0) {
-        t = c & 0x07;
-        j = 4;
-    } else {
-        return -1;
-    }
-    if (j > n) return 1;
-    for (std::size_t i = 1; i < j; ++i) {
-        c = p[i];
-        if ((c & 0xC0) != 0x80) return -1;
-        t = (t << 6) | (c & 0x3F);
-    }
-    rc = j;
-    if (t >= 0x110000UL || (0xD800UL <= t && t <= 0xDFFFUL)) return -1;
-    u = t;
-    return 0;
-}
-
-DecodeStatus decodeStringMbcsOrSbcs(TextEncoding enc,
-                                    const SingleByteCharacterSet& sbcs,
-                                    u32ostringstream& out,
-                                    const_bytespan data) {
-    DecodeStatus status{true, 0, 0};
-    std::size_t ds = data.size();
-    bool little = false;
-    switch (enc) {
-    case TextEncoding::SBCS:
-        for (std::size_t i = 0; i < ds; ++i) {
-            char32_t u = sbcs.toChar(data[i]);
-            if (!u) {
-                status.ok = false;
-                return status;
-            }
-            ++status.readCount;
-            ++status.charCount;
-            out << u;
-        }
-        break;
-    case TextEncoding::UTF8: {
-        const byte* p = data.data();
-        const byte* pe = data.data() + ds;
-        char32_t u;
-        std::size_t rc;
-        while (p < pe) {
-            int err = decodeCharUTF8(p, pe - p, u, rc);
-            if (err) {
-                status.ok = err > 0;
-                return status;
-            }
-            status.readCount += rc;
-            p += rc;
-            ++status.charCount;
-            out << u;
-        }
-        break;
-    }
-    case TextEncoding::UTF16LE:
-        little = true;
-        [[fallthrough]];
-    case TextEncoding::UTF16BE: {
-        const byte* p = data.data();
-        --ds;
-        for (std::size_t j = 0; j < ds; j += 2) {
-            std::uint16_t u = uintFromBytes<std::uint16_t>(
-                sizeof(std::uint16_t), &p[j], little);
-            if ((u & 0xDC00) == 0xD800) {
-                j += 2;
-                if (j >= ds) return status;
-                status.readCount += 2;
-                u = (u & 0x3FF) << 10;
-                u += uintFromBytes<std::uint16_t>(sizeof(std::uint16_t), &p[j],
-                                                  little);
-                u += 0x10000UL - 0xDC00UL;
-            } else if ((u & 0xDC00) == 0xDC00) {
-                status.ok = false;
-                return status;
-            }
-            status.readCount += 2;
-            ++status.charCount;
-            out << static_cast<char32_t>(u);
-        }
-        break;
-    }
-    case TextEncoding::UTF32LE:
-        little = true;
-        [[fallthrough]];
-    case TextEncoding::UTF32BE: {
-        const byte* p = data.data();
-        ds -= 3;
-        for (std::size_t j = 0; j < ds; j += 4) {
-            std::uint32_t u = uintFromBytes<std::uint32_t>(
-                sizeof(std::uint32_t), &p[j], little);
-            status.readCount += 4;
-            ++status.charCount;
-            out << static_cast<char32_t>(u);
-        }
-        break;
-    }
-    default:
-        return DecodeStatus{};
-    }
-    return status;
 }
 
 template <std::size_t N>

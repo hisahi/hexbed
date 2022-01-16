@@ -17,39 +17,59 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// file/cisearch.hh -- header for case-insensitive search
+// ui/tools/textconv.hh -- header for the text converter tool
 
-#ifndef HEXBED_FILE_CISEARCH_HH
-#define HEXBED_FILE_CISEARCH_HH
+#ifndef HEXBED_UI_TOOLS_TEXTCONV_HH
+#define HEXBED_UI_TOOLS_TEXTCONV_HH
 
-#include "common/charconv.hh"
-#include "file/document-fwd.hh"
-#include "file/search.hh"
-#include "file/task.hh"
+#include <wx/choice.h>
+#include <wx/dialog.h>
+#include <wx/textctrl.h>
+
+#include "common/types.hh"
+#include "ui/context.hh"
+#include "ui/hexbed-fwd.hh"
+#include "ui/saeditor.hh"
 
 namespace hexbed {
 
-struct CaseInsensitivePattern {
-    CaseInsensitivePattern();
-    CaseInsensitivePattern(const string& encoding, const std::wstring& text);
+namespace ui {
 
-    CharacterEncoding encoding;
-    std::u32string pattern;
-    bufsize headLowerLen;
-    byte headLower[MBCS_CHAR_MAX];
-    bufsize headUpperLen;
-    byte headUpper[MBCS_CHAR_MAX];
+enum struct NewlineMode {
+    Raw,
+    LF,
+    CRLF,
+    CR,
 };
 
-SearchResult searchForwardCaseless(HexBedTask& task,
-                                   const HexBedDocument& document,
-                                   bufsize start, bufsize end,
-                                   CaseInsensitivePattern& pattern);
-SearchResult searchBackwardCaseless(HexBedTask& task,
-                                    const HexBedDocument& document,
-                                    bufsize start, bufsize end,
-                                    CaseInsensitivePattern& pattern);
+class TextConverterTool : public wxDialog {
+  public:
+    TextConverterTool(HexBedMainFrame* parent,
+                      std::shared_ptr<HexBedContextMain> context,
+                      std::shared_ptr<HexBedDocument> document);
+    void UpdateConfig();
+
+  private:
+    void OnTextToBytes(wxCommandEvent&);
+    void OnBytesToText(wxCommandEvent&);
+    void OnCopySelection(wxCommandEvent&);
+    void OnPasteSelection(wxCommandEvent&);
+
+    HexBedMainFrame* parent_;
+    std::shared_ptr<HexBedContextMain> context_;
+    std::shared_ptr<HexBedDocument> document_;
+    HexBedEditorRegistration registration_;
+
+    HexBedStandaloneEditor* editor_;
+    wxTextCtrl* textInput_;
+    wxChoice* encodingList_;
+
+    string encoding_;
+    NewlineMode newlines_{NewlineMode::Raw};
+};
+
+};  // namespace ui
 
 };  // namespace hexbed
 
-#endif /* HEXBED_FILE_SEARCH_HH */
+#endif /* HEXBED_UI_TOOLS_TEXTCONV_HH */

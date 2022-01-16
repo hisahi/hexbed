@@ -153,6 +153,8 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
              HexBedMainFrame::OnViewBitEditor)
     EVT_MENU(hexbed::menu::MenuView_DataInspector,
              HexBedMainFrame::OnViewDataInspector)
+    EVT_MENU(hexbed::menu::MenuView_TextConverter,
+             HexBedMainFrame::OnViewTextConverter)
 
     EVT_MENU(wxID_EXIT, HexBedMainFrame::OnExit)
     EVT_MENU(wxID_ABOUT, HexBedMainFrame::OnAbout)
@@ -340,6 +342,7 @@ HexBedMainFrame::HexBedMainFrame()
     replaceDocument_ = std::make_shared<HexBedDocument>(context_);
     insertDocument_ = std::make_shared<HexBedDocument>(context_);
     binaryOpDocument_ = std::make_shared<HexBedDocument>(context_);
+    textConvDocument_ = std::make_shared<HexBedDocument>(context_);
     menuBar->Check(hexbed::menu::MenuEdit_InsertMode, context_->state.insert);
 }
 
@@ -489,6 +492,7 @@ void HexBedMainFrame::ApplyConfig() {
     HexEditor::InitConfig();
     context_->updateWindows();
     if (findDialog_) findDialog_->UpdateConfig();
+    if (textConverter_) textConverter_->UpdateConfig();
 }
 
 bool HexBedMainFrame::FileClose(std::size_t i) {
@@ -731,6 +735,11 @@ void HexBedMainFrame::OnBitEditorClose(wxCloseEvent& event) {
 void HexBedMainFrame::OnDataInspectorClose(wxCloseEvent& event) {
     dataInspector_->Destroy();
     dataInspector_ = nullptr;
+}
+
+void HexBedMainFrame::OnTextConverterClose(wxCloseEvent& event) {
+    textConverter_->Destroy();
+    textConverter_ = nullptr;
 }
 
 void HexBedMainFrame::NoMoreResults() {
@@ -1074,6 +1083,18 @@ void HexBedMainFrame::OnViewDataInspector(wxCommandEvent& event) {
     dataInspector_->Show(true);
     dataInspector_->Raise();
     dataInspector_->SetFocus();
+}
+
+void HexBedMainFrame::OnViewTextConverter(wxCommandEvent& event) {
+    if (!textConverter_) {
+        textConverter_ = std::make_unique<TextConverterTool>(this, context_,
+                                                             textConvDocument_);
+        textConverter_->Bind(wxEVT_CLOSE_WINDOW,
+                             &HexBedMainFrame::OnTextConverterClose, this);
+    }
+    textConverter_->Show(true);
+    textConverter_->Raise();
+    textConverter_->SetFocus();
 }
 
 void HexBedMainFrame::OnEditInsertToggle(wxCommandEvent& event) {

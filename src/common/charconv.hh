@@ -24,7 +24,9 @@
 
 #include <array>
 #include <bitset>
+#include <functional>
 #include <string>
+#include <variant>
 
 #include "common/types.hh"
 
@@ -52,8 +54,6 @@ class SingleByteCharacterSet {
 
 extern SingleByteCharacterSet sbcs;
 
-enum class TextEncoding { SBCS, UTF8, UTF16LE, UTF16BE, UTF32LE, UTF32BE };
-
 SingleByteCharacterSet getBuiltinSbcsByName(const string& name);
 
 std::u32string sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
@@ -64,22 +64,70 @@ bool sbcsToBytes(const SingleByteCharacterSet& sbcs, bufsize& len, byte* data,
 std::u32string sbcsFromBytes(bufsize len, const byte* data);
 bool sbcsToBytes(bufsize& len, byte* data, const std::u32string& text);
 
-struct DecodeStatus {
+using u32span = std::span<char32_t>;
+using const_u32span = std::span<const char32_t>;
+
+struct CharEncodeStatus {
     bool ok{false};
-    std::size_t charCount{0};
-    std::size_t readCount{0};
+    bufsize readChars{0};
+    bufsize wroteBytes{0};
 };
+
+struct CharDecodeStatus {
+    bool ok{false};
+    bufsize readBytes{0};
+    bufsize wroteChars{0};
+};
+
+using CharEncodeInputFunction = std::function<bufsize(u32span)>;
+using CharEncodeOutputFunction = std::function<void(const_bytespan)>;
+
+using CharDecodeInputFunction = std::function<bufsize(bytespan)>;
+using CharDecodeOutputFunction = std::function<void(const_u32span)>;
+
+using CharEncodeFunction = std::function<CharEncodeStatus(
+    CharEncodeInputFunction, CharEncodeOutputFunction)>;
+using CharDecodeFunction = std::function<CharDecodeStatus(
+    CharDecodeInputFunction, CharDecodeOutputFunction)>;
+
+struct MultiByteCharacterSet {
+    CharEncodeFunction encode;
+    CharDecodeFunction decode;
+};
+
+class CharacterEncoding {
+  public:
+    CharacterEncoding(const SingleByteCharacterSet& sbcs);
+    CharacterEncoding(const MultiByteCharacterSet& mbcs);
+    CharEncodeStatus encode(CharEncodeInputFunction,
+                            CharEncodeOutputFunction) const;
+    CharDecodeStatus decode(CharDecodeInputFunction,
+                            CharDecodeOutputFunction) const;
+
+  private:
+    std::variant<SingleByteCharacterSet, MultiByteCharacterSet> enc_;
+};
+
+MultiByteCharacterSet getBuiltinMbcsByName(const string& name);
+CharacterEncoding getBuiltinCharacterEncodingByName(const string& name);
 
 using u32ostringstream = std::basic_ostringstream<char32_t>;
 
+CharEncodeInputFunction charEncodeFromArray(std::size_t n, const char32_t* arr);
+CharEncodeInputFunction charEncodeFromString(std::u32string s);
+
+CharEncodeOutputFunction charEncodeToNull();
+CharEncodeOutputFunction charEncodeToArray(std::size_t n, byte* arr);
+
+CharDecodeInputFunction charDecodeFromArray(std::size_t n, const byte* arr);
+
+CharDecodeOutputFunction charDecodeToNull();
+CharDecodeOutputFunction charDecodeToStream(u32ostringstream& stream);
+
+extern MultiByteCharacterSet mbcs_utf8;
+
 bool isPrintable(char32_t c);
 
-std::size_t encodeCharMbcsOrSbcs(TextEncoding enc,
-                                 const SingleByteCharacterSet& sbcs, char32_t c,
-                                 std::size_t size, byte* out);
-DecodeStatus decodeStringMbcsOrSbcs(TextEncoding enc,
-                                    const SingleByteCharacterSet& sbcs,
-                                    u32ostringstream& out, const_bytespan data);
 std::u32string wstringToU32string(const std::wstring& w);
 std::wstring u32stringToWstring(const std::u32string& w);
 

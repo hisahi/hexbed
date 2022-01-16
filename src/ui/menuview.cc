@@ -70,6 +70,8 @@ wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
             _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
     addItem(menuView, MenuView_DataInspector, _("&Data inspector"),
             _("Shows the data inspector"), wxACCEL_CTRL, 'D');
+    addItem(menuView, MenuView_TextConverter, _("Te&xt converter"),
+            _("Shows the text converter"), wxACCEL_CTRL | wxACCEL_SHIFT, 'T');
     menuBar->Append(menuView, _("&View"));
     return menuView;
 }

@@ -40,6 +40,7 @@
 #include "ui/menus.hh"
 #include "ui/tools/bitedit.hh"
 #include "ui/tools/inspector.hh"
+#include "ui/tools/textconv.hh"
 
 namespace hexbed {
 
@@ -124,12 +125,14 @@ class HexBedMainFrame : public wxFrame {
     void OnViewUTF32BE(wxCommandEvent& event);
     void OnViewBitEditor(wxCommandEvent& event);
     void OnViewDataInspector(wxCommandEvent& event);
+    void OnViewTextConverter(wxCommandEvent& event);
 
     void UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& editor);
 
     void OnFindClose(wxCloseEvent& event);
     void OnBitEditorClose(wxCloseEvent& event);
     void OnDataInspectorClose(wxCloseEvent& event);
+    void OnTextConverterClose(wxCloseEvent& event);
 
     hexbed::ui::HexBedEditor* GetEditor();
     hexbed::ui::HexBedEditor* GetEditor(std::size_t i);
@@ -161,9 +164,11 @@ class HexBedMainFrame : public wxFrame {
     std::shared_ptr<HexBedDocument> replaceDocument_;
     std::shared_ptr<HexBedDocument> insertDocument_;
     std::shared_ptr<HexBedDocument> binaryOpDocument_;
+    std::shared_ptr<HexBedDocument> textConvDocument_;
     std::unique_ptr<FindDialog> findDialog_;
     std::unique_ptr<BitEditorTool> bitEditorTool_;
     std::unique_ptr<DataInspector> dataInspector_;
+    std::unique_ptr<TextConverterTool> textConverter_;
     hexbed::menu::FileMenus fileMenus_;
 };
 

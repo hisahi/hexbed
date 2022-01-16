@@ -28,7 +28,7 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "app/sbcs.hh"
+#include "app/encoding.hh"
 #include "common/charconv.hh"
 #include "common/logger.hh"
 #include "common/types.hh"

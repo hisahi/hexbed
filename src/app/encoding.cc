@@ -17,9 +17,9 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// app/sbcs.cc -- impl for charset plugins
+// app/encoding.cc -- impl for charset and char encoding plugins
 
-#include "app/sbcs.hh"
+#include "app/encoding.hh"
 
 #include <array>
 #include <fstream>
@@ -111,6 +111,15 @@ SingleByteCharacterSet getSbcsByName(const string& name) {
         if (s != hexbed::plugins::charsetPlugins.end()) return s->second;
     }
     return getBuiltinSbcsByName(name);
+}
+
+CharacterEncoding getCharacterEncodingByName(const string& name) {
+    if (name.size() > 1 && name[0] == '!') {
+        auto s = hexbed::plugins::charsetPlugins.find(name);
+        if (s != hexbed::plugins::charsetPlugins.end())
+            return CharacterEncoding(s->second);
+    }
+    return getBuiltinCharacterEncodingByName(name);
 }
 
 };  // namespace hexbed

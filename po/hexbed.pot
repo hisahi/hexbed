@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 17:05+0200\n"
+"POT-Creation-Date: 2022-01-16 23:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -331,7 +331,7 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#: src/ui/textinput.cc:66 src/ui/valueinput.cc:59
+#: src/ui/textinput.cc:66 src/ui/tools/textconv.cc:79 src/ui/valueinput.cc:59
 msgid "Encoding"
 msgstr ""
 
@@ -344,7 +344,7 @@ msgstr ""
 msgid "Configured character encoding (%s)"
 msgstr ""
 
-#: src/ui/textinput.cc:127
+#: src/ui/textinput.cc:127 src/ui/tools/textconv.cc:323
 msgid "The entered text cannot be represented in the selected encoding."
 msgstr ""
 
@@ -463,6 +463,14 @@ msgid "Shows the data inspector"
 msgstr ""
 
 #: src/ui/menuview.cc:73
+msgid "Te&xt converter"
+msgstr ""
+
+#: src/ui/menuview.cc:74
+msgid "Shows the text converter"
+msgstr ""
+
+#: src/ui/menuview.cc:75
 msgid "&View"
 msgstr ""
 
@@ -522,7 +530,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/context.cc:168 src/ui/hexbed.cc:474
+#: src/ui/context.cc:168 src/ui/hexbed.cc:477
 msgid "&Retry"
 msgstr ""
 
@@ -542,127 +550,127 @@ msgstr ""
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 
-#: src/ui/hexbed.cc:363
+#: src/ui/hexbed.cc:366
 #, c-format
 msgid "[unsaved] %s"
 msgstr ""
 
 #. / main window title bar
-#: src/ui/hexbed.cc:373 src/ui/hexbed.cc:546
+#: src/ui/hexbed.cc:376 src/ui/hexbed.cc:550
 #, c-format
 msgid "%s - %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:394
+#: src/ui/hexbed.cc:397
 msgid "Save a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:396 src/ui/hexbed.cc:1092 src/ui/plugins/export.cc:67
+#: src/ui/hexbed.cc:399 src/ui/hexbed.cc:1113 src/ui/plugins/export.cc:67
 #: src/ui/plugins/import.cc:52
 msgid "All files (*.*)"
 msgstr ""
 
-#: src/ui/hexbed.cc:420
+#: src/ui/hexbed.cc:423
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:448
+#: src/ui/hexbed.cc:451
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr ""
 
-#: src/ui/hexbed.cc:468
+#: src/ui/hexbed.cc:471
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:474
+#: src/ui/hexbed.cc:477
 msgid "&Cancel"
 msgstr ""
 
-#: src/ui/hexbed.cc:476
+#: src/ui/hexbed.cc:479
 msgid "Retry?"
 msgstr ""
 
-#: src/ui/hexbed.cc:500
+#: src/ui/hexbed.cc:504
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr ""
 
-#: src/ui/hexbed.cc:655
+#: src/ui/hexbed.cc:659
 #, c-format
 msgid "[read-only] %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:665
+#: src/ui/hexbed.cc:669
 #, c-format
 msgid "New-%llu"
 msgstr ""
 
-#: src/ui/hexbed.cc:670
+#: src/ui/hexbed.cc:674
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:690
+#: src/ui/hexbed.cc:694
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:699
+#: src/ui/hexbed.cc:703
 msgid "Read only"
 msgstr ""
 
-#: src/ui/hexbed.cc:737
+#: src/ui/hexbed.cc:746
 msgid "No more results found for this search."
 msgstr ""
 
-#: src/ui/hexbed.cc:743
+#: src/ui/hexbed.cc:752
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/hexbed.cc:844 src/ui/hexbed.cc:881
+#: src/ui/hexbed.cc:853 src/ui/hexbed.cc:890
 #, c-format
 msgid "Insert failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:907
+#: src/ui/hexbed.cc:916
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:927
+#: src/ui/hexbed.cc:936
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:948
+#: src/ui/hexbed.cc:957
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1091
+#: src/ui/hexbed.cc:1112
 msgid "Open a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1138
+#: src/ui/hexbed.cc:1159
 msgid "Import file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1158
+#: src/ui/hexbed.cc:1179
 #, c-format
 msgid ""
 "Error on line %llu:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1160
+#: src/ui/hexbed.cc:1181
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -670,25 +678,25 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1168
+#: src/ui/hexbed.cc:1189
 #, c-format
 msgid ""
 "Failed to import:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1192
+#: src/ui/hexbed.cc:1213
 msgid "Export file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1229
+#: src/ui/hexbed.cc:1250
 #, c-format
 msgid ""
 "Failed to export:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1295
+#: src/ui/hexbed.cc:1316
 msgid "A hex editor."
 msgstr ""
 
@@ -718,6 +726,70 @@ msgstr ""
 
 #: src/ui/tools/inspector.cc:178 src/ui/valueinput.cc:49
 msgid "Value"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:56
+msgid "Text converter"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:86
+msgid "Convert text to bytes"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:90
+msgid "Convert bytes to text"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:111
+msgid "New lines"
+msgstr ""
+
+#. / newline mode
+#: src/ui/tools/textconv.cc:114
+msgid "Raw"
+msgstr ""
+
+#. / newline mode
+#: src/ui/tools/textconv.cc:116
+msgid "LF"
+msgstr ""
+
+#. / newline mode
+#: src/ui/tools/textconv.cc:118
+msgid "CR+LF"
+msgstr ""
+
+#. / newline mode
+#: src/ui/tools/textconv.cc:120
+msgid "CR"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:130
+msgid "From Editor"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:133
+msgid ""
+"Copies the selected block of bytes from the open file into the text converter"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:136
+msgid "To Editor"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:139
+msgid ""
+"Copies the bytes from the text converter and inserts into or replaces the "
+"selection in the open file"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:184
+#, c-format
+msgid "Default (%s)"
+msgstr ""
+
+#: src/ui/tools/textconv.cc:353
+msgid "The bytes do not represent a valid encoding."
 msgstr ""
 
 #: src/ui/dialogs/goto.cc:35
@@ -1426,16 +1498,16 @@ msgstr ""
 msgid "C# source code file (*.cs)"
 msgstr ""
 
-#: src/ui/plugins/export/text.cc:84 src/ui/plugins/export/html.cc:85
+#: src/ui/plugins/export/text.cc:84 src/ui/plugins/export/html.cc:86
 msgid "Column count"
 msgstr ""
 
-#: src/ui/plugins/export/text.cc:90 src/ui/plugins/export/html.cc:91
+#: src/ui/plugins/export/text.cc:90 src/ui/plugins/export/html.cc:92
 #, c-format
 msgid "From editor (%s)"
 msgstr ""
 
-#: src/ui/plugins/export/text.cc:96 src/ui/plugins/export/html.cc:97
+#: src/ui/plugins/export/text.cc:96 src/ui/plugins/export/html.cc:98
 msgid "Custom"
 msgstr ""
 
@@ -1443,11 +1515,11 @@ msgstr ""
 msgid "Text file (*.txt)"
 msgstr ""
 
-#: src/ui/plugins/export/html.cc:64 src/ui/plugins/export/html.cc:118
+#: src/ui/plugins/export/html.cc:65 src/ui/plugins/export/html.cc:119
 msgid "HTML"
 msgstr ""
 
-#: src/ui/plugins/export/html.cc:121
+#: src/ui/plugins/export/html.cc:122
 msgid "HTML file (*.html, *.htm)"
 msgstr ""
 

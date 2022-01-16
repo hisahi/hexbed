@@ -21,7 +21,7 @@
 
 #include "ui/settings/layout.hh"
 
-#include "app/sbcs.hh"
+#include "app/encoding.hh"
 #include "ui/config.hh"
 #include "ui/encoding.hh"
 #include "ui/settings/controls.hh"

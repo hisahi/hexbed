@@ -23,7 +23,7 @@
 
 #include <sstream>
 
-#include "app/sbcs.hh"
+#include "app/encoding.hh"
 #include "common/buffer.hh"
 #include "common/caseconv.hh"
 #include "common/logger.hh"
@@ -34,34 +34,27 @@
 namespace hexbed {
 
 CaseInsensitivePattern::CaseInsensitivePattern()
-    : encoding(TextEncoding::SBCS),
-      sbcs(getSbcsByName("ascii")),
+    : encoding(getCharacterEncodingByName(STRING(""))),
       pattern(),
       headLowerLen(0),
       headUpperLen(0) {}
 
+static std::size_t encodeOneChar(const CharacterEncoding& enc, char32_t c,
+                                 std::size_t n, byte* b) {
+    CharEncodeStatus status =
+        enc.encode(charEncodeFromArray(1, &c), charEncodeToArray(n, b));
+    return status.ok ? status.wroteBytes : 0;
+}
+
 CaseInsensitivePattern::CaseInsensitivePattern(const string& encname,
-                                               const std::wstring& text_) {
+                                               const std::wstring& text_)
+    : encoding(getCharacterEncodingByName(encname)) {
     std::u32string text = wstringToU32string(text_);
-    if (encname == "m_utf8") {
-        encoding = TextEncoding::UTF8;
-    } else if (encname == "m_utf16le") {
-        encoding = TextEncoding::UTF16LE;
-    } else if (encname == "m_utf16be") {
-        encoding = TextEncoding::UTF16BE;
-    } else if (encname == "m_utf32le") {
-        encoding = TextEncoding::UTF32LE;
-    } else if (encname == "m_utf32be") {
-        encoding = TextEncoding::UTF32BE;
-    } else {
-        encoding = TextEncoding::SBCS;
-        sbcs = getSbcsByName(encname);
-    }
     pattern = textCaseFold(text);
-    headUpperLen = encodeCharMbcsOrSbcs(encoding, sbcs, textCaseUpper(text)[0],
-                                        sizeof(headUpper), headUpper);
-    headLowerLen = encodeCharMbcsOrSbcs(encoding, sbcs, textCaseLower(text)[0],
-                                        sizeof(headLower), headLower);
+    headUpperLen = encodeOneChar(encoding, textCaseUpper(text)[0],
+                                 sizeof(headUpper), headUpper);
+    headLowerLen = encodeOneChar(encoding, textCaseLower(text)[0],
+                                 sizeof(headLower), headLower);
 }
 
 static std::u32string readU32String(const HexBedDocument& document,
@@ -76,13 +69,12 @@ static std::u32string readU32String(const HexBedDocument& document,
     bufsize total = 0;
     while ((r = document.read(offset,
                               bytespan{buf + leftover, buf + sizeof(buf)}))) {
-        DecodeStatus status =
-            decodeStringMbcsOrSbcs(pattern.encoding, pattern.sbcs, us,
-                                   const_bytespan{buf, buf + r + leftover});
-        readchars += status.charCount;
-        leftover = r - status.readCount;
-        total += status.readCount;
-        offset += status.readCount;
+        CharDecodeStatus status = pattern.encoding.decode(
+            charDecodeFromArray(r + leftover, buf), charDecodeToStream(us));
+        readchars += status.wroteChars;
+        leftover = r - status.readBytes;
+        total += status.readBytes;
+        offset += status.readBytes;
         if (!status.ok) break;
         if (readchars >= wantedLength) {
             std::u32string folded = textCaseFold(us.str());
@@ -91,7 +83,7 @@ static std::u32string readU32String(const HexBedDocument& document,
                 return folded;
             }
         }
-        if (leftover) memMove(buf, buf + status.readCount, leftover);
+        if (leftover) memMove(buf, buf + status.readBytes, leftover);
     }
     readBytes = total;
     return textCaseFold(us.str());
@@ -101,7 +93,6 @@ static bool equalsCaseInsensitive(const HexBedDocument& document,
                                   bufsize offset,
                                   CaseInsensitivePattern& pattern,
                                   bufsize& length) {
-    byte tmp[MBCS_CHAR_MAX];
     std::size_t expected = pattern.pattern.length();
     std::u32string compareString =
         readU32String(document, offset, expected + 1, length, pattern);
@@ -109,11 +100,13 @@ static bool equalsCaseInsensitive(const HexBedDocument& document,
     if (std::u32string_view(compareString.data(), expected) !=
         std::u32string_view(pattern.pattern.data(), expected))
         return false;
-    bufsize leftover = 0;
-    for (std::size_t i = expected; i < compareString.size(); ++i)
-        leftover += encodeCharMbcsOrSbcs(pattern.encoding, pattern.sbcs,
-                                         compareString[i], sizeof(tmp), tmp);
-    length -= leftover;
+    if (expected < compareString.size())
+        length -=
+            pattern.encoding
+                .encode(charEncodeFromArray(compareString.size() - expected,
+                                            compareString.data()),
+                        charEncodeToNull())
+                .wroteBytes;
     return true;
 }
 

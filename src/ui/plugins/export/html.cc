@@ -49,6 +49,7 @@
 #include "ui/config.hh"
 #include "ui/plugins/dialog.hh"
 #include "ui/settings/validate.hh"
+#include "ui/string.hh"
 
 namespace hexbed {
 
@@ -134,9 +135,18 @@ bool ExportPluginHTML::configureExport(wxWindow* parent,
     return true;
 }
 
-static void htmlString(std::ofstream& f, const string& string) {
-    char utfBuffer[MBCS_CHAR_MAX + 1];
-    for (char32_t c : string) {
+static void encodeOneUTF8Char(char* buf, char32_t c) {
+    buf[mbcs_utf8
+            .encode(
+                charEncodeFromArray(1, &c),
+                charEncodeToArray(MBCS_CHAR_MAX, reinterpret_cast<byte*>(buf)))
+            .wroteBytes] = 0;
+}
+
+template <typename T>
+static void htmlString(std::ofstream& f, const std::basic_string<T>& string) {
+    // char utfBuffer[MBCS_CHAR_MAX + 1];
+    for (T c : string) {
         if (c == CHAR('&')) {
             f << "&amp;";
             continue;
@@ -147,16 +157,17 @@ static void htmlString(std::ofstream& f, const string& string) {
             f << "&gt;";
             continue;
         }
-        utfBuffer[encodeCharMbcsOrSbcs(TextEncoding::UTF8, sbcs, c,
-                                       sizeof(utfBuffer),
-                                       reinterpret_cast<byte*>(utfBuffer))] = 0;
-        f << utfBuffer;
+        /*encodeOneUTF8Char(utfBuffer, c);
+        f << utfBuffer;*/
+        f << c;
     }
 }
 
-static void htmlStringQuote(std::ofstream& f, const wxString& string) {
+template <typename T>
+static void htmlStringQuote(std::ofstream& f,
+                            const std::basic_string<T>& string) {
     char utfBuffer[MBCS_CHAR_MAX + 1];
-    for (wxUniChar c : string) {
+    for (T c : string) {
         if (c == CHAR('&')) {
             f << "&amp;";
             continue;
@@ -168,10 +179,7 @@ static void htmlStringQuote(std::ofstream& f, const wxString& string) {
             continue;
         }
         if (c == CHAR('"') || c == CHAR('\\')) f << '\\';
-        utfBuffer[encodeCharMbcsOrSbcs(
-            TextEncoding::UTF8, sbcs,
-            static_cast<char32_t>(static_cast<unsigned long>(c)),
-            sizeof(utfBuffer), reinterpret_cast<byte*>(utfBuffer))] = 0;
+        encodeOneUTF8Char(utfBuffer, c);
         f << utfBuffer;
     }
 }
@@ -212,7 +220,7 @@ static void htmlFont(std::ofstream& f, const wxFont& font) {
     f << ' ';
     f << std::dec << static_cast<unsigned>(font.GetPointSize()) << "pt ";
     f << '"';
-    htmlStringQuote(f, font.GetFaceName());
+    htmlStringQuote(f, u32StringFromWx(font.GetFaceName()));
     f << '"';
 }
 
@@ -254,7 +262,7 @@ void ExportPluginHTML::doExport(HexBedTask& task,
     f << "<meta name=\"generator\" content=\"HexBed v" HEXBED_VER_STRING
          "\">\n";
     f << "<title>";
-    htmlString(f, details.filename);
+    htmlString<strchar>(f, details.filename);
     f << "</title>\n";
     f << "<style type=\"text/css\">\n";
     f << "html { background-color: ";
@@ -358,9 +366,7 @@ void ExportPluginHTML::doExport(HexBedTask& task,
                     else if (c == '>')
                         f << "&gt;";
                     else {
-                        utfBuffer[encodeCharMbcsOrSbcs(
-                            TextEncoding::UTF8, sbcs, c, sizeof(utfBuffer),
-                            reinterpret_cast<byte*>(utfBuffer))] = 0;
+                        encodeOneUTF8Char(utfBuffer, c);
                         f << utfBuffer;
                     }
                 }

@@ -23,7 +23,7 @@
 
 #include <filesystem>
 
-#include "app/sbcs.hh"
+#include "app/encoding.hh"
 #include "common/ctype.hh"
 #include "common/logger.hh"
 #include "ui/plugins/export.hh"

@@ -17,10 +17,10 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// app/sbcs.hh -- header for charset plugins
+// app/encoding.hh -- header for charset and char encoding plugins
 
-#ifndef HEXBED_APP_SBCS_HH
-#define HEXBED_APP_SBCS_HH
+#ifndef HEXBED_APP_ENCODING_HH
+#define HEXBED_APP_ENCODING_HH
 
 #include <utility>
 
@@ -40,7 +40,8 @@ const std::pair<string, string>& charsetPluginByIndex(std::size_t);
 };  // namespace plugins
 
 SingleByteCharacterSet getSbcsByName(const string& name);
+CharacterEncoding getCharacterEncodingByName(const string& name);
 
 };  // namespace hexbed
 
-#endif /* HEXBED_APP_SBCS_HH */
+#endif /* HEXBED_APP_ENCODING_HH */

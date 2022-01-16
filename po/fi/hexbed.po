@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 17:05+0200\n"
+"POT-Creation-Date: 2022-01-16 23:13+0200\n"
 "PO-Revision-Date: 2021-12-23 21:14+0200\n"
 "Last-Translator: Sampo Hippeläinen <sampo.hippelainen@gmail.com>\n"
 "Language-Team: fi\n"
@@ -330,7 +330,7 @@ msgstr "Lopeta"
 msgid "Text"
 msgstr "Teksti"
 
-#: src/ui/textinput.cc:66 src/ui/valueinput.cc:59
+#: src/ui/textinput.cc:66 src/ui/tools/textconv.cc:79 src/ui/valueinput.cc:59
 msgid "Encoding"
 msgstr "Koodaus"
 
@@ -343,7 +343,7 @@ msgstr "Aakkoskoosta riippumaton"
 msgid "Configured character encoding (%s)"
 msgstr "Asetuksissa määritelty koodaus (%s)"
 
-#: src/ui/textinput.cc:127
+#: src/ui/textinput.cc:127 src/ui/tools/textconv.cc:323
 msgid "The entered text cannot be represented in the selected encoding."
 msgstr "Syötettyä tekstiä ei voi esittää valitulla merkistökoodauksella."
 
@@ -447,7 +447,7 @@ msgstr "&UTF-tila"
 
 #: src/ui/menuview.cc:67
 msgid "Controls UTF text mode"
-msgstr ""
+msgstr "Säätää UTF-tekstitilaa"
 
 #: src/ui/menuview.cc:69
 msgid "&Bit editor"
@@ -466,6 +466,14 @@ msgid "Shows the data inspector"
 msgstr "Näyttää tietojenkatselimen"
 
 #: src/ui/menuview.cc:73
+msgid "Te&xt converter"
+msgstr "Tekstim&uunnin"
+
+#: src/ui/menuview.cc:74
+msgid "Shows the text converter"
+msgstr "Näyttää tekstimuuntimen"
+
+#: src/ui/menuview.cc:75
 msgid "&View"
 msgstr "&Näytä"
 
@@ -527,7 +535,7 @@ msgstr ""
 "Varmuuskopiointi epäonnistui:\n"
 "%s"
 
-#: src/ui/context.cc:168 src/ui/hexbed.cc:474
+#: src/ui/context.cc:168 src/ui/hexbed.cc:477
 msgid "&Retry"
 msgstr "&Uudelleen"
 
@@ -551,37 +559,37 @@ msgstr ""
 "Yritetäänkö uudelleen? 'Ei' tallentaa silti ja 'Peruuta' peruuttaa "
 "tallennuksen."
 
-#: src/ui/hexbed.cc:363
+#: src/ui/hexbed.cc:366
 #, c-format
 msgid "[unsaved] %s"
 msgstr "[muokattu] %s"
 
 #. / main window title bar
-#: src/ui/hexbed.cc:373 src/ui/hexbed.cc:546
+#: src/ui/hexbed.cc:376 src/ui/hexbed.cc:550
 #, c-format
 msgid "%s - %s"
 msgstr "%s - %s"
 
-#: src/ui/hexbed.cc:394
+#: src/ui/hexbed.cc:397
 msgid "Save a file"
 msgstr "Tallenna tiedosto"
 
-#: src/ui/hexbed.cc:396 src/ui/hexbed.cc:1092 src/ui/plugins/export.cc:67
+#: src/ui/hexbed.cc:399 src/ui/hexbed.cc:1113 src/ui/plugins/export.cc:67
 #: src/ui/plugins/import.cc:52
 msgid "All files (*.*)"
 msgstr "Kaikki tiedostot (*.*)"
 
-#: src/ui/hexbed.cc:420
+#: src/ui/hexbed.cc:423
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr "Tiedoston %s tallentaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:448
+#: src/ui/hexbed.cc:451
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Hylätäänkö ne?"
 
-#: src/ui/hexbed.cc:468
+#: src/ui/hexbed.cc:471
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
@@ -590,83 +598,83 @@ msgstr ""
 "Tiedostosta %s ei voitu lukea:\n"
 "%s"
 
-#: src/ui/hexbed.cc:474
+#: src/ui/hexbed.cc:477
 msgid "&Cancel"
 msgstr "&Peruuta"
 
-#: src/ui/hexbed.cc:476
+#: src/ui/hexbed.cc:479
 msgid "Retry?"
 msgstr "Yritetäänkö uudelleen?"
 
-#: src/ui/hexbed.cc:500
+#: src/ui/hexbed.cc:504
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Haluatko tallentaa ne?"
 
-#: src/ui/hexbed.cc:655
+#: src/ui/hexbed.cc:659
 #, c-format
 msgid "[read-only] %s"
 msgstr "[vain luku] %s"
 
-#: src/ui/hexbed.cc:665
+#: src/ui/hexbed.cc:669
 #, c-format
 msgid "New-%llu"
 msgstr "Uusi-%llu"
 
-#: src/ui/hexbed.cc:670
+#: src/ui/hexbed.cc:674
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr "Uuden tiedoston luonti epäonnistui: %s"
 
-#: src/ui/hexbed.cc:690
+#: src/ui/hexbed.cc:694
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr "Tiedoston %s avaaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:699
+#: src/ui/hexbed.cc:703
 msgid "Read only"
 msgstr "Vain luku"
 
-#: src/ui/hexbed.cc:737
+#: src/ui/hexbed.cc:746
 msgid "No more results found for this search."
 msgstr "Tällä haulla ei löytynyt lisää tuloksia."
 
-#: src/ui/hexbed.cc:743
+#: src/ui/hexbed.cc:752
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] "%llu esiintymä korvattiin."
 msgstr[1] "%llu esiintymää korvattiin."
 
-#: src/ui/hexbed.cc:844 src/ui/hexbed.cc:881
+#: src/ui/hexbed.cc:853 src/ui/hexbed.cc:890
 #, c-format
 msgid "Insert failed: %s"
 msgstr "Lisäys epäonnistui: %s"
 
-#: src/ui/hexbed.cc:907
+#: src/ui/hexbed.cc:916
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr "Binäärilaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:927
+#: src/ui/hexbed.cc:936
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr "Unaarilaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:948
+#: src/ui/hexbed.cc:957
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr "Bittisiirtolaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:1091
+#: src/ui/hexbed.cc:1112
 msgid "Open a file"
 msgstr "Avaa tiedosto"
 
-#: src/ui/hexbed.cc:1138
+#: src/ui/hexbed.cc:1159
 msgid "Import file"
 msgstr "Tuo tiedosto"
 
-#: src/ui/hexbed.cc:1158
+#: src/ui/hexbed.cc:1179
 #, c-format
 msgid ""
 "Error on line %llu:\n"
@@ -675,7 +683,7 @@ msgstr ""
 "Virhe rivillä %llu:\n"
 "%s"
 
-#: src/ui/hexbed.cc:1160
+#: src/ui/hexbed.cc:1181
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -686,7 +694,7 @@ msgstr ""
 "Tuotu tiedosto on virheellinen.\n"
 "%s"
 
-#: src/ui/hexbed.cc:1168
+#: src/ui/hexbed.cc:1189
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -695,11 +703,11 @@ msgstr ""
 "Tuonti epäonnistui:\n"
 "%s"
 
-#: src/ui/hexbed.cc:1192
+#: src/ui/hexbed.cc:1213
 msgid "Export file"
 msgstr "Vie tiedosto"
 
-#: src/ui/hexbed.cc:1229
+#: src/ui/hexbed.cc:1250
 #, c-format
 msgid ""
 "Failed to export:\n"
@@ -708,7 +716,7 @@ msgstr ""
 "Vienti epäonnistui:\n"
 "%s"
 
-#: src/ui/hexbed.cc:1295
+#: src/ui/hexbed.cc:1316
 msgid "A hex editor."
 msgstr "Tavumuokkain."
 
@@ -739,6 +747,70 @@ msgstr "Tyyppi"
 #: src/ui/tools/inspector.cc:178 src/ui/valueinput.cc:49
 msgid "Value"
 msgstr "Arvo"
+
+#: src/ui/tools/textconv.cc:56
+msgid "Text converter"
+msgstr "Tekstimuunnin"
+
+#: src/ui/tools/textconv.cc:86
+msgid "Convert text to bytes"
+msgstr "Muunna teksti tavuiksi"
+
+#: src/ui/tools/textconv.cc:90
+msgid "Convert bytes to text"
+msgstr "Muunna tavut tekstiksi"
+
+#: src/ui/tools/textconv.cc:111
+msgid "New lines"
+msgstr "Rivinvaihdot"
+
+#. / newline mode
+#: src/ui/tools/textconv.cc:114
+msgid "Raw"
+msgstr "Raaka"
+
+#. / newline mode
+#: src/ui/tools/textconv.cc:116
+msgid "LF"
+msgstr "LF"
+
+#. / newline mode
+#: src/ui/tools/textconv.cc:118
+msgid "CR+LF"
+msgstr "CR+LF"
+
+#. / newline mode
+#: src/ui/tools/textconv.cc:120
+msgid "CR"
+msgstr "CR"
+
+#: src/ui/tools/textconv.cc:130
+msgid "From Editor"
+msgstr "Muokkaimesta"
+
+#: src/ui/tools/textconv.cc:133
+msgid ""
+"Copies the selected block of bytes from the open file into the text converter"
+msgstr "Kopioi valitun tavualueen tiedostosta muuntimeen"
+
+#: src/ui/tools/textconv.cc:136
+msgid "To Editor"
+msgstr "Muokkaimeen"
+
+#: src/ui/tools/textconv.cc:139
+msgid ""
+"Copies the bytes from the text converter and inserts into or replaces the "
+"selection in the open file"
+msgstr "Kopioi tavut muuntimesta ja korvaa valinnan tai lisää tiedostoon"
+
+#: src/ui/tools/textconv.cc:184
+#, c-format
+msgid "Default (%s)"
+msgstr "Oletus (%s)"
+
+#: src/ui/tools/textconv.cc:353
+msgid "The bytes do not represent a valid encoding."
+msgstr "Syötetyt tavut eivät ole kelvollisia valitulla merkistökoodauksella."
 
 #: src/ui/dialogs/goto.cc:35
 msgid "Go to"
@@ -1472,16 +1544,16 @@ msgstr "C#-lähdekoodi"
 msgid "C# source code file (*.cs)"
 msgstr "C#-lähdekooditiedosto (*.cs)"
 
-#: src/ui/plugins/export/text.cc:84 src/ui/plugins/export/html.cc:85
+#: src/ui/plugins/export/text.cc:84 src/ui/plugins/export/html.cc:86
 msgid "Column count"
 msgstr "Sarakemäärä"
 
-#: src/ui/plugins/export/text.cc:90 src/ui/plugins/export/html.cc:91
+#: src/ui/plugins/export/text.cc:90 src/ui/plugins/export/html.cc:92
 #, c-format
 msgid "From editor (%s)"
 msgstr "Muokkaimesta (%s)"
 
-#: src/ui/plugins/export/text.cc:96 src/ui/plugins/export/html.cc:97
+#: src/ui/plugins/export/text.cc:96 src/ui/plugins/export/html.cc:98
 msgid "Custom"
 msgstr "Mukautettu"
 
@@ -1489,11 +1561,11 @@ msgstr "Mukautettu"
 msgid "Text file (*.txt)"
 msgstr "Tekstitiedosto (*.txt)"
 
-#: src/ui/plugins/export/html.cc:64 src/ui/plugins/export/html.cc:118
+#: src/ui/plugins/export/html.cc:65 src/ui/plugins/export/html.cc:119
 msgid "HTML"
 msgstr "HTML"
 
-#: src/ui/plugins/export/html.cc:121
+#: src/ui/plugins/export/html.cc:122
 msgid "HTML file (*.html, *.htm)"
 msgstr "HTML-tiedosto (*.html, *.htm)"
 

@@ -26,11 +26,15 @@
 
 #include <filesystem>
 
+#include "common/charconv.hh"
 #include "common/types.hh"
 
 namespace hexbed {
 
 inline string stringFromWx(const wxString& s) { return static_cast<string>(s); }
+inline std::u32string u32StringFromWx(const wxString& s) {
+    return wstringToU32string(static_cast<std::wstring>(s));
+}
 
 };  // namespace hexbed
 

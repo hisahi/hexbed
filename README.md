@@ -22,6 +22,8 @@ A graphical hex editor, still a work in progress.
 * Export into programming languages (C, C#, Java)
 * Export into Text, HTML
 * Plugin system for loading extra charset definitions
+* UTF-16/UTF-32 character viewer
+* Text<->binary converter
 
 ## Planned features
 * Stability
@@ -32,6 +34,7 @@ A graphical hex editor, still a work in progress.
 * Multiple windows/views
 * Plugin system for data inspector
 * Plugin system for import/export
+* Plugin system for text converter
 * File compare
 * Scripting system
 * Bells and whistles

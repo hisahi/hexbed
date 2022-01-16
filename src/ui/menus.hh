@@ -69,6 +69,7 @@ enum {
     MenuView_UTFMode32BE,
     MenuView_BitEditor,
     MenuView_DataInspector,
+    MenuView_TextConverter,
 };
 
 // menus.cc

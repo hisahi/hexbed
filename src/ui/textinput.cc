@@ -28,7 +28,7 @@
 #include <wx/valtext.h>
 
 #include "app/config.hh"
-#include "app/sbcs.hh"
+#include "app/encoding.hh"
 #include "common/logger.hh"
 #include "file/document.hh"
 #include "ui/encoding.hh"

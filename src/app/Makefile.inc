@@ -1,4 +1,4 @@
 
-FILES := config.o bitop.o plugin.o sbcs.o
+FILES := config.o bitop.o encoding.o plugin.o
 
 OBJS := $(OBJS) $(addprefix app/,$(FILES))
