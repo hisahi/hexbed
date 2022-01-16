@@ -31,10 +31,12 @@
 #include "common/charconv.hh"
 #include "common/format.hh"
 #include "common/hexconv.hh"
+#include "common/intconv.hh"
 #include "common/logger.hh"
 #include "common/memory.hh"
 #include "common/specs.hh"
 #include "ui/clipboard.hh"
+#include "ui/config.hh"
 
 namespace hexbed {
 namespace ui {
@@ -65,7 +67,6 @@ HexEditor::HexEditor(wxWindow* parent, HexEditorParent* editor)
     Bind(wxEVT_SIZE, &HexEditor::OnResize, this);
     Bind(wxEVT_SET_FOCUS, &HexEditor::OnFocus, this);
     Bind(wxEVT_KILL_FOCUS, &HexEditor::OnBlur, this);
-    Bind(wxEVT_SHOW, &HexEditor::OnShow, this);
     Bind(wxEVT_ERASE_BACKGROUND, &HexEditor::OnEraseBackground, this);
     Bind(wxEVT_LEFT_DOWN, &HexEditor::OnLMouseDown, this);
     Bind(wxEVT_LEFT_UP, &HexEditor::OnLMouseUp, this);
@@ -200,8 +201,9 @@ unsigned HexEditor::GetColumns() const { return columns_; }
 void HexEditor::SetColumns(unsigned columns) {
     size_t oldSize = bufc_, newSize;
     columns_ = columns;
-    unsigned gs = static_cast<unsigned>(config().groupSize);
-    group_ = std::bit_width(gs) - 1;
+    group_ = std::bit_width<bufsize>(config().groupSize) - 1;
+    unsigned gs = std::max<unsigned>(static_cast<unsigned>(config().groupSize),
+                                     configUtfGroupSize());
     HEXBED_ASSERT(columns_ > 0 && (!group_ || !(columns_ % gs)));
     bufviewable_ = rows_ * columns_;
     bufc_ = newSize = bufviewable_ + MAX_LOOKAHEAD;
@@ -251,11 +253,12 @@ unsigned HexEditor::FitColumns(wxCoord width) {
     // how many columns can we fit in width pixels?
     /* unsigned w = byteWidth_ * (c << group_)
                   + charWidth_ * ((c << group_) + c + 3); */
-    if (width < 3 * charWidth_) return group_;
+    unsigned g = std::max<unsigned>(group_, configUtfGroupSizeL2());
+    if (width < 3 * charWidth_) return g;
     wxCoord w = width - 3 * charWidth_;
-    wxCoord c = w / (((byteWidth_ + charWidth_) << group_) + charWidth_);
-    c &= ~((1 << group_) - 1);
-    return std::min(std::max(group_, static_cast<unsigned>(c)), MAX_COLUMNS);
+    wxCoord c = w / (((byteWidth_ + charWidth_) << g) + charWidth_);
+    c &= ~((1 << g) - 1);
+    return std::min(std::max(g, static_cast<unsigned>(c)), MAX_COLUMNS);
 }
 
 unsigned HexEditor::GetLineHeight() { return lineHeight_; }
@@ -263,13 +266,6 @@ unsigned HexEditor::GetLineHeight() { return lineHeight_; }
 bool HexEditor::TestVisibility() const noexcept { return IsShownOnScreen(); }
 
 void HexEditor::QueueRefresh() { waitRedraw_ = true; }
-
-void HexEditor::WhenVisible() {
-    if (waitRedraw_) {
-        Redraw();
-        waitRedraw_ = false;
-    }
-}
 
 void HexEditor::OnEditorCopy() { parent_->OnEditorCopy(); }
 
@@ -320,19 +316,8 @@ void HexEditor::DoEditorPaste(bool insert) {
         bool seltext = curtext_;
         try {
             bufsize len;
-            if (!hexbed::clip::PasteBytes(document(), insert, sel, seln,
-                                          seltext, len)) {
-                wxMessageBox(
-                    seltext
-                        ? _("Cannot paste the current clipboard contents, "
-                            "because it contains characters that the currently "
-                            "selected character encoding cannot represent.")
-                        : _("Cannot paste the current clipboard contents, "
-                            "because it does not contain valid hexadecimal "
-                            "data. Text data should be a string of hexadecimal "
-                            "bytes."),
-                    "HexBed", wxOK | wxICON_ERROR);
-            } else {
+            if (hexbed::clip::PasteBytes(document(), insert, sel, seln, seltext,
+                                         len)) {
                 HintBytesChanged(sel);
                 SelectBytes(sel + len, 0,
                             SelectFlags().caretAtEnd().highlightCaret());
@@ -416,6 +401,7 @@ HEXBED_INLINE void HexEditor::DrawRow_(const char* hex, const byte* si,
     char32_t rowText[MAX_COLUMNS + 1];
     auto wch = rowTextT.GetWritableChar(0);
     bool selected = false, sel, sp;
+    unsigned utf = config().utfMode;
     bufsize sele = sel_ + seln_ - 1;
     bufsize offe = off + columns_, eof = off_ + bufn_;
     unsigned j,
@@ -427,14 +413,16 @@ HEXBED_INLINE void HexEditor::DrawRow_(const char* hex, const byte* si,
     rowHex[2] = rowHex[3] = 0;
     wxCoord x = 0;
     dc_->SetTextBackground(backColor_);
+    unsigned ugm = configUtfGroupSize() - 1;
     if (hasHex_) {
         for (j = 0; j < columns_ && off + j < eof; ++j) {
             sp = j && !(j & gm);
             if (sp) x += charWidth_;
             if constexpr (selectCheck) sel = sel_ <= off + j && off + j <= sele;
+            if (!(j & ugm))
+                rowText[j] = convertCharFrom(utf, eof - (off + j), si);
             byte b = *si++;
             fastByteConv(rowHex, hex, b);
-            rowText[j] = sbcs.toPrintableChar(b);
             if constexpr (selectCheck) {
                 if (sel && !selected) {
                     dc_->SetTextBackground(curtext_ ? selBg2Color_
@@ -468,7 +456,8 @@ HEXBED_INLINE void HexEditor::DrawRow_(const char* hex, const byte* si,
         x = textX_;
         selected = false;
         if constexpr (selectCheck) dc_->SetTextBackground(backColor_);
-        for (j = 0; j < columns_ && off + j < eof; ++j) {
+        for (j = 0; j < columns_ && off + j < eof; ++j, x += charWidth_) {
+            if (j & ugm) continue;
             bool printable;
             if constexpr (selectCheck) sel = sel_ <= off + j && off + j <= sele;
             printable = !!rowText[j];
@@ -498,7 +487,6 @@ HEXBED_INLINE void HexEditor::DrawRow_(const char* hex, const byte* si,
                 }
             }
             dc_->DrawText(rowTextT, x, y);
-            x += charWidth_;
         }
     }
     if (caret <= columns_ && !seln_ && hasText_ && hasHex_) {
@@ -728,6 +716,42 @@ void HexEditor::HandleTextInput(byte b) {
     UpdateCaret(cur_ + 1);
 }
 
+void HexEditor::HandleUnicodeTextInput(char32_t u) {
+    if (document().readOnly()) return;
+    byte tmp[4];
+    unsigned g = configUtfGroupSize();
+    std::size_t n;
+    switch (config().utfMode) {
+    case 1:
+    case 2:
+        if (u >= 0x10000) {
+            u -= 0x10000;
+            HandleUnicodeTextInput(0xD800 | ((u >> 10) & 0x3FF));
+            HandleUnicodeTextInput(0xDC00 | (u & 0x3FF));
+            return;
+        }
+        n = uintToBytes<std::uint16_t>(2, tmp, static_cast<std::uint16_t>(u),
+                                       config().utfMode == 1);
+        break;
+    case 3:
+    case 4:
+        n = uintToBytes<std::uint32_t>(4, tmp, static_cast<std::uint32_t>(u),
+                                       config().utfMode == 3);
+        break;
+    }
+    cur_ &= ~(g - 1);
+    parent_->BringOffsetToScreen(cur_);
+    if (context().state.insert || cur_ == off_ + bufn_) {
+        document().insert(cur_, const_bytespan{tmp, n});
+    } else {
+        document().replace(cur_,
+                           static_cast<std::size_t>(
+                               std::min<bufsize>(n, document().size() - cur_)),
+                           const_bytespan{tmp, n});
+    }
+    UpdateCaret(cur_ + g);
+}
+
 void HexEditor::OnChar(wxKeyEvent& e) {
     if (!HasFocus()) {
         e.Skip();
@@ -876,10 +900,14 @@ void HexEditor::OnChar(wxKeyEvent& e) {
             // text input...?
             wxChar u = e.GetUnicodeKey();
             if (u != WXK_NONE) {
-                int v = sbcs.fromChar(u);
-                if (v >= 0) {
-                    HandleTextInput((byte)v);
-                    break;
+                if (config().utfMode) {
+                    HandleUnicodeTextInput(u);
+                } else {
+                    int v = sbcs.fromChar(u);
+                    if (v >= 0) {
+                        HandleTextInput((byte)v);
+                        break;
+                    }
                 }
             }
         } else if (e.ControlDown() && !e.AltDown() && !e.ShiftDown()) {
@@ -964,6 +992,7 @@ bool HexEditor::HitPos(wxCoord x, wxCoord y, HitPoint& p, bool drag) {
         } else if (x < textMaxX_) {
             int xo = x - textX_ + (charWidth_ / 2);
             unsigned sub = static_cast<unsigned>(xo / charWidth_);
+            sub &= ~(configUtfGroupSize() - 1);
             p.offset = off_ + row * columns_ + sub;
             p.text = true;
             p.nibble = false;
@@ -1116,6 +1145,10 @@ void HexEditor::UpdateSelectionDrag() {
 
 void HexEditor::OnPaint(wxPaintEvent& e) {
     if (!columns_) return;
+    if (waitRedraw_) {
+        Redraw();
+        waitRedraw_ = false;
+    }
     auto dc = wxPaintDC(this);
     int vX, vY, vW, vH;
     wxRegionIterator upd(GetUpdateRegion());
@@ -1137,14 +1170,12 @@ void HexEditor::OnBlur(wxFocusEvent& event) {
     if (caret_.IsVisible()) HideCaret();
 }
 
-void HexEditor::OnShow(wxShowEvent& event) { WhenVisible(); }
-
 void HexEditor::ResizeDone() {
     GetDC();
     if (IsShownOnScreen()) Redraw();
 }
 
-void HexEditor::Selected() { WhenVisible(); }
+void HexEditor::Selected() {}
 
 void HexEditor::OnResize(wxSizeEvent& e) {
     /* ResizeDone(); */

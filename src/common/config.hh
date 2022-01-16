@@ -56,6 +56,7 @@ struct ConfigurationValues {
     string font;
     long showColumnTypes;
     bool backupFiles;
+    long utfMode;
 };
 
 class Configuration {

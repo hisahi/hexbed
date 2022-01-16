@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 01:30+0200\n"
+"POT-Creation-Date: 2022-01-16 17:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -327,7 +327,7 @@ msgid "Exit"
 msgstr ""
 
 #: src/ui/textinput.cc:54 src/ui/dialogs/find.cc:62
-#: src/ui/plugins/export/text.cc:62 src/ui/plugins/export/text.cc:116
+#: src/ui/plugins/export/text.cc:63 src/ui/plugins/export/text.cc:117
 msgid "Text"
 msgstr ""
 
@@ -348,30 +348,18 @@ msgstr ""
 msgid "The entered text cannot be represented in the selected encoding."
 msgstr ""
 
-#: src/ui/hexedit.cc:287 src/ui/hexedit.cc:295
+#: src/ui/hexedit.cc:283 src/ui/hexedit.cc:291
 #, c-format
 msgid ""
 "Failed to copy:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexedit.cc:288 src/ui/hexedit.cc:344
+#: src/ui/hexedit.cc:284 src/ui/hexedit.cc:329
 msgid "Failed to open the clipboard"
 msgstr ""
 
-#: src/ui/hexedit.cc:327
-msgid ""
-"Cannot paste the current clipboard contents, because it contains characters "
-"that the currently selected character encoding cannot represent."
-msgstr ""
-
-#: src/ui/hexedit.cc:330
-msgid ""
-"Cannot paste the current clipboard contents, because it does not contain "
-"valid hexadecimal data. Text data should be a string of hexadecimal bytes."
-msgstr ""
-
-#: src/ui/hexedit.cc:343 src/ui/hexedit.cc:351
+#: src/ui/hexedit.cc:328 src/ui/hexedit.cc:336
 #, c-format
 msgid ""
 "Failed to paste:\n"
@@ -410,23 +398,71 @@ msgstr ""
 msgid "Controls which columns to show"
 msgstr ""
 
-#: src/ui/menuview.cc:46
-msgid "&Bit editor"
-msgstr ""
-
 #: src/ui/menuview.cc:47
-msgid "Shows the bit editor"
+msgid "&Off"
 msgstr ""
 
 #: src/ui/menuview.cc:48
+msgid "Show single-byte characters"
+msgstr ""
+
+#: src/ui/menuview.cc:51
+msgid "UTF-16LE (little endian)"
+msgstr ""
+
+#: src/ui/menuview.cc:52
+msgid "Show little-endian UTF-16 characters"
+msgstr ""
+
+#: src/ui/menuview.cc:55
+msgid "UTF-16BE (big endian)"
+msgstr ""
+
+#: src/ui/menuview.cc:56
+msgid "Show big-endian UTF-16 characters"
+msgstr ""
+
+#: src/ui/menuview.cc:59
+msgid "UTF-32LE (little endian)"
+msgstr ""
+
+#: src/ui/menuview.cc:60
+msgid "Show little-endian UTF-32 characters"
+msgstr ""
+
+#: src/ui/menuview.cc:63
+msgid "UTF-32BE (big endian)"
+msgstr ""
+
+#: src/ui/menuview.cc:64
+msgid "Show big-endian UTF-32 characters"
+msgstr ""
+
+#: src/ui/menuview.cc:66
+msgid "&UTF mode"
+msgstr ""
+
+#: src/ui/menuview.cc:67
+msgid "Controls UTF text mode"
+msgstr ""
+
+#: src/ui/menuview.cc:69
+msgid "&Bit editor"
+msgstr ""
+
+#: src/ui/menuview.cc:70
+msgid "Shows the bit editor"
+msgstr ""
+
+#: src/ui/menuview.cc:71
 msgid "&Data inspector"
 msgstr ""
 
-#: src/ui/menuview.cc:49
+#: src/ui/menuview.cc:72
 msgid "Shows the data inspector"
 msgstr ""
 
-#: src/ui/menuview.cc:50
+#: src/ui/menuview.cc:73
 msgid "&View"
 msgstr ""
 
@@ -486,7 +522,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/context.cc:168 src/ui/hexbed.cc:464
+#: src/ui/context.cc:168 src/ui/hexbed.cc:474
 msgid "&Retry"
 msgstr ""
 
@@ -506,127 +542,127 @@ msgstr ""
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 
-#: src/ui/hexbed.cc:353
+#: src/ui/hexbed.cc:363
 #, c-format
 msgid "[unsaved] %s"
 msgstr ""
 
 #. / main window title bar
-#: src/ui/hexbed.cc:363 src/ui/hexbed.cc:536
+#: src/ui/hexbed.cc:373 src/ui/hexbed.cc:546
 #, c-format
 msgid "%s - %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:384
+#: src/ui/hexbed.cc:394
 msgid "Save a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:386 src/ui/hexbed.cc:1052 src/ui/plugins/export.cc:67
+#: src/ui/hexbed.cc:396 src/ui/hexbed.cc:1092 src/ui/plugins/export.cc:67
 #: src/ui/plugins/import.cc:52
 msgid "All files (*.*)"
 msgstr ""
 
-#: src/ui/hexbed.cc:410
+#: src/ui/hexbed.cc:420
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:438
+#: src/ui/hexbed.cc:448
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr ""
 
-#: src/ui/hexbed.cc:458
+#: src/ui/hexbed.cc:468
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:464
+#: src/ui/hexbed.cc:474
 msgid "&Cancel"
 msgstr ""
 
-#: src/ui/hexbed.cc:466
+#: src/ui/hexbed.cc:476
 msgid "Retry?"
 msgstr ""
 
-#: src/ui/hexbed.cc:490
+#: src/ui/hexbed.cc:500
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr ""
 
-#: src/ui/hexbed.cc:645
+#: src/ui/hexbed.cc:655
 #, c-format
 msgid "[read-only] %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:655
+#: src/ui/hexbed.cc:665
 #, c-format
 msgid "New-%llu"
 msgstr ""
 
-#: src/ui/hexbed.cc:660
+#: src/ui/hexbed.cc:670
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:680
+#: src/ui/hexbed.cc:690
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:689
+#: src/ui/hexbed.cc:699
 msgid "Read only"
 msgstr ""
 
-#: src/ui/hexbed.cc:727
+#: src/ui/hexbed.cc:737
 msgid "No more results found for this search."
 msgstr ""
 
-#: src/ui/hexbed.cc:733
+#: src/ui/hexbed.cc:743
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/hexbed.cc:834 src/ui/hexbed.cc:871
+#: src/ui/hexbed.cc:844 src/ui/hexbed.cc:881
 #, c-format
 msgid "Insert failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:897
+#: src/ui/hexbed.cc:907
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:917
+#: src/ui/hexbed.cc:927
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:938
+#: src/ui/hexbed.cc:948
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1051
+#: src/ui/hexbed.cc:1091
 msgid "Open a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1098
+#: src/ui/hexbed.cc:1138
 msgid "Import file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1118
+#: src/ui/hexbed.cc:1158
 #, c-format
 msgid ""
 "Error on line %llu:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1120
+#: src/ui/hexbed.cc:1160
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -634,25 +670,25 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1128
+#: src/ui/hexbed.cc:1168
 #, c-format
 msgid ""
 "Failed to import:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1152
+#: src/ui/hexbed.cc:1192
 msgid "Export file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1189
+#: src/ui/hexbed.cc:1229
 #, c-format
 msgid ""
 "Failed to export:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1255
+#: src/ui/hexbed.cc:1295
 msgid "A hex editor."
 msgstr ""
 
@@ -887,6 +923,28 @@ msgstr ""
 
 #: src/ui/dialogs/bitopunary.cc:53
 msgid "Reverse bit order"
+msgstr ""
+
+#: src/ui/clipboard.cc:91
+msgid ""
+"Cannot paste the current clipboard contents, because it does not contain "
+"text data."
+msgstr ""
+
+#: src/ui/clipboard.cc:102
+msgid "Cannot paste Unicode text out of alignment."
+msgstr ""
+
+#: src/ui/clipboard.cc:113
+msgid ""
+"Cannot paste the current clipboard contents, because it contains characters "
+"that the currently selected character encoding cannot represent."
+msgstr ""
+
+#: src/ui/clipboard.cc:128
+msgid ""
+"Cannot paste the current clipboard contents, because it does not contain "
+"valid hexadecimal data. Text data should be a string of hexadecimal bytes."
 msgstr ""
 
 #: src/ui/settings/appearance.cc:36
@@ -1368,20 +1426,20 @@ msgstr ""
 msgid "C# source code file (*.cs)"
 msgstr ""
 
-#: src/ui/plugins/export/text.cc:83 src/ui/plugins/export/html.cc:85
+#: src/ui/plugins/export/text.cc:84 src/ui/plugins/export/html.cc:85
 msgid "Column count"
 msgstr ""
 
-#: src/ui/plugins/export/text.cc:89 src/ui/plugins/export/html.cc:91
+#: src/ui/plugins/export/text.cc:90 src/ui/plugins/export/html.cc:91
 #, c-format
 msgid "From editor (%s)"
 msgstr ""
 
-#: src/ui/plugins/export/text.cc:95 src/ui/plugins/export/html.cc:97
+#: src/ui/plugins/export/text.cc:96 src/ui/plugins/export/html.cc:97
 msgid "Custom"
 msgstr ""
 
-#: src/ui/plugins/export/text.cc:119
+#: src/ui/plugins/export/text.cc:120
 msgid "Text file (*.txt)"
 msgstr ""
 

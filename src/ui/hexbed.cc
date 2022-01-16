@@ -139,6 +139,16 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
              HexBedMainFrame::OnViewColumnsHex)
     EVT_MENU(hexbed::menu::MenuView_ShowColumnsText,
              HexBedMainFrame::OnViewColumnsText)
+    EVT_MENU(hexbed::menu::MenuView_UTFModeOff,
+             HexBedMainFrame::OnViewUTFOff)
+    EVT_MENU(hexbed::menu::MenuView_UTFMode16LE,
+             HexBedMainFrame::OnViewUTF16LE)
+    EVT_MENU(hexbed::menu::MenuView_UTFMode16BE,
+             HexBedMainFrame::OnViewUTF16BE)
+    EVT_MENU(hexbed::menu::MenuView_UTFMode32LE,
+             HexBedMainFrame::OnViewUTF32LE)
+    EVT_MENU(hexbed::menu::MenuView_UTFMode32BE,
+             HexBedMainFrame::OnViewUTF32BE)
     EVT_MENU(hexbed::menu::MenuView_BitEditor,
              HexBedMainFrame::OnViewBitEditor)
     EVT_MENU(hexbed::menu::MenuView_DataInspector,
@@ -1011,6 +1021,36 @@ void HexBedMainFrame::OnViewColumnsHex(wxCommandEvent& event) {
 void HexBedMainFrame::OnViewColumnsText(wxCommandEvent& event) {
     currentConfig.values().showColumnTypes = 1;
     GetMenuBar()->Check(hexbed::menu::MenuView_ShowColumnsText, true);
+    ApplyConfig();
+}
+
+void HexBedMainFrame::OnViewUTFOff(wxCommandEvent& event) {
+    currentConfig.values().utfMode = 0;
+    GetMenuBar()->Check(hexbed::menu::MenuView_UTFModeOff, true);
+    ApplyConfig();
+}
+
+void HexBedMainFrame::OnViewUTF16LE(wxCommandEvent& event) {
+    currentConfig.values().utfMode = 1;
+    GetMenuBar()->Check(hexbed::menu::MenuView_UTFMode16LE, true);
+    ApplyConfig();
+}
+
+void HexBedMainFrame::OnViewUTF16BE(wxCommandEvent& event) {
+    currentConfig.values().utfMode = 2;
+    GetMenuBar()->Check(hexbed::menu::MenuView_UTFMode16BE, true);
+    ApplyConfig();
+}
+
+void HexBedMainFrame::OnViewUTF32LE(wxCommandEvent& event) {
+    currentConfig.values().utfMode = 3;
+    GetMenuBar()->Check(hexbed::menu::MenuView_UTFMode32LE, true);
+    ApplyConfig();
+}
+
+void HexBedMainFrame::OnViewUTF32BE(wxCommandEvent& event) {
+    currentConfig.values().utfMode = 4;
+    GetMenuBar()->Check(hexbed::menu::MenuView_UTFMode32BE, true);
     ApplyConfig();
 }
 

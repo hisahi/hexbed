@@ -117,6 +117,11 @@ class HexBedMainFrame : public wxFrame {
     void OnViewColumnsBoth(wxCommandEvent& event);
     void OnViewColumnsHex(wxCommandEvent& event);
     void OnViewColumnsText(wxCommandEvent& event);
+    void OnViewUTFOff(wxCommandEvent& event);
+    void OnViewUTF16LE(wxCommandEvent& event);
+    void OnViewUTF16BE(wxCommandEvent& event);
+    void OnViewUTF32LE(wxCommandEvent& event);
+    void OnViewUTF32BE(wxCommandEvent& event);
     void OnViewBitEditor(wxCommandEvent& event);
     void OnViewDataInspector(wxCommandEvent& event);
 

@@ -100,7 +100,6 @@ class HexEditor : public wxWindow {
     void OnPaint(wxPaintEvent& event);
     void OnFocus(wxFocusEvent& event);
     void OnBlur(wxFocusEvent& event);
-    void OnShow(wxShowEvent& event);
     void OnResize(wxSizeEvent& event);
     void OnLMouseDown(wxMouseEvent& event);
     void OnLMouseUp(wxMouseEvent& event);
@@ -126,6 +125,7 @@ class HexEditor : public wxWindow {
     void UpdateSelectionDrag();
     void HandleHexInput(char ch);
     void HandleTextInput(byte b);
+    void HandleUnicodeTextInput(char32_t u);
 
     void StartSelection(bufsize offset);
     void Deselect();
@@ -142,7 +142,6 @@ class HexEditor : public wxWindow {
     bool HitPos(wxCoord x, wxCoord y, HitPoint& point, bool drag);
     bufsize Buffer(bufsize beg, bufsize end, bufsize off);
 
-    void WhenVisible();
     void QueueRefresh();
     bool TestVisibility() const noexcept;
 

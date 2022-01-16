@@ -214,9 +214,10 @@ void HexBedEditor::OnUndoRedo() { frame_->OnUndoRedo(*this); }
 void HexBedEditor::LayoutUpdate() {
     group_ = config().groupSize;
     if (!config().autoFit) {
+        unsigned g = std::max<unsigned>(group_, configUtfGroupSize());
         cols_ = config().hexColumns;
-        cols_ -= cols_ % group_;
-        if (!cols_) cols_ = group_;
+        cols_ -= cols_ % g;
+        if (!cols_) cols_ = g;
     }
     if (config().showColumnTypes & 2) {  // if showing hex column
         std::ostringstream os;
@@ -271,8 +272,9 @@ bool HexBedEditor::AutoFitUpdate() {
         group_ = config().groupSize;
         unsigned colsOld_ = cols_;
         cols_ = hexEdit_->FitColumns(hexEdit_->GetClientSize().GetWidth());
-        cols_ -= cols_ % group_;
-        if (!cols_) cols_ = group_;
+        unsigned g = std::max<unsigned>(group_, configUtfGroupSize());
+        cols_ -= cols_ % g;
+        if (!cols_) cols_ = g;
         if (cols_ != colsOld_) {
             hexEdit_->SetColumns(cols_);
             FileSizeUpdate();

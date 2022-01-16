@@ -36,8 +36,6 @@ static constexpr bool isInRange(char32_t c, char32_t a, char32_t b) {
     return a <= c && c <= b;
 }
 
-static bool isPrintable(char32_t c);
-
 SingleByteCharacterSet::SingleByteCharacterSet() : map_{} { initPrint(); }
 
 SingleByteCharacterSet::SingleByteCharacterSet(std::array<char32_t, 256> map)
@@ -134,26 +132,19 @@ SingleByteCharacterSet getBuiltinSbcsByName(const string& name) {
     return SingleByteCharacterSet(s->second);
 }
 
-std::wstring sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
-                           const byte* data) {
-    std::vector<wchar_t> chars;
+std::u32string sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
+                             const byte* data) {
+    std::vector<char32_t> chars;
     for (bufsize j = 0; j < len; ++j) {
         char32_t u = sbcs.toChar(data[j]);
-        wchar_t w;
-        if (u == CHAR32_INVALID)
-            continue;
-        else if (std::numeric_limits<wchar_t>::max() >= 0x110000UL ||
-                 u < 0x10000)
-            w = u;
-        else
-            w = 0xFFFDU;
-        chars.push_back(w);
+        if (u == CHAR32_INVALID) continue;
+        chars.push_back(u);
     }
-    return std::wstring(chars.begin(), chars.end());
+    return std::u32string(chars.begin(), chars.end());
 }
 
 bool sbcsToBytes(const SingleByteCharacterSet& sbcs, bufsize& len, byte* data,
-                 const std::wstring& text) {
+                 const std::u32string& text) {
     bufsize l = 0, ll = len;
     for (wchar_t c : text) {
         int v = sbcs.fromChar(c);
@@ -165,11 +156,11 @@ bool sbcsToBytes(const SingleByteCharacterSet& sbcs, bufsize& len, byte* data,
     return true;
 }
 
-std::wstring sbcsFromBytes(bufsize len, const byte* data) {
+std::u32string sbcsFromBytes(bufsize len, const byte* data) {
     return sbcsFromBytes(sbcs, len, data);
 }
 
-bool sbcsToBytes(bufsize& len, byte* data, const std::wstring& text) {
+bool sbcsToBytes(bufsize& len, byte* data, const std::u32string& text) {
     return sbcsToBytes(sbcs, len, data, text);
 }
 
@@ -433,13 +424,137 @@ extern bool isUnicodePrintable(char32_t c);
 bool isUnicodePrintable(char32_t c) { return false; }
 */
 
-static bool isPrintable(char32_t c) {
+bool isPrintable(char32_t c) {
     if (c == 0x7F || c == CHAR32_INVALID) return false;
     if (isInRange(c, 0x20, 0x7E) || isInRange(c, 0xA1, 0xAC) ||
         isInRange(c, 0xAE, 0xFF))
         return true;
     if (!(c & ~0xFF)) return false;
     return isUnicodePrintable(c);
+}
+
+char32_t convertCharFrom(unsigned utf, bufsize n, const byte* b,
+                         bool printable) {
+    switch (utf) {
+    default:
+    case 0:
+        return sbcs.toPrintableChar(*b);
+    case 1:
+    case 2:
+        if (n < 2)
+            return 0;
+        else {
+            char32_t c = static_cast<char32_t>(
+                uintFromBytes<std::uint16_t>(2, b, utf == 1));
+            if (printable && !isPrintable(c)) c = 0;
+            return c;
+        }
+        break;
+    case 3:
+    case 4:
+        if (n < 4)
+            return 0;
+        else {
+            char32_t c = static_cast<char32_t>(
+                uintFromBytes<std::uint32_t>(4, b, utf == 3));
+            if (c > UCHAR32_MAX) {
+                c = printable ? 0 : 0xFFFDU;
+            } else if (printable && !isPrintable(c))
+                c = 0;
+            return c;
+        }
+        break;
+    }
+}
+
+std::u32string convertCharsFrom(unsigned utf, bufsize n, const byte* b,
+                                bool printable) {
+    std::u32string w;
+    switch (utf) {
+    case 0:
+        return sbcsFromBytes(n, b);
+    case 1:
+    case 2:
+        while (n >= 2) {
+            char32_t c = convertCharFrom(utf, n, b, false);
+            n -= 2, b += 2;
+            if ((c & 0xD800U) == 0xD800U) {
+                if ((c & 0xDC00U) == 0xD800U && n >= 2) {
+                    c = (c & 0x3FFUL) << 10;
+                    char32_t c2 = convertCharFrom(utf, n, b);
+                    n -= 2, b += 2;
+                    if ((c2 & 0xDC00U) == 0xDC00U) {
+                        c += (c2 & 0x3FFUL) + 0x10000UL;
+                    } else
+                        c = 0xFFFDU;
+                } else
+                    c = 0xFFFDU;
+            }
+            if (!printable || isPrintable(c)) w += c;
+        }
+        return w;
+    case 3:
+    case 4:
+        while (n >= 4) {
+            char32_t c = convertCharFrom(utf, n, b, printable);
+            n -= 4, b += 4;
+            if (!printable || isPrintable(c)) w += c;
+        }
+        return w;
+    }
+    return w;
+}
+
+bool convertCharsTo(unsigned utf, bufsize& rlen, byte* data,
+                    const std::u32string& text) {
+    const char32_t* sp = text.data();
+    bufsize len = rlen, outp = 0;
+    std::size_t sn = text.size();
+    bool le;
+    switch (utf) {
+    case 0:
+        return sbcsToBytes(len, data, text);
+    case 1:
+    case 2:
+        le = utf == 1;
+        while (len >= 2 && sn) {
+            std::uint32_t u = static_cast<std::uint32_t>(*sp++);
+            --sn;
+            if (u >= 0x10000) {
+                u -= 0x10000UL;
+                uintToBytes<std::uint16_t>(
+                    len, data,
+                    static_cast<std::uint16_t>(0xD800 | ((u >> 10) & 0x3FFU)),
+                    le);
+                len -= 2, data += 2, outp += 2;
+                if (len >= 2) {
+                    uintToBytes<std::uint16_t>(
+                        len, data,
+                        static_cast<std::uint16_t>(0xDC00 | (u & 0x3FFU)), le);
+                    len -= 2, data += 2, outp += 2;
+                } else
+                    return false;
+            } else {
+                uintToBytes<std::uint16_t>(len, data,
+                                           static_cast<std::uint16_t>(u), le);
+                len -= 2, data += 2, outp += 2;
+            }
+        }
+        rlen = outp;
+        return true;
+    case 3:
+    case 4:
+        le = utf == 3;
+        while (len >= 4 && sn) {
+            uintToBytes<std::uint32_t>(len, data,
+                                       static_cast<std::uint32_t>(*sp++), le);
+            --sn;
+            len -= 4, data += 4, outp += 4;
+        }
+        rlen = outp;
+        return true;
+    }
+    return false;
 }
 
 };  // namespace hexbed

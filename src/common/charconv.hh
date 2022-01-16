@@ -56,13 +56,13 @@ enum class TextEncoding { SBCS, UTF8, UTF16LE, UTF16BE, UTF32LE, UTF32BE };
 
 SingleByteCharacterSet getBuiltinSbcsByName(const string& name);
 
-std::wstring sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
-                           const byte* data);
+std::u32string sbcsFromBytes(const SingleByteCharacterSet& sbcs, bufsize len,
+                             const byte* data);
 bool sbcsToBytes(const SingleByteCharacterSet& sbcs, bufsize& len, byte* data,
-                 const std::wstring& text);
+                 const std::u32string& text);
 
-std::wstring sbcsFromBytes(bufsize len, const byte* data);
-bool sbcsToBytes(bufsize& len, byte* data, const std::wstring& text);
+std::u32string sbcsFromBytes(bufsize len, const byte* data);
+bool sbcsToBytes(bufsize& len, byte* data, const std::u32string& text);
 
 struct DecodeStatus {
     bool ok{false};
@@ -71,6 +71,8 @@ struct DecodeStatus {
 };
 
 using u32ostringstream = std::basic_ostringstream<char32_t>;
+
+bool isPrintable(char32_t c);
 
 std::size_t encodeCharMbcsOrSbcs(TextEncoding enc,
                                  const SingleByteCharacterSet& sbcs, char32_t c,
@@ -82,6 +84,13 @@ std::u32string wstringToU32string(const std::wstring& w);
 std::wstring u32stringToWstring(const std::u32string& w);
 
 constexpr std::size_t MBCS_CHAR_MAX = 4;
+
+char32_t convertCharFrom(unsigned utfMode, bufsize n, const byte* b,
+                         bool printable = true);
+std::u32string convertCharsFrom(unsigned utfMode, bufsize n, const byte* b,
+                                bool printable = true);
+bool convertCharsTo(unsigned utfMode, bufsize& len, byte* data,
+                    const std::u32string& text);
 
 };  // namespace hexbed
 

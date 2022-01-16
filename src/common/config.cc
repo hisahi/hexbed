@@ -60,6 +60,7 @@ void Configuration::loadValues() {
     values_.font = loadString("font", "");
     values_.showColumnTypes = loadIntRange("showColumnTypes", 3, 1, 3);
     values_.backupFiles = loadBool("backupFiles", true);
+    values_.utfMode = loadIntRange("utfMode", 0, 4, 0);
 }
 
 void Configuration::saveValues() {
@@ -85,6 +86,7 @@ void Configuration::saveValues() {
     saveString("font", values_.font);
     saveInt("showColumnTypes", values_.showColumnTypes);
     saveBool("backupFiles", values_.backupFiles);
+    saveInt("utfMode", values_.utfMode);
 }
 
 long Configuration::loadColor(const string& key, long def) {

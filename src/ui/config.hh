@@ -39,6 +39,9 @@ string hexFontToString(const wxFont& font);
 wxFont configFont();
 void configFont(const wxFont& font);
 
+unsigned configUtfGroupSize();
+unsigned configUtfGroupSizeL2();
+
 };  // namespace ui
 
 };  // namespace hexbed

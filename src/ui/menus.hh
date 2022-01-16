@@ -62,6 +62,11 @@ enum {
     MenuView_ShowColumnsBoth = 0x400,
     MenuView_ShowColumnsHex,
     MenuView_ShowColumnsText,
+    MenuView_UTFModeOff,
+    MenuView_UTFMode16LE,
+    MenuView_UTFMode16BE,
+    MenuView_UTFMode32LE,
+    MenuView_UTFMode32BE,
     MenuView_BitEditor,
     MenuView_DataInspector,
 };

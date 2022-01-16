@@ -22,6 +22,7 @@
 #include "ui/config.hh"
 
 #include "common/logger.hh"
+#include "common/specs.hh"
 #include "ui/string.hh"
 
 namespace hexbed {
@@ -57,6 +58,23 @@ wxFont configFont() { return getHexFontOrDefault(config().font); }
 void configFont(const wxFont& font) {
     currentConfig.values().font = hexFontToString(font);
 }
+
+unsigned configUtfGroupSizeL2() {
+    switch (config().utfMode) {
+    default:
+        HEXBED_UNREACHABLE();
+    case 0:
+        return 0;
+    case 1:
+    case 2:
+        return 1;
+    case 3:
+    case 4:
+        return 2;
+    }
+}
+
+unsigned configUtfGroupSize() { return 1U << configUtfGroupSizeL2(); }
 
 };  // namespace ui
 

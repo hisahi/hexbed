@@ -22,9 +22,9 @@
 #include "common/hexconv.hh"
 
 #include <algorithm>
-#include <cctype>
 
 #include "common/config.hh"
+#include "common/ctype.hh"
 #include "common/logger.hh"
 #include "common/values.hh"
 
@@ -117,8 +117,8 @@ bool hexToBytes(bufsize& len, byte* data, const string& text) {
     bufsize l = 0, ll = len;
     byte next;
     bool nibble = false;
-    for (char c : text) {
-        if (isspace(c)) continue;
+    for (strchar c : text) {
+        if (c_isspace(c)) continue;
         int v = hexDigitToNum(c);
         if (v < 0) return false;
         if (!nibble)
@@ -139,7 +139,7 @@ bool convertBaseFrom(bufsize& out, stringview text, unsigned base) {
     if (text.empty()) return false;
     switch (base) {
     case 8:
-        for (char c : text) {
+        for (strchar c : text) {
             int i = octDigitToNum(c);
             if (i < 0) return false;
             o = (o << 3) + i;
@@ -148,7 +148,7 @@ bool convertBaseFrom(bufsize& out, stringview text, unsigned base) {
         }
         break;
     case 10:
-        for (char c : text) {
+        for (strchar c : text) {
             int i = decDigitToNum(c);
             if (i < 0) return false;
             o = 10 * o + i;
@@ -157,7 +157,7 @@ bool convertBaseFrom(bufsize& out, stringview text, unsigned base) {
         }
         break;
     case 16:
-        for (char c : text) {
+        for (strchar c : text) {
             int i = hexDigitToNum(c);
             if (i < 0) return false;
             o = (o << 4) + i;

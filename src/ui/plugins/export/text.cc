@@ -45,6 +45,7 @@
 #include "common/hexconv.hh"
 #include "common/intconv.hh"
 #include "common/logger.hh"
+#include "ui/config.hh"
 #include "ui/plugins/dialog.hh"
 #include "ui/settings/validate.hh"
 
@@ -140,6 +141,7 @@ void ExportPluginText::doExport(HexBedTask& task,
 
     unsigned bc = settings_.customColumns ? settings_.columns : details.columns;
     unsigned gs = config().groupSize;
+    unsigned ugs = hexbed::ui::configUtfGroupSize();
     bc -= bc % gs;
     bufsize maxOffset = actualOffset + size - 1, offsetWidth = 0;
     bufsize finalByte = maxOffset + 1;
@@ -157,6 +159,9 @@ void ExportPluginText::doExport(HexBedTask& task,
 
     hasText = config().showColumnTypes & 1;
     hasHex = config().showColumnTypes & 2;
+
+    bc -= bc % ugs;
+    if (!bc) bc = ugs;
 
     if (config().uppercase)
         f << std::uppercase;
@@ -185,6 +190,7 @@ void ExportPluginText::doExport(HexBedTask& task,
         f << "\n\n";
     }
 
+    unsigned utf = config().utfMode;
     for (bufsize row = actualOffset - actualOffset % bc;
          !task.isCancelled() && row <= maxOffset; row += bc) {
         unsigned startOffset = row > actualOffset ? 0 : actualOffset - row;
@@ -218,11 +224,11 @@ void ExportPluginText::doExport(HexBedTask& task,
             if (hasText) f << "  ";
         }
         if (hasText) {
-            for (unsigned i = 0; i < bc; ++i) {
+            for (unsigned i = 0; i < bc; i += ugs) {
                 if (i < startOffset || i >= endOffset)
                     f << ' ';
                 else {
-                    char32_t c = sbcs.toPrintableChar(buf[i]);
+                    char32_t c = convertCharFrom(utf, bc - i, &buf[i]);
                     if (!c)
                         f << '.';
                     else {

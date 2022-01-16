@@ -225,6 +225,7 @@ void ExportPluginHTML::doExport(HexBedTask& task,
 
     unsigned bc = settings_.customColumns ? settings_.columns : details.columns;
     unsigned gs = config().groupSize;
+    unsigned ugs = hexbed::ui::configUtfGroupSize();
     bc -= bc % gs;
     bufsize maxOffset = actualOffset + size - 1, offsetWidth = 0;
     bufsize finalByte = maxOffset + 1;
@@ -242,6 +243,9 @@ void ExportPluginHTML::doExport(HexBedTask& task,
 
     hasText = config().showColumnTypes & 1;
     hasHex = config().showColumnTypes & 2;
+
+    bc -= bc % ugs;
+    if (!bc) bc = ugs;
 
     f << "<!DOCTYPE html>\n";
     f << "<html>\n";
@@ -301,6 +305,7 @@ void ExportPluginHTML::doExport(HexBedTask& task,
     }
 
     f << "<pre>\n";
+    unsigned utf = config().utfMode;
     for (bufsize row = actualOffset - actualOffset % bc;
          !task.isCancelled() && row <= maxOffset; row += bc) {
         unsigned startOffset = row > actualOffset ? 0 : actualOffset - row;
@@ -339,11 +344,11 @@ void ExportPluginHTML::doExport(HexBedTask& task,
         }
         if (hasText) {
             f << "<span class=\"datatext\">";
-            for (unsigned i = 0; i < bc; ++i) {
+            for (unsigned i = 0; i < bc; i += ugs) {
                 if (i < startOffset || i >= endOffset)
                     f << ' ';
                 else {
-                    char32_t c = sbcs.toPrintableChar(buf[i]);
+                    char32_t c = convertCharFrom(utf, bc - i, &buf[i]);
                     if (!c)
                         f << '.';
                     else if (c == '&')

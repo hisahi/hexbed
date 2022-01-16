@@ -112,9 +112,10 @@ void HexBedStandaloneEditor::LayoutUpdate() {
 }
 
 void HexBedStandaloneEditor::ResizeUpdate() {
+    unsigned g = std::max<unsigned>(group_, configUtfGroupSize());
     cols_ = hexEdit_->FitColumns(hexEdit_->GetClientSize().GetWidth());
-    cols_ -= cols_ % group_;
-    if (!cols_) cols_ = group_;
+    cols_ -= cols_ % g;
+    if (!cols_) cols_ = g;
     hexEdit_->SetColumns(cols_);
     rows_ =
         std::max((hexEdit_->GetClientSize().GetHeight() + 1) / rowHeight_, 1U);

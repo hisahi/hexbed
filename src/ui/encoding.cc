@@ -62,10 +62,12 @@ bool textEncode(const string& encoding, const wxString& text, bufsize& outp,
     SingleByteCharacterSet sbcs =
         getSbcsByName(!encoding.empty() ? encoding : config().charset);
     std::wstring wstr = text.ToStdWstring();
-    if (!sbcsToBytes(sbcs, outp, nullptr, wstr)) return false;
+    if (!sbcsToBytes(sbcs, outp, nullptr, wstringToU32string(wstr)))
+        return false;
     if (doc) {
         auto buffer = std::make_unique<byte[]>(outp);
-        if (!sbcsToBytes(sbcs, outp, buffer.get(), wstr)) return false;
+        if (!sbcsToBytes(sbcs, outp, buffer.get(), wstringToU32string(wstr)))
+            return false;
         doc->replace(0, doc->size(), const_bytespan{buffer.get(), outp});
     }
     return true;
@@ -97,7 +99,7 @@ bool textDecode(const string& encoding, wxString& text, const_bytespan data) {
     }
     SingleByteCharacterSet sbcs =
         getSbcsByName(!encoding.empty() ? encoding : config().charset);
-    text = sbcsFromBytes(sbcs, data.size(), data.data());
+    text = u32stringToWstring(sbcsFromBytes(sbcs, data.size(), data.data()));
     return true;
 }
 

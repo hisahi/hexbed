@@ -23,11 +23,13 @@
 
 #include <wx/clipbrd.h>
 #include <wx/intl.h>
+#include <wx/msgdlg.h>
 
 #include "app/config.hh"
 #include "common/buffer.hh"
 #include "common/charconv.hh"
 #include "common/hexconv.hh"
+#include "ui/config.hh"
 #include "ui/string.hh"
 
 namespace hexbed {
@@ -47,17 +49,22 @@ void CopyBytes(HexBedDocument& document, bufsize off, bufsize cnt, bool text) {
     bufsize q = 0, qq;
     byte buf[BUFFER_SIZE];
     if (text) {
-        std::wstring result;
+        std::u32string result;
+        std::size_t sz = sizeof(buf);
+        unsigned utf = config().utfMode;
+        sz -= sz % hexbed::ui::configUtfGroupSize();
+        HEXBED_ASSERT(sz);
 
         while (cnt) {
-            qq = std::min<bufsize>(cnt, sizeof(buf));
+            qq = std::min<bufsize>(cnt, sz);
             q = document.read(off, bytespan{buf, qq});
-            result += sbcsFromBytes(q, buf);
+            result += convertCharsFrom(utf, q, buf, false);
             if (q < qq) break;
             off += qq, cnt -= qq;
         }
 
-        wxTheClipboard->SetData(new wxTextDataObject(result));
+        wxTheClipboard->SetData(
+            new wxTextDataObject(u32stringToWstring(result)));
     } else {
         string result;
         bool cont = false;
@@ -80,27 +87,51 @@ bool PasteBytes(HexBedDocument& document, bool insert, bufsize off, bufsize cnt,
                 bool text, bufsize& len) {
     bool flag = true;
     if (!wxTheClipboard->Open()) throw ClipboardError();
-    if (!wxTheClipboard->IsSupported(wxDF_TEXT))
+    if (!wxTheClipboard->IsSupported(wxDF_TEXT)) {
+        wxMessageBox(_("Cannot paste the current clipboard contents, "
+                       "because it does not contain text data."),
+                     "HexBed", wxOK | wxICON_ERROR);
         goto fail;
-    else {
+    } else {
         wxTextDataObject data;
         wxTheClipboard->GetData(data);
         std::vector<byte> bytes;
 
         if (text) {
-            std::wstring s = data.GetText().ToStdWstring();
-            len = 0;
-            bool ok = sbcsToBytes(len, nullptr, s);
-            if (!ok) goto fail;
+            if (off % hexbed::ui::configUtfGroupSize()) {
+                wxMessageBox(_("Cannot paste Unicode text out of alignment."),
+                             "HexBed", wxOK | wxICON_ERROR);
+                goto fail;
+            }
+            std::u32string s =
+                wstringToU32string(data.GetText().ToStdWstring());
+            unsigned utf = config().utfMode;
+            bytes.resize(s.size() * (utf ? 4 : 1));
+            len = bytes.size();
+            if (!convertCharsTo(utf, len, bytes.data(), s)) {
+                wxMessageBox(
+                    _("Cannot paste the current clipboard contents, "
+                      "because it contains characters that the currently "
+                      "selected character encoding cannot represent."),
+                    "HexBed", wxOK | wxICON_ERROR);
+                goto fail;
+            }
             bytes.resize(len);
-            if (!sbcsToBytes(len, bytes.data(), s)) goto fail;
         } else {
             string s = stringFromWx(data.GetText());
             len = 0;
             bool ok = hexToBytes(len, nullptr, s);
             if (!ok) goto fail;
             bytes.resize(len);
-            if (!hexToBytes(len, bytes.data(), s)) goto fail;
+            if (!hexToBytes(len, bytes.data(), s)) {
+                wxMessageBox(
+                    _("Cannot paste the current clipboard contents, "
+                      "because it does not contain valid hexadecimal "
+                      "data. Text data should be a string of hexadecimal "
+                      "bytes."),
+                    "HexBed", wxOK | wxICON_ERROR);
+                goto fail;
+            }
         }
 
         if (insert)

@@ -42,6 +42,29 @@ wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
         ->Check(config().showColumnTypes == 1);
     menuView->AppendSubMenu(viewColumns, _("&Columns"),
                             _("Controls which columns to show"));
+    wxMenu* viewUtf = new wxMenu;
+    viewUtf
+        ->AppendRadioItem(MenuView_UTFModeOff, _("&Off"),
+                          _("Show single-byte characters"))
+        ->Check(config().utfMode == 0);
+    viewUtf
+        ->AppendRadioItem(MenuView_UTFMode16LE, _("UTF-16LE (little endian)"),
+                          _("Show little-endian UTF-16 characters"))
+        ->Check(config().utfMode == 1);
+    viewUtf
+        ->AppendRadioItem(MenuView_UTFMode16BE, _("UTF-16BE (big endian)"),
+                          _("Show big-endian UTF-16 characters"))
+        ->Check(config().utfMode == 2);
+    viewUtf
+        ->AppendRadioItem(MenuView_UTFMode32LE, _("UTF-32LE (little endian)"),
+                          _("Show little-endian UTF-32 characters"))
+        ->Check(config().utfMode == 3);
+    viewUtf
+        ->AppendRadioItem(MenuView_UTFMode32BE, _("UTF-32BE (big endian)"),
+                          _("Show big-endian UTF-32 characters"))
+        ->Check(config().utfMode == 4);
+    menuView->AppendSubMenu(viewUtf, _("&UTF mode"),
+                            _("Controls UTF text mode"));
     menuView->AppendSeparator();
     addItem(menuView, MenuView_BitEditor, _("&Bit editor"),
             _("Shows the bit editor"), wxACCEL_CTRL | wxACCEL_SHIFT, 'B');
