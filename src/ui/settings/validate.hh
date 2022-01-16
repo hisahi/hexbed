@@ -166,7 +166,7 @@ class ChoiceValidator : public wxValidator {
         if (size < values_.size()) values_.resize(size);
         std::size_t n = picker->GetCount();
         if (n)
-            for (std::size_t i = n - 1; i >= size; ++i) picker->Delete(i);
+            for (std::size_t i = n - 1; i >= size; --i) picker->Delete(i);
     }
 
   private:
