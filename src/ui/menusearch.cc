@@ -24,8 +24,8 @@
 namespace hexbed {
 namespace menu {
 
-wxMenu* createSearchMenu(wxMenuBar* menuBar,
-                         std::vector<wxMenuItem*>& fileOnly) {
+wxMenu* createSearchMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                         MenuIds& menus) {
     wxMenu* menuSearch = new wxMenu;
     fileOnly.push_back(addItem(menuSearch, wxID_FIND, _("&Find..."),
                                _("Finds data and brings it into view"),

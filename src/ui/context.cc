@@ -26,6 +26,8 @@
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
 
+#include <limits>
+
 #include "app/config.hh"
 #include "common/logger.hh"
 #include "ui/editor.hh"
@@ -196,7 +198,7 @@ void HexBedContextMain::announceBytesChanged(HexBedDocument* doc,
                                              bufsize start) {
     auto it = open_.find(doc);
     if (it != open_.end())
-        for (hexbed::ui::HexEditorParent* editor : it->second)
+        for (hexbed::ui::HexEditorParent* editor : it->second.views)
             editor->HintBytesChanged(start);
     if (doc == lastdoc_ && !viewers_.empty()) {
         byte tmp[MAX_LOOKAHEAD];
@@ -215,10 +217,10 @@ void HexBedContextMain::announceBytesChanged(HexBedDocument* doc, bufsize start,
     auto it = open_.find(doc);
     if (it != open_.end()) {
         if (length == 1) {
-            for (hexbed::ui::HexEditorParent* editor : it->second)
+            for (hexbed::ui::HexEditorParent* editor : it->second.views)
                 editor->HintByteChanged(start);
         } else {
-            for (hexbed::ui::HexEditorParent* editor : it->second)
+            for (hexbed::ui::HexEditorParent* editor : it->second.views)
                 editor->HintBytesChanged(start, start + length - 1);
         }
     }
@@ -236,7 +238,7 @@ void HexBedContextMain::announceBytesChanged(HexBedDocument* doc, bufsize start,
 
 void HexBedContextMain::announceUndoChanged(HexBedDocument* doc) {
     auto it = open_.find(doc);
-    if (it != open_.end()) main_->OnUndoRedo(*it->second[0]);
+    if (it != open_.end()) main_->OnUndoRedo(*it->second.views[0]);
 }
 
 void HexBedContextMain::announceCursorUpdate(HexBedPeekRegion peek) {
@@ -245,14 +247,20 @@ void HexBedContextMain::announceCursorUpdate(HexBedPeekRegion peek) {
     for (HexBedViewer* viewer : viewers_) viewer->onUpdateCursor(peek);
 }
 
-void HexBedContextMain::addWindow(hexbed::ui::HexEditorParent* editor) {
+void HexBedContextMain::addWindow(hexbed::ui::HexEditorParent* editor,
+                                  bool subview) {
     HexBedDocument* document = &editor->document();
     auto it = open_.find(document);
-    if (it != open_.end())
-        it->second.push_back(editor);
-    else
-        open_.emplace(document,
-                      std::vector<hexbed::ui::HexEditorParent*>{editor});
+    if (it != open_.end()) {
+        it->second.views.push_back(editor);
+        if (subview) ++it->second.subviewCount;
+    } else {
+        open_.emplace(
+            document,
+            DocumentViewList{std::vector<hexbed::ui::HexEditorParent*>{editor},
+                             subview ? 1U : 0U});
+        meta_.emplace(document, DocumentMetadata());
+    }
 }
 
 void HexBedContextMain::removeWindow(
@@ -260,15 +268,21 @@ void HexBedContextMain::removeWindow(
     HexBedDocument* document = &editor->document();
     auto it = open_.find(document);
     if (it != open_.end()) {
-        std::vector<hexbed::ui::HexEditorParent*>& editors = it->second;
+        std::vector<hexbed::ui::HexEditorParent*>& editors = it->second.views;
+        if (editor->IsSubView()) --it->second.subviewCount;
         std::erase(editors, editor);
-        if (editors.empty()) open_.erase(document);
+        if (editors.size() <= it->second.subviewCount) {
+            for (hexbed::ui::HexEditorParent* editor : editors)
+                editor->OnMainFileClose();
+            open_.erase(document);
+            meta_.erase(document);
+        }
     }
 }
 
 void HexBedContextMain::updateWindows() {
     for (const auto& pair : open_) {
-        for (hexbed::ui::HexEditorParent* editor : pair.second) {
+        for (hexbed::ui::HexEditorParent* editor : pair.second.views) {
             editor->ReloadConfig();
         }
     }
@@ -312,6 +326,55 @@ byte* HexBedContextMain::getReplaceBuffer(bufsize n) {
 
 const_bytespan HexBedContextMain::getReplaceString() const noexcept {
     return const_bytespan{replaceBuffer_.begin(), replaceBuffer_.end()};
+}
+
+static DocumentMetadata illegalMetadata_;
+
+DocumentMetadata& HexBedContextMain::getMetadata(HexBedDocument* doc) {
+    auto it = meta_.find(doc);
+    if (it == meta_.end()) {
+        HEXBED_ASSERT(false);
+        return illegalMetadata_;
+    }
+    return it->second;
+}
+
+std::optional<bufsize> DocumentMetadata::getBookmark(unsigned index) {
+    if (index >= BOOKMARK_COUNT) return {};
+    if (!bookmarkSet_[index]) return {};
+    return bookmarkAt_[index];
+}
+
+void DocumentMetadata::setBookmark(unsigned index, bufsize pos) {
+    if (index >= BOOKMARK_COUNT) return;
+    bookmarkSet_[index] = true;
+    bookmarkAt_[index] = pos;
+}
+
+std::optional<bufsize> DocumentMetadata::nextBookmark(bufsize pos) {
+    bool ok = false;
+    bufsize res = std::numeric_limits<bufsize>::max();
+    for (std::size_t i = 0; i < BOOKMARK_COUNT; ++i) {
+        if (bookmarkSet_[i] && bookmarkAt_[i] > pos) {
+            ok = true;
+            if (res > bookmarkAt_[i]) res = bookmarkAt_[i];
+        }
+    }
+    if (!ok) return {};
+    return res;
+}
+
+std::optional<bufsize> DocumentMetadata::previousBookmark(bufsize pos) {
+    bool ok = false;
+    bufsize res = 0;
+    for (std::size_t i = 0; i < BOOKMARK_COUNT; ++i) {
+        if (bookmarkSet_[i] && bookmarkAt_[i] < pos) {
+            ok = true;
+            if (res < bookmarkAt_[i]) res = bookmarkAt_[i];
+        }
+    }
+    if (!ok) return {};
+    return res;
 }
 
 };  // namespace hexbed

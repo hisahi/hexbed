@@ -387,7 +387,7 @@ void HexEditor::InitDraw() {
     }
     textMaxX_ = hasText_ ? textX_ + textWidth_ : textX_;
     wxCoord width = textMaxX_ + charWidth_;
-    SetMinClientSize(wxSize(config().autoFit ? byteWidth_ : width, 1));
+    SetMinClientSize(wxSize(byteWidth_, 1));
     SetVirtualSize(wxSize{width, static_cast<int>(lineHeight_ * rows_)});
     caret_.SetSize(2, lineHeight_);
 }
@@ -609,6 +609,8 @@ void HexEditor::GetSelection(bufsize& start, bufsize& length, bool& text) {
     length = seldown_ ? 0 : seln_;
     text = curtext_;
 }
+
+bufsize HexEditor::GetCaretPosition() { return cur_; }
 
 HexBedPeekRegion HexEditor::PeekBufferAtCursor() {
     const byte* buf = buffer_.data();
@@ -889,7 +891,7 @@ void HexEditor::OnChar(wxKeyEvent& e) {
     case 'e': case 'E':
     case 'f': case 'F':
         // clang-format on
-        if (!curtext_ && !e.AltDown()) {
+        if (!curtext_ && !e.ControlDown() && !e.AltDown()) {
             HandleHexInput(kc);
             break;
         }

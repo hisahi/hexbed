@@ -217,6 +217,10 @@ void HexBedStandaloneEditor::GetSelection(bufsize& start, bufsize& length,
     hexEdit_->GetSelection(start, length, text);
 }
 
+bufsize HexBedStandaloneEditor::GetCaretPosition() {
+    return hexEdit_->GetCaretPosition();
+}
+
 HexBedPeekRegion HexBedStandaloneEditor::PeekBufferAtCursor() {
     return hexEdit_->PeekBufferAtCursor();
 }
@@ -243,6 +247,10 @@ void HexBedStandaloneEditor::HintBytesChanged(bufsize begin) {
 void HexBedStandaloneEditor::HintBytesChanged(bufsize begin, bufsize end) {
     hexEdit_->HintBytesChanged(begin, end);
     AddPendingEvent(wxCommandEvent(HEX_EDIT_EVENT));
+}
+
+void HexBedStandaloneEditor::OnMainFileClose() {
+    HEXBED_ASSERT(false, "HexBedStandaloneEditor cannot be a subview!");
 }
 
 void HexBedStandaloneEditor::DoCtrlCut() { hexEdit_->DoCtrlCut(); }

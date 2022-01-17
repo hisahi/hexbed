@@ -58,10 +58,13 @@ class HexBedStandaloneEditor : public wxPanel, public HexEditorParent {
     void SelectAll(SelectFlags flags);
     void SelectNone() override;
     void GetSelection(bufsize& start, bufsize& length, bool& text) override;
+    bufsize GetCaretPosition() override;
     HexBedPeekRegion PeekBufferAtCursor() override;
     void HintByteChanged(bufsize offset) override;
     void HintBytesChanged(bufsize begin) override;
     void HintBytesChanged(bufsize begin, bufsize end) override;
+    inline bool IsSubView() const override { return false; }
+    virtual void OnMainFileClose() override;
 
     void DoCtrlCut() override;
     void DoCtrlCopy() override;

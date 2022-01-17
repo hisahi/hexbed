@@ -100,18 +100,22 @@ void LongScrollBar::SetThumbPositionLong(scroll_t viewStart) {
 }
 
 HexBedEditor::HexBedEditor(HexBedMainFrame* frame, wxWindow* parent,
-                           HexBedContextMain* ctx, HexBedDocument&& document)
+                           HexBedContextMain* ctx, HexBedDocument&& document,
+                           bool autoResize)
     : HexBedEditor(frame, parent, ctx,
-                   std::make_shared<HexBedDocument>(std::move(document))) {}
+                   std::make_shared<HexBedDocument>(std::move(document)),
+                   autoResize) {}
 
 HexBedEditor::HexBedEditor(HexBedMainFrame* frame, wxWindow* parent,
                            HexBedContextMain* ctx,
-                           std::shared_ptr<HexBedDocument>&& document)
+                           std::shared_ptr<HexBedDocument>&& document,
+                           bool autoResize)
     : wxPanel(parent),
       frame_(frame),
       document_(std::move(document)),
       ctx_(ctx),
-      timer_(this, wxID_ANY) {
+      timer_(this, wxID_ANY),
+      autoResize_(autoResize) {
     box_ = new wxBoxSizer(wxVERTICAL);
     SetSizer(box_);
     int gap = 4;
@@ -213,7 +217,7 @@ void HexBedEditor::OnUndoRedo() { frame_->OnUndoRedo(*this); }
 
 void HexBedEditor::LayoutUpdate() {
     group_ = config().groupSize;
-    if (!config().autoFit) {
+    if (!(config().autoFit || autoResize_)) {
         unsigned g = std::max<unsigned>(group_, configUtfGroupSize());
         cols_ = config().hexColumns;
         cols_ -= cols_ % g;
@@ -252,7 +256,7 @@ void HexBedEditor::LayoutUpdate() {
     charWidth_ = zeroSz.GetWidth();
     rowHeight_ = zeroSz.GetHeight();
     ResizeUpdate();
-    if (config().autoFit) {
+    if (config().autoFit || autoResize_) {
         wxSize sz{hexEdit_->GetClientSize().GetWidth(),
                   static_cast<int>(rowHeight_)};
         rowTop_->SetMinClientSize(wxSize{1, sz.GetHeight()});
@@ -268,7 +272,7 @@ void HexBedEditor::LayoutUpdate() {
 }
 
 bool HexBedEditor::AutoFitUpdate() {
-    if (config().autoFit) {
+    if (config().autoFit || autoResize_) {
         group_ = config().groupSize;
         unsigned colsOld_ = cols_;
         cols_ = hexEdit_->FitColumns(hexEdit_->GetClientSize().GetWidth());
@@ -286,6 +290,13 @@ bool HexBedEditor::AutoFitUpdate() {
 }
 
 void HexBedEditor::ResizeUpdate() {
+    if (autoResize_) {
+        unsigned g = std::max<unsigned>(group_, configUtfGroupSize());
+        cols_ = hexEdit_->FitColumns(hexEdit_->GetClientSize().GetWidth());
+        cols_ -= cols_ % g;
+        if (!cols_) cols_ = g;
+        hexEdit_->SetColumns(cols_);
+    }
     // how many rows can we display now?
     rows_ =
         std::max((hexEdit_->GetClientSize().GetHeight() + 1) / rowHeight_, 1U);
@@ -316,6 +327,10 @@ void HexBedEditor::GetSelection(bufsize& start, bufsize& length, bool& text) {
     hexEdit_->GetSelection(start, length, text);
 }
 
+bufsize HexBedEditor::GetCaretPosition() {
+    return hexEdit_->GetCaretPosition();
+}
+
 HexBedPeekRegion HexBedEditor::PeekBufferAtCursor() {
     return hexEdit_->PeekBufferAtCursor();
 }
@@ -338,6 +353,10 @@ void HexBedEditor::HintBytesChanged(bufsize begin) {
 void HexBedEditor::HintBytesChanged(bufsize begin, bufsize end) {
     hexEdit_->HintBytesChanged(begin, end);
     AddPendingEvent(wxCommandEvent(HEX_EDIT_EVENT));
+}
+
+void HexBedEditor::OnMainFileClose() {
+    HEXBED_ASSERT(false, "HexBedEditor cannot be a subview!");
 }
 
 void HexBedEditor::DoCtrlCut() { hexEdit_->DoCtrlCut(); }
@@ -429,7 +448,7 @@ void HexBedEditor::FileSizeUpdate() {
         wxSize(offSize.GetWidth(), offSize.GetHeight() * rows_));
     grid_->Layout();
     offsetBuf_.resize((offsetWidth_ + 1) * rows_ + 3, '\n');
-    ScrollUpdate();
+    if (rows_) ScrollUpdate();
 }
 
 void HexBedEditor::OnMouseWheel(wxMouseEvent& event) {

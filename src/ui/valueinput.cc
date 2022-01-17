@@ -31,7 +31,7 @@
 #include "app/config.hh"
 #include "common/logger.hh"
 #include "file/document.hh"
-#include "ui/plugins/inspector.hh"
+#include "plugins/inspector.hh"
 #include "ui/settings/validate.hh"
 
 namespace hexbed {

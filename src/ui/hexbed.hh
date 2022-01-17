@@ -65,6 +65,8 @@ class HexBedMainFrame : public wxFrame {
     void OnReplaceDone(bufsize count);
     void OnActiveEditorResize();
 
+    void Attention(const wxString& text);
+
   private:
     void OnClose(wxCloseEvent& event);
     void OnTabSwitch(wxAuiNotebookEvent& event);
@@ -126,6 +128,11 @@ class HexBedMainFrame : public wxFrame {
     void OnViewBitEditor(wxCommandEvent& event);
     void OnViewDataInspector(wxCommandEvent& event);
     void OnViewTextConverter(wxCommandEvent& event);
+    void OnViewBookmarkJump(wxCommandEvent& event);
+    void OnViewBookmarkMark(wxCommandEvent& event);
+    void OnViewBookmarkNext(wxCommandEvent& event);
+    void OnViewBookmarkPrev(wxCommandEvent& event);
+    void OnViewNewSubView(wxCommandEvent& event);
 
     void UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& editor);
 
@@ -169,7 +176,7 @@ class HexBedMainFrame : public wxFrame {
     std::unique_ptr<BitEditorTool> bitEditorTool_;
     std::unique_ptr<DataInspector> dataInspector_;
     std::unique_ptr<TextConverterTool> textConverter_;
-    hexbed::menu::FileMenus fileMenus_;
+    hexbed::menu::MenuIds menuIds_;
 };
 
 };  // namespace ui

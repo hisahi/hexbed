@@ -28,7 +28,7 @@ LDFLAGS := $(LDFLAGS) `wx-config --libs std,aui` \
 LDLIBS=-lm
 OBJS=
 SUBDIRS=common file app ui/dialogs \
-		ui/plugins ui/plugins/export ui/plugins/import ui/plugins/inspector \
+		plugins plugins/export plugins/import plugins/inspector \
 		ui/settings ui/tools ui
 
 TARGET := ../hexbed

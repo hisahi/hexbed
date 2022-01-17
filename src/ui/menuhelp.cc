@@ -24,7 +24,8 @@
 namespace hexbed {
 namespace menu {
 
-wxMenu* createHelpMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
+wxMenu* createHelpMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                       MenuIds& menus) {
     wxMenu* menuHelp = new wxMenu;
     addItem(menuHelp, wxID_ABOUT, _("&About"),
             _("Displays information about this application"));

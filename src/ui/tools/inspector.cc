@@ -29,8 +29,8 @@
 
 #include "app/config.hh"
 #include "common/hexconv.hh"
+#include "plugins/inspector.hh"
 #include "ui/hexbed.hh"
-#include "ui/plugins/inspector.hh"
 #include "ui/string.hh"
 
 namespace hexbed {

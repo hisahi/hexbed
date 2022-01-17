@@ -28,8 +28,8 @@
 #include <unordered_map>
 
 #include "common/types.hh"
+#include "plugins/inspector.hh"
 #include "ui/context.hh"
-#include "ui/plugins/inspector.hh"
 
 namespace hexbed {
 

@@ -25,7 +25,8 @@
 namespace hexbed {
 namespace menu {
 
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
+wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                       MenuIds& menus) {
     wxMenu* menuView = new wxMenu;
     wxMenu* viewColumns = new wxMenu;
     viewColumns
@@ -72,6 +73,47 @@ wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
             _("Shows the data inspector"), wxACCEL_CTRL, 'D');
     addItem(menuView, MenuView_TextConverter, _("Te&xt converter"),
             _("Shows the text converter"), wxACCEL_CTRL | wxACCEL_SHIFT, 'T');
+
+    int bookmarkGetId =
+        wxWindow::NewControlId(DocumentMetadata::BOOKMARK_COUNT);
+    int bookmarkSetId =
+        wxWindow::NewControlId(DocumentMetadata::BOOKMARK_COUNT);
+    menus.firstBookmarkGetId = bookmarkGetId;
+    menus.firstBookmarkSetId = bookmarkSetId;
+    if (bookmarkGetId != wxID_NONE && bookmarkSetId != wxID_NONE) {
+        menuView->AppendSeparator();
+        wxMenu* bookmarkGetMenu = new wxMenu;
+        wxMenu* bookmarkSetMenu = new wxMenu;
+
+        for (std::size_t i = 0; i < DocumentMetadata::BOOKMARK_COUNT; ++i) {
+            wxString text =
+                wxString::Format(_("Bookmark &%u"), static_cast<unsigned>(i));
+            addItem(bookmarkGetMenu, bookmarkGetId + i, text, wxEmptyString,
+                    wxACCEL_CTRL | wxACCEL_SHIFT, '0' + i);
+            fileOnly.push_back(addItem(bookmarkSetMenu, bookmarkSetId + i, text,
+                                       wxEmptyString,
+                                       wxACCEL_ALT | wxACCEL_SHIFT, '0' + i));
+        }
+
+        menuView->AppendSubMenu(bookmarkGetMenu, _("&Jump to bookmark"),
+                                _("Jumps to a bookmark (jump point)"));
+        menuView->AppendSubMenu(bookmarkSetMenu, _("S&et bookmark"),
+                                _("Sets a bookmark (jump point)"));
+        fileOnly.push_back(addItem(menuView, MenuView_BookmarkPrev,
+                                   _("Pre&vious bookmark"),
+                                   _("Jumps to the bookmark closest to the "
+                                     "cursor when going backwards if any"),
+                                   wxACCEL_CTRL | wxACCEL_SHIFT, ','));
+        fileOnly.push_back(addItem(menuView, MenuView_BookmarkNext,
+                                   _("Ne&xt bookmark"),
+                                   _("Jumps to the bookmark closest to the "
+                                     "cursor when going forwards if any"),
+                                   wxACCEL_CTRL | wxACCEL_SHIFT, '.'));
+    }
+    menuView->AppendSeparator();
+    fileOnly.push_back(addItem(menuView, MenuView_NewSubView, _("Add subvie&w"),
+                               _("Adds a new subview"),
+                               wxACCEL_CTRL | wxACCEL_SHIFT, 'W'));
     menuBar->Append(menuView, _("&View"));
     return menuView;
 }

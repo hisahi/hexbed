@@ -23,6 +23,7 @@
 
 #include <wx/aboutdlg.h>
 #include <wx/arrstr.h>
+#include <wx/tipwin.h>
 #include <wx/wx.h>
 
 #include <chrono>
@@ -37,6 +38,9 @@
 #include "common/version.hh"
 #include "file/document.hh"
 #include "file/task.hh"
+#include "plugins/export.hh"
+#include "plugins/import.hh"
+#include "plugins/plugin.hh"
 #include "ui/applock.hh"
 #include "ui/clipboard.hh"
 #include "ui/dialogs/bitopbinary.hh"
@@ -53,11 +57,9 @@
 #include "ui/hexedit.hh"
 #include "ui/logger.hh"
 #include "ui/menus.hh"
-#include "ui/plugins/export.hh"
-#include "ui/plugins/import.hh"
-#include "ui/plugins/plugin.hh"
 #include "ui/settings.hh"
 #include "ui/string.hh"
+#include "ui/subeditor.hh"
 
 #define PLURAL wxPLURAL
 
@@ -155,6 +157,12 @@ wxBEGIN_EVENT_TABLE(HexBedMainFrame, wxFrame)
              HexBedMainFrame::OnViewDataInspector)
     EVT_MENU(hexbed::menu::MenuView_TextConverter,
              HexBedMainFrame::OnViewTextConverter)
+    EVT_MENU(hexbed::menu::MenuView_BookmarkNext,
+             HexBedMainFrame::OnViewBookmarkNext)
+    EVT_MENU(hexbed::menu::MenuView_BookmarkPrev,
+             HexBedMainFrame::OnViewBookmarkPrev)
+    EVT_MENU(hexbed::menu::MenuView_NewSubView,
+             HexBedMainFrame::OnViewNewSubView)
 
     EVT_MENU(wxID_EXIT, HexBedMainFrame::OnExit)
     EVT_MENU(wxID_ABOUT, HexBedMainFrame::OnAbout)
@@ -297,39 +305,51 @@ HexBedMainFrame::HexBedMainFrame()
     tabs_ = new wxAuiNotebook(this, tabContainerID);
     context_ = std::make_shared<HexBedContextMain>(this);
     wxMenuBar* menuBar = new wxMenuBar;
-    hexbed::menu::createFileMenu(menuBar, fileOnlyMenuItems_, fileMenus_);
-    hexbed::menu::createEditMenu(menuBar, fileOnlyMenuItems_)
+    hexbed::menu::createFileMenu(menuBar, fileOnlyMenuItems_, menuIds_);
+    hexbed::menu::createEditMenu(menuBar, fileOnlyMenuItems_, menuIds_)
         ->Bind(wxEVT_MENU_OPEN, &HexBedMainFrame::OnEditMenuOpened, this);
-    hexbed::menu::createSearchMenu(menuBar, fileOnlyMenuItems_);
-    hexbed::menu::createViewMenu(menuBar, fileOnlyMenuItems_);
-    hexbed::menu::createHelpMenu(menuBar, fileOnlyMenuItems_);
+    hexbed::menu::createSearchMenu(menuBar, fileOnlyMenuItems_, menuIds_);
+    hexbed::menu::createViewMenu(menuBar, fileOnlyMenuItems_, menuIds_);
+    hexbed::menu::createHelpMenu(menuBar, fileOnlyMenuItems_, menuIds_);
     wxToolBar* toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
     hexbed::menu::populateToolBar(toolBar, fileOnlyToolItems_);
     toolBar->Show(true);
     SetMenuBar(menuBar);
-    if (fileMenus_.importMenu) {
+    if (menuIds_.importMenu) {
         int n = static_cast<int>(
             std::min<size_t>(std::numeric_limits<int>::max(),
                              hexbed::plugins::importPluginCount()));
         if (n) {
-            int id = addImportPlugins(this, fileMenus_.importMenu, n);
+            int id = addImportPlugins(this, menuIds_.importMenu, n);
             menuBar->Bind(wxEVT_MENU, &HexBedMainFrame::OnFileMenuImport, this,
                           id, id + n - 1);
-            fileMenus_.importPluginCount = n;
-            fileMenus_.firstImportId = id;
+            menuIds_.importPluginCount = n;
+            menuIds_.firstImportId = id;
         }
     }
-    if (fileMenus_.exportMenu) {
+    if (menuIds_.exportMenu) {
         int n = static_cast<int>(
             std::min<size_t>(std::numeric_limits<int>::max(),
                              hexbed::plugins::exportPluginCount()));
         if (n) {
-            int id = addExportPlugins(this, fileMenus_.exportMenu, n);
+            int id = addExportPlugins(this, menuIds_.exportMenu, n);
             menuBar->Bind(wxEVT_MENU, &HexBedMainFrame::OnFileMenuExport, this,
                           id, id + n - 1);
-            fileMenus_.exportPluginCount = n;
-            fileMenus_.firstExportId = id;
+            menuIds_.exportPluginCount = n;
+            menuIds_.firstExportId = id;
         }
+    }
+    if (menuIds_.firstBookmarkGetId != wxID_NONE) {
+        menuBar->Bind(
+            wxEVT_MENU, &HexBedMainFrame::OnViewBookmarkJump, this,
+            menuIds_.firstBookmarkGetId,
+            menuIds_.firstBookmarkGetId + DocumentMetadata::BOOKMARK_COUNT - 1);
+    }
+    if (menuIds_.firstBookmarkSetId != wxID_NONE) {
+        menuBar->Bind(
+            wxEVT_MENU, &HexBedMainFrame::OnViewBookmarkMark, this,
+            menuIds_.firstBookmarkSetId,
+            menuIds_.firstBookmarkSetId + DocumentMetadata::BOOKMARK_COUNT - 1);
     }
     sbar_ = CreateStatusBar(4);
     if (sbar_) hexbed::menu::populateStatusBar(sbar_);
@@ -533,8 +553,13 @@ void HexBedMainFrame::UpdateFileOnly() {
     bool haveFiles = tabs_->GetPageCount() > 0;
     for (wxMenuItem* p : fileOnlyMenuItems_) p->Enable(haveFiles);
     for (wxToolBarToolBase* p : fileOnlyToolItems_) p->Enable(haveFiles);
-    for (int i = 0; i < fileMenus_.exportPluginCount; ++i) {
-        mbar.Enable(fileMenus_.firstExportId + i, haveFiles);
+    for (int i = 0; i < menuIds_.exportPluginCount; ++i) {
+        mbar.Enable(menuIds_.firstExportId + i, haveFiles);
+    }
+    if (!haveFiles) {
+        for (unsigned i = 0; i < DocumentMetadata::BOOKMARK_COUNT; ++i) {
+            mbar.Enable(menuIds_.firstBookmarkGetId + i, false);
+        }
     }
 }
 
@@ -549,10 +574,18 @@ void HexBedMainFrame::OnTabSwitch(wxAuiNotebookEvent& event) {
     /// main window title bar
     SetTitle(wxString::Format(_("%s - %s"), tabs_->GetPageText(s), "HexBed"));
     hexbed::ui::HexBedEditor* editor = GetEditor(s);
-    editor->Selected();
-    UpdateMenuEnabled(*editor);
-    context_->announceCursorUpdate(editor->PeekBufferAtCursor());
-    AddPendingEvent(wxCommandEvent(HEX_SELECT_EVENT));
+    if (editor) {
+        editor->Selected();
+        UpdateMenuEnabled(*editor);
+        context_->announceCursorUpdate(editor->PeekBufferAtCursor());
+        AddPendingEvent(wxCommandEvent(HEX_SELECT_EVENT));
+        DocumentMetadata& meta = context_->getMetadata(&editor->document());
+        wxMenuBar& mbar = *GetMenuBar();
+        for (unsigned i = 0; i < DocumentMetadata::BOOKMARK_COUNT; ++i) {
+            mbar.Enable(menuIds_.firstBookmarkGetId + i,
+                        meta.getBookmark(i).has_value());
+        }
+    }
 }
 
 void HexBedMainFrame::InitMenuEnabled() {
@@ -647,14 +680,16 @@ std::unique_ptr<hexbed::ui::HexBedEditor> HexBedMainFrame::MakeEditor(
 void HexBedMainFrame::AddTab(std::unique_ptr<hexbed::ui::HexBedEditor>&& editor,
                              const wxString& fn, const wxString& path) {
     auto i = tabs_->GetPageCount() ? tabs_->GetSelection() + 1 : 0;
-    if (!tabs_->InsertPage(i, editor.get(), fn, true))
+    context_->addWindow(editor.get());
+    if (!tabs_->InsertPage(i, editor.get(), fn, true)) {
+        context_->removeWindow(editor.get());
         throw std::runtime_error("could not add wxAuiNotebook page");
+    }
     if (sbar_) editor->SetStatusBar(sbar_);
     if (!path.IsEmpty()) tabs_->SetPageToolTip(i, path);
     editor->SetFocus();
     editor->FocusEditor();
     editor->Bind(HEX_EDIT_EVENT, &HexBedMainFrame::OnDocumentEdit, this);
-    context_->addWindow(editor.get());
     if (editor->document().readOnly()) {
         tabs_->SetPageToolTip(i, wxString::Format(_("[read-only] %s"), path));
         tabs_->SetPageText(i, wxString::Format("[%s]", tabs_->GetPageText(i)));
@@ -740,6 +775,12 @@ void HexBedMainFrame::OnDataInspectorClose(wxCloseEvent& event) {
 void HexBedMainFrame::OnTextConverterClose(wxCloseEvent& event) {
     textConverter_->Destroy();
     textConverter_ = nullptr;
+}
+
+void HexBedMainFrame::Attention(const wxString& text) {
+    wxBell();
+    // TODO better options? use status bar? how to clear the text afterwards?
+    new wxTipWindow(this, text);
 }
 
 void HexBedMainFrame::NoMoreResults() {
@@ -1097,6 +1138,76 @@ void HexBedMainFrame::OnViewTextConverter(wxCommandEvent& event) {
     textConverter_->SetFocus();
 }
 
+void HexBedMainFrame::OnViewBookmarkJump(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    int i = event.GetId() - menuIds_.firstBookmarkGetId;
+    if (ed && i >= 0 &&
+        static_cast<unsigned>(i) < DocumentMetadata::BOOKMARK_COUNT) {
+        auto o = context_->getMetadata(&ed->document())
+                     .getBookmark(static_cast<unsigned>(i));
+        if (o.has_value()) {
+            bufsize p = o.value();
+            if (p <= ed->document().size())
+                ed->SelectBytes(p, 0, SelectFlags().highlightCaret());
+            else
+                Attention(_("Bookmark beyond end of document"));
+        }
+    }
+}
+
+void HexBedMainFrame::OnViewBookmarkMark(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    bufsize sel, seln;
+    bool seltext;
+    int i = event.GetId() - menuIds_.firstBookmarkSetId;
+    if (ed && i >= 0 &&
+        static_cast<unsigned>(i) < DocumentMetadata::BOOKMARK_COUNT) {
+        ed->GetSelection(sel, seln, seltext);
+        context_->getMetadata(&ed->document())
+            .setBookmark(static_cast<unsigned>(i), sel);
+        GetMenuBar()->Enable(menuIds_.firstBookmarkGetId + i, true);
+    }
+}
+
+void HexBedMainFrame::OnViewBookmarkNext(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    if (ed) {
+        auto o = context_->getMetadata(&ed->document())
+                     .previousBookmark(ed->GetCaretPosition());
+        if (o.has_value()) {
+            bufsize p = o.value();
+            if (p <= ed->document().size())
+                ed->SelectBytes(p, 0, SelectFlags().highlightCaret());
+        } else
+            Attention(_("No next bookmark"));
+    }
+}
+
+void HexBedMainFrame::OnViewBookmarkPrev(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    if (ed) {
+        auto o = context_->getMetadata(&ed->document())
+                     .nextBookmark(ed->GetCaretPosition());
+        if (o.has_value()) {
+            bufsize p = o.value();
+            if (p <= ed->document().size())
+                ed->SelectBytes(p, 0, SelectFlags().highlightCaret());
+        } else
+            Attention(_("No previous bookmark"));
+    }
+}
+
+void HexBedMainFrame::OnViewNewSubView(wxCommandEvent& event) {
+    hexbed::ui::HexBedEditor* ed = GetEditor();
+    if (ed) {
+        auto view = new hexbed::ui::HexBedSubView(
+            this, context_.get(), ed->copyDocument(),
+            pathToWxString(ed->document().path().filename()));
+        view->Show();
+        view->SetFocus();
+    }
+}
+
 void HexBedMainFrame::OnEditInsertToggle(wxCommandEvent& event) {
     EditorState& state = context_->state;
     state.insert = !state.insert;
@@ -1152,8 +1263,8 @@ void HexBedMainFrame::OnFileReload(wxCommandEvent& event) {
 void HexBedMainFrame::OnFileCloseAll(wxCommandEvent& event) { FileCloseAll(); }
 
 void HexBedMainFrame::OnFileMenuImport(wxCommandEvent& event) {
-    int i = event.GetId() - fileMenus_.firstImportId;
-    if (i >= 0 && i < fileMenus_.importPluginCount) {
+    int i = event.GetId() - menuIds_.firstImportId;
+    if (i >= 0 && i < menuIds_.importPluginCount) {
         hexbed::plugins::ImportPlugin& plugin =
             hexbed::plugins::importPluginByIndex(i);
         wxFileDialog dial(this, _("Import file"), "", "",
@@ -1197,9 +1308,9 @@ void HexBedMainFrame::OnFileMenuImport(wxCommandEvent& event) {
 }
 
 void HexBedMainFrame::OnFileMenuExport(wxCommandEvent& event) {
-    int i = event.GetId() - fileMenus_.firstExportId;
+    int i = event.GetId() - menuIds_.firstExportId;
     hexbed::ui::HexBedEditor* ed = GetEditor();
-    if (ed && i >= 0 && i < fileMenus_.exportPluginCount) {
+    if (ed && i >= 0 && i < menuIds_.exportPluginCount) {
         HexBedDocument& doc = ed->document();
         hexbed::plugins::ExportPlugin& plugin =
             hexbed::plugins::exportPluginByIndex(i);

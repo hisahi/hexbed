@@ -156,10 +156,14 @@ class HexEditorParent {
                              SelectFlags flags) = 0;
     virtual void SelectNone() = 0;
     virtual void GetSelection(bufsize& start, bufsize& length, bool& text) = 0;
+    virtual bufsize GetCaretPosition() = 0;
     virtual HexBedPeekRegion PeekBufferAtCursor() = 0;
     virtual void HintByteChanged(bufsize offset) = 0;
     virtual void HintBytesChanged(bufsize begin) = 0;
     virtual void HintBytesChanged(bufsize begin, bufsize end) = 0;
+
+    virtual bool IsSubView() const = 0;
+    virtual void OnMainFileClose() = 0;
 
     virtual void DoCtrlCut() = 0;
     virtual void DoCtrlCopy() = 0;
@@ -173,9 +177,11 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
   public:
     HexBedEditor(HexBedMainFrame* frame, wxWindow* parent,
                  HexBedContextMain* ctx,
-                 std::shared_ptr<HexBedDocument>&& document);
+                 std::shared_ptr<HexBedDocument>&& document,
+                 bool autoResize = false);
     HexBedEditor(HexBedMainFrame* frame, wxWindow* parent,
-                 HexBedContextMain* ctx, HexBedDocument&& document);
+                 HexBedContextMain* ctx, HexBedDocument&& document,
+                 bool autoResize = false);
     inline HexBedDocument& document() override { return *document_; }
     inline HexBedContextMain& context() override { return *ctx_; }
     inline std::shared_ptr<HexBedDocument> copyDocument() { return document_; }
@@ -207,10 +213,13 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     void SelectBytes(bufsize start, bufsize length, SelectFlags flags) override;
     void SelectNone() override;
     void GetSelection(bufsize& start, bufsize& length, bool& text) override;
+    bufsize GetCaretPosition() override;
     HexBedPeekRegion PeekBufferAtCursor() override;
     void HintByteChanged(bufsize offset) override;
     void HintBytesChanged(bufsize begin) override;
     void HintBytesChanged(bufsize begin, bufsize end) override;
+    virtual bool IsSubView() const override { return false; }
+    virtual void OnMainFileClose() override;
 
     void DoCtrlCut() override;
     void DoCtrlCopy() override;
@@ -251,6 +260,7 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     bool wasUnsaved_{false};
     std::vector<char> offsetBuf_;
     wxTimer timer_;
+    bool autoResize_{false};
 };
 
 };  // namespace ui

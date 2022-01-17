@@ -24,14 +24,16 @@ A graphical hex editor, still a work in progress.
 * Plugin system for loading extra charset definitions
 * UTF-16/UTF-32 character viewer
 * Text<->binary converter
+* Bookmarks / jump points (up to ten per file)
+* Subviews in separate windows
 
 ## Planned features
 * Stability
 * Performance
 * Not losing data
 * Not having bugs
-* Bookmarks
-* Multiple windows/views
+* Watches (data inspector with customizable fixed points)
+* Multiple main windows (configurable)
 * Plugin system for data inspector
 * Plugin system for import/export
 * Plugin system for text converter
@@ -47,6 +49,10 @@ In modern C++ (C++17 with some C++20). The UI uses wxWidgets.
 
 ICU is used, but not technically necessary (it can be disabled by changing
 the Makefile).
+
+Only the `app`, `plugins` and `ui` directories contain files with external
+dependencies. Code under `common` and `file` has no required dependencies
+besides STL.
 
 ## License
 GPL version 3. See `COPYING`.

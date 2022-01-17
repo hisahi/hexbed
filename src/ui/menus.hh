@@ -70,6 +70,9 @@ enum {
     MenuView_BitEditor,
     MenuView_DataInspector,
     MenuView_TextConverter,
+    MenuView_BookmarkNext,
+    MenuView_BookmarkPrev,
+    MenuView_NewSubView,
 };
 
 // menus.cc
@@ -80,7 +83,7 @@ wxMenuItem* addItem(wxMenu* menu, int id, const wxString& text,
 wxMenuItem* addCheckItem(wxMenu* menu, int id, const wxString& text,
                          const wxString& tip, int flags, int keyCode);
 
-struct FileMenus {
+struct MenuIds {
     wxMenu* importMenu{nullptr};
     wxMenu* exportMenu{nullptr};
 
@@ -88,20 +91,26 @@ struct FileMenus {
     int importPluginCount{0};
     int firstExportId;
     int exportPluginCount{0};
+
+    int firstBookmarkGetId;
+    int firstBookmarkSetId;
 };
 
 // menufile.cc
 wxMenu* createFileMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
-                       FileMenus& menus);
+                       MenuIds& menus);
 // menuedit.cc
-wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly);
+wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                       MenuIds& menus);
 // menusearch.cc
-wxMenu* createSearchMenu(wxMenuBar* menuBar,
-                         std::vector<wxMenuItem*>& fileOnly);
+wxMenu* createSearchMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                         MenuIds& menus);
 // menuview.cc
-wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly);
+wxMenu* createViewMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                       MenuIds& menus);
 // menuhelp.cc
-wxMenu* createHelpMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly);
+wxMenu* createHelpMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                       MenuIds& menus);
 // status.cc
 void populateStatusBar(wxStatusBar* statusBar);
 void updateStatusBarNoFile(wxStatusBar* statusBar, const EditorState& state);

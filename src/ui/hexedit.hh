@@ -76,6 +76,7 @@ class HexEditor : public wxWindow {
     void SelectBytes(bufsize start, bufsize length, SelectFlags flags);
     void SelectNone();
     void GetSelection(bufsize& start, bufsize& length, bool& text);
+    bufsize GetCaretPosition();
     HexBedPeekRegion PeekBufferAtCursor();
     void HintByteChanged(bufsize offset);
     void HintBytesChanged(bufsize begin);

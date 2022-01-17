@@ -25,7 +25,8 @@
 namespace hexbed {
 namespace menu {
 
-wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly) {
+wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
+                       MenuIds& menus) {
     wxMenu* menuEdit = new wxMenu;
     addItem(menuEdit, wxID_UNDO, _("&Undo"), _("Undoes the last action"),
             wxACCEL_CTRL, 'Z');

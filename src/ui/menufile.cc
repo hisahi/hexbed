@@ -25,7 +25,7 @@ namespace hexbed {
 namespace menu {
 
 wxMenu* createFileMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
-                       FileMenus& menus) {
+                       MenuIds& menus) {
     wxMenu* menuFile = new wxMenu;
     addItem(menuFile, wxID_NEW, _("&New"), _("Creates a new file"),
             wxACCEL_CTRL, 'N');

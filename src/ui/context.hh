@@ -24,7 +24,9 @@
 
 #include <wx/string.h>
 
+#include <array>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -118,6 +120,26 @@ class HexBedViewerRegistration {
     HexBedViewer* ptr_;
 };
 
+class DocumentMetadata {
+  public:
+    static constexpr std::size_t BOOKMARK_COUNT = 10;
+
+    std::optional<bufsize> getBookmark(unsigned index);
+    void setBookmark(unsigned index, bufsize pos);
+
+    std::optional<bufsize> nextBookmark(bufsize pos);
+    std::optional<bufsize> previousBookmark(bufsize pos);
+
+  private:
+    std::array<bool, BOOKMARK_COUNT> bookmarkSet_;
+    std::array<bufsize, BOOKMARK_COUNT> bookmarkAt_;
+};
+
+struct DocumentViewList {
+    std::vector<hexbed::ui::HexEditorParent*> views;
+    std::size_t subviewCount{0};
+};
+
 class HexBedContextMain : public HexBedContext {
   public:
     HexBedContextMain(hexbed::ui::HexBedMainFrame* main_);
@@ -132,8 +154,10 @@ class HexBedContextMain : public HexBedContext {
     void announceUndoChanged(HexBedDocument* doc);
     void announceCursorUpdate(HexBedPeekRegion peek);
 
+    DocumentMetadata& getMetadata(HexBedDocument* doc);
+
     hexbed::ui::HexEditorParent* activeWindow() noexcept;
-    void addWindow(hexbed::ui::HexEditorParent* editor);
+    void addWindow(hexbed::ui::HexEditorParent* editor, bool subview = false);
     void removeWindow(hexbed::ui::HexEditorParent* editor) noexcept;
     void updateWindows();
 
@@ -152,9 +176,8 @@ class HexBedContextMain : public HexBedContext {
   private:
     hexbed::ui::HexBedMainFrame* main_;
     std::unique_ptr<HexBedTaskHandler> task_;
-    std::unordered_map<HexBedDocument*,
-                       std::vector<hexbed::ui::HexEditorParent*>>
-        open_;
+    std::unordered_map<HexBedDocument*, DocumentViewList> open_;
+    std::unordered_map<HexBedDocument*, DocumentMetadata> meta_;
     std::vector<byte> searchBuffer_;
     std::vector<byte> replaceBuffer_;
     std::vector<HexBedViewer*> viewers_;

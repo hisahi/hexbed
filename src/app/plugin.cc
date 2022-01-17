@@ -26,9 +26,9 @@
 #include "app/encoding.hh"
 #include "common/ctype.hh"
 #include "common/logger.hh"
-#include "ui/plugins/export.hh"
-#include "ui/plugins/import.hh"
-#include "ui/plugins/inspector.hh"
+#include "plugins/export.hh"
+#include "plugins/import.hh"
+#include "plugins/inspector.hh"
 
 namespace hexbed {
 

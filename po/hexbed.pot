@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 23:13+0200\n"
+"POT-Creation-Date: 2022-01-18 00:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,203 +18,514 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: src/ui/menuhelp.cc:29
-msgid "&About"
+#: src/plugins/inspector/uint8.cc:38
+msgid "uint8 (unsigned 8-bit integer)"
+msgstr ""
+
+#: src/plugins/inspector/int8.cc:38
+msgid "int8 (signed 8-bit integer)"
+msgstr ""
+
+#: src/plugins/inspector/uint16.cc:39
+msgid "uint16 (unsigned 16-bit integer)"
+msgstr ""
+
+#: src/plugins/inspector/uint32.cc:39
+msgid "uint32 (unsigned 32-bit integer)"
+msgstr ""
+
+#: src/plugins/inspector/uint64.cc:39
+msgid "uint64 (unsigned 64-bit integer)"
+msgstr ""
+
+#: src/plugins/inspector/int16.cc:38
+msgid "int16 (signed 16-bit integer)"
+msgstr ""
+
+#: src/plugins/inspector/int32.cc:38
+msgid "int32 (signed 32-bit integer)"
+msgstr ""
+
+#: src/plugins/inspector/int64.cc:38
+msgid "int64 (signed 64-bit integer)"
+msgstr ""
+
+#: src/plugins/inspector/float32.cc:43
+msgid "float (IEEE 754 binary32 single-precision floating-point)"
+msgstr ""
+
+#: src/plugins/inspector/float64.cc:43
+msgid "double (IEEE 754 binary64 double-precision floating-point)"
+msgstr ""
+
+#: src/plugins/inspector/float32x.cc:43
+msgid "Hexadecimal float (IEEE 754 binary32 single-precision floating-point)"
+msgstr ""
+
+#: src/plugins/inspector/float64x.cc:44
+msgid "Hexadecimal double (IEEE 754 binary64 double-precision floating-point)"
+msgstr ""
+
+#: src/plugins/export.cc:67 src/plugins/import.cc:52 src/ui/hexbed.cc:419
+#: src/ui/hexbed.cc:1224
+msgid "All files (*.*)"
+msgstr ""
+
+#. / format name, perhaps should not be translated
+#: src/plugins/export/intelhex.cc:64 src/plugins/export/intelhex.cc:208
+#: src/plugins/import/intelhex.cc:47 src/plugins/import/intelhex.cc:76
+msgid "Intel HEX"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:87 src/plugins/export/srec.cc:87
+msgid "Bytes per row"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:97 src/plugins/export/srec.cc:97
+msgid "Mode"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:101
+msgid "I8 (8080)"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:107
+msgid "I16 (8086)"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:113
+msgid "I32 (80386)"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:119 src/plugins/export/srec.cc:119
+msgid "Offset base"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:125 src/plugins/export/srec.cc:125
+msgid "Zero"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:133 src/plugins/export/srec.cc:134
+#, c-format
+msgid "Selection (%s)"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:141 src/plugins/export/srec.cc:144
+msgid "Custom:"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:195 src/plugins/export/srec.cc:198
+msgid ""
+"The exported offset would be out of range for the given amount of data.\n"
+"Decrease the offset, try another mode or select less data to export."
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:211 src/plugins/import/intelhex.cc:79
+msgid "Intel HEX file (*.hex, *.h86)"
+msgstr ""
+
+#: src/plugins/export/intelhex.cc:219
+msgid ""
+"The exported section is 4 GiB (2^32 bytes) or longer, which is too long for "
+"Intel HEX files."
+msgstr ""
+
+#. / format name, perhaps should not be translated
+#: src/plugins/export/srec.cc:63 src/plugins/export/srec.cc:211
+#: src/plugins/import/srec.cc:47 src/plugins/import/srec.cc:76
+msgid "Motorola S-record"
+msgstr ""
+
+#: src/plugins/export/srec.cc:101
+msgid "S19 (16-bit)"
+msgstr ""
+
+#: src/plugins/export/srec.cc:107
+msgid "S28 (24-bit)"
+msgstr ""
+
+#: src/plugins/export/srec.cc:113
+msgid "S37 (32-bit)"
+msgstr ""
+
+#: src/plugins/export/srec.cc:214 src/plugins/import/srec.cc:79
+msgid "Motorola S-record file (*.s19, *.s28, *.s37)"
+msgstr ""
+
+#: src/plugins/export/srec.cc:222
+msgid ""
+"The exported section is 4 GiB (2^32 bytes) or longer, which is too long for "
+"Motorola S-record files."
+msgstr ""
+
+#: src/plugins/export/carray.cc:64 src/plugins/export/carray.cc:215
+msgid "C source code"
+msgstr ""
+
+#: src/plugins/export/carray.cc:83
+msgid "signed assumes two's complement."
+msgstr ""
+
+#: src/plugins/export/carray.cc:87
+msgid "Signed"
+msgstr ""
+
+#: src/plugins/export/carray.cc:98 src/plugins/export/java.cc:94
+#: src/plugins/export/csharp.cc:95
+msgid "Determine width by"
+msgstr ""
+
+#: src/plugins/export/carray.cc:103 src/plugins/export/java.cc:99
+#: src/plugins/export/csharp.cc:100
+msgid "Bytes per line"
+msgstr ""
+
+#: src/plugins/export/carray.cc:118 src/plugins/export/java.cc:114
+#: src/plugins/export/csharp.cc:115
+msgid "Columns per line"
+msgstr ""
+
+#: src/plugins/export/carray.cc:132 src/plugins/export/java.cc:128
+#: src/plugins/export/csharp.cc:129
+msgid "Indentation"
+msgstr ""
+
+#: src/plugins/export/carray.cc:137 src/plugins/export/java.cc:133
+#: src/plugins/export/csharp.cc:134
+msgid "Use tab instead of spaces"
+msgstr ""
+
+#: src/plugins/export/carray.cc:146 src/plugins/export/java.cc:142
+#: src/plugins/export/csharp.cc:143
+msgid "Spaces to indent/per tab"
+msgstr ""
+
+#: src/plugins/export/carray.cc:157 src/plugins/export/java.cc:167
+#: src/plugins/export/csharp.cc:168
+msgid "Format"
+msgstr ""
+
+#: src/plugins/export/carray.cc:161 src/plugins/export/java.cc:171
+#: src/plugins/export/csharp.cc:172
+msgid "Encode bytes as hex"
+msgstr ""
+
+#: src/plugins/export/carray.cc:166
+msgid "Use C99 stdint type instead of char"
+msgstr ""
+
+#: src/plugins/export/carray.cc:170
+msgid "static (internal linkage)"
+msgstr ""
+
+#: src/plugins/export/carray.cc:189
+msgid ""
+"There are not enough columns for the current settings to fit a single byte "
+"on a line.\n"
+"Increase the number of columns or switch to using bytes per line instead."
+msgstr ""
+
+#: src/plugins/export/carray.cc:196 src/plugins/export/java.cc:197
+#: src/plugins/export/csharp.cc:198
+msgid "The variable name may not be empty."
+msgstr ""
+
+#: src/plugins/export/carray.cc:202 src/plugins/export/java.cc:203
+#: src/plugins/export/csharp.cc:204
+msgid ""
+"The current variable name contains characters that the system is unable to "
+"presently convert into a multibyte string.\n"
+"Please change the name so that it only uses ASCII characters."
+msgstr ""
+
+#: src/plugins/export/carray.cc:218
+msgid "C source code file (*.c)"
+msgstr ""
+
+#: src/plugins/export/java.cc:64 src/plugins/export/java.cc:216
+msgid "Java source code"
+msgstr ""
+
+#. / data type, perhaps should be left untranslated
+#: src/plugins/export/java.cc:84 src/plugins/export/csharp.cc:85
+msgid "byte"
+msgstr ""
+
+#: src/plugins/export/java.cc:156 src/plugins/export/csharp.cc:157
+msgid "Variable indent"
+msgstr ""
+
+#: src/plugins/export/java.cc:189 src/plugins/export/csharp.cc:190
+msgid ""
+"There are not enough columns for the current settings to fit a single byte "
+"on a line.\n"
+"Increase the number of columns, decrease the variable indent level or switch "
+"to using bytes per line instead."
+msgstr ""
+
+#: src/plugins/export/java.cc:219
+msgid "Java source code file (*.java)"
+msgstr ""
+
+#: src/plugins/export/csharp.cc:65 src/plugins/export/csharp.cc:217
+msgid "C# source code"
+msgstr ""
+
+#: src/plugins/export/csharp.cc:220
+msgid "C# source code file (*.cs)"
+msgstr ""
+
+#: src/plugins/export/text.cc:60 src/plugins/export/text.cc:113
+#: src/ui/textinput.cc:54 src/ui/dialogs/find.cc:62
+msgid "Text"
+msgstr ""
+
+#: src/plugins/export/text.cc:80 src/plugins/export/html.cc:82
+msgid "Column count"
+msgstr ""
+
+#: src/plugins/export/text.cc:86 src/plugins/export/html.cc:88
+#, c-format
+msgid "From editor (%s)"
+msgstr ""
+
+#: src/plugins/export/text.cc:92 src/plugins/export/html.cc:94
+msgid "Custom"
+msgstr ""
+
+#: src/plugins/export/text.cc:116
+msgid "Text file (*.txt)"
+msgstr ""
+
+#: src/plugins/export/html.cc:62 src/plugins/export/html.cc:115
+msgid "HTML"
+msgstr ""
+
+#: src/plugins/export/html.cc:118
+msgid "HTML file (*.html, *.htm)"
+msgstr ""
+
+#: src/plugins/import/intelhex.cc:61 src/plugins/import/srec.cc:61
+msgid "Verify checksums"
+msgstr ""
+
+#: src/plugins/import/intelhex.cc:97 src/plugins/import/srec.cc:97
+msgid "Unexpected end-of-file while reading line."
+msgstr ""
+
+#: src/plugins/import/intelhex.cc:101 src/plugins/import/srec.cc:101
+msgid "Invalid character while reading line; expected hex digit."
+msgstr ""
+
+#: src/plugins/import/intelhex.cc:134 src/plugins/import/srec.cc:136
+msgid "Checksum error."
+msgstr ""
+
+#: src/plugins/import/intelhex.cc:154 src/plugins/import/srec.cc:180
+msgid "Unrecognized record type."
+msgstr ""
+
+#: src/plugins/import/srec.cc:130
+msgid "Invalid record type."
 msgstr ""
 
 #: src/ui/menuhelp.cc:30
-msgid "Displays information about this application"
+msgid "&About"
 msgstr ""
 
 #: src/ui/menuhelp.cc:31
+msgid "Displays information about this application"
+msgstr ""
+
+#: src/ui/menuhelp.cc:32
 msgid "&Help"
 msgstr ""
 
-#: src/ui/menuedit.cc:30
+#: src/ui/menuedit.cc:31
 msgid "&Undo"
 msgstr ""
 
-#: src/ui/menuedit.cc:30
+#: src/ui/menuedit.cc:31
 msgid "Undoes the last action"
 msgstr ""
 
-#: src/ui/menuedit.cc:32
+#: src/ui/menuedit.cc:33
 msgid "&Redo"
 msgstr ""
 
-#: src/ui/menuedit.cc:32
+#: src/ui/menuedit.cc:33
 msgid "Redoes the last undone action"
 msgstr ""
 
-#: src/ui/menuedit.cc:35
+#: src/ui/menuedit.cc:36
 msgid "Cu&t"
 msgstr ""
 
-#: src/ui/menuedit.cc:36
+#: src/ui/menuedit.cc:37
 msgid "Copies the selection and removes it"
 msgstr ""
 
-#: src/ui/menuedit.cc:37
+#: src/ui/menuedit.cc:38
 msgid "&Copy"
 msgstr ""
 
-#: src/ui/menuedit.cc:37
+#: src/ui/menuedit.cc:38
 msgid "Copies the selection"
 msgstr ""
 
-#: src/ui/menuedit.cc:39
+#: src/ui/menuedit.cc:40
 msgid "&Paste Insert"
 msgstr ""
 
-#: src/ui/menuedit.cc:40
+#: src/ui/menuedit.cc:41
 msgid "Pastes data from the clipboard and inserts it at the caret"
 msgstr ""
 
-#: src/ui/menuedit.cc:42
+#: src/ui/menuedit.cc:43
 msgid "P&aste Overwrite"
 msgstr ""
 
-#: src/ui/menuedit.cc:43
+#: src/ui/menuedit.cc:44
 msgid "Pastes data from the clipboard, overwriting existing data"
 msgstr ""
 
-#: src/ui/menuedit.cc:45
+#: src/ui/menuedit.cc:46
 msgid "&Delete"
 msgstr ""
 
-#: src/ui/menuedit.cc:46
+#: src/ui/menuedit.cc:47
 msgid "Deletes the currently selected data"
 msgstr ""
 
-#: src/ui/menuedit.cc:49
+#: src/ui/menuedit.cc:50
 msgid "Select &all"
 msgstr ""
 
-#: src/ui/menuedit.cc:50
+#: src/ui/menuedit.cc:51
 msgid "Selects the entire file"
 msgstr ""
 
-#: src/ui/menuedit.cc:53
+#: src/ui/menuedit.cc:54
 msgid "Select &block..."
 msgstr ""
 
-#: src/ui/menuedit.cc:54
+#: src/ui/menuedit.cc:55
 msgid "Selects a block of bytes"
 msgstr ""
 
-#: src/ui/menuedit.cc:57
+#: src/ui/menuedit.cc:58
 msgid "Ins&ert or replace..."
 msgstr ""
 
-#: src/ui/menuedit.cc:58
+#: src/ui/menuedit.cc:59
 msgid "Inserts or replaces the selection with a block of bytes"
 msgstr ""
 
-#: src/ui/menuedit.cc:61
+#: src/ui/menuedit.cc:62
 msgid "Insert rando&m..."
 msgstr ""
 
-#: src/ui/menuedit.cc:62
+#: src/ui/menuedit.cc:63
 msgid "Inserts or replaces the selection with a random block of bytes"
 msgstr ""
 
-#: src/ui/menuedit.cc:66
+#: src/ui/menuedit.cc:67
 msgid "Bitwise &binary operation..."
 msgstr ""
 
-#: src/ui/menuedit.cc:67
+#: src/ui/menuedit.cc:68
 msgid "Performs a binary bitwise operation on the selected block"
 msgstr ""
 
-#: src/ui/menuedit.cc:69
+#: src/ui/menuedit.cc:70
 msgid "Bitwise &unary operation..."
 msgstr ""
 
-#: src/ui/menuedit.cc:70
+#: src/ui/menuedit.cc:71
 msgid "Performs a unary bitwise operation on the selected block"
 msgstr ""
 
-#: src/ui/menuedit.cc:72
+#: src/ui/menuedit.cc:73
 msgid "Bitwise &shift operation..."
 msgstr ""
 
-#: src/ui/menuedit.cc:73
+#: src/ui/menuedit.cc:74
 msgid "Performs a bitwise shift operation on the selected block"
 msgstr ""
 
-#: src/ui/menuedit.cc:76
+#: src/ui/menuedit.cc:77
 msgid "Byte swap (&2-byte words)"
 msgstr ""
 
-#: src/ui/menuedit.cc:77
+#: src/ui/menuedit.cc:78
 msgid "Swaps the byte order in the selected block of 2-byte words"
 msgstr ""
 
-#: src/ui/menuedit.cc:79
+#: src/ui/menuedit.cc:80
 msgid "Byte swap (&4-byte words)"
 msgstr ""
 
-#: src/ui/menuedit.cc:80
+#: src/ui/menuedit.cc:81
 msgid "Swaps the byte order in the selected block of 4-byte words"
 msgstr ""
 
-#: src/ui/menuedit.cc:82
+#: src/ui/menuedit.cc:83
 msgid "Byte swap (&8-byte words)"
 msgstr ""
 
-#: src/ui/menuedit.cc:83
+#: src/ui/menuedit.cc:84
 msgid "Swaps the byte order in the selected block of 8-byte words"
 msgstr ""
 
-#: src/ui/menuedit.cc:85
+#: src/ui/menuedit.cc:86
 msgid "Byte swap (1&6-byte words)"
 msgstr ""
 
-#: src/ui/menuedit.cc:86
+#: src/ui/menuedit.cc:87
 msgid "Swaps the byte order in the selected block of 16-byte words"
 msgstr ""
 
-#: src/ui/menuedit.cc:87
+#: src/ui/menuedit.cc:88
 msgid "Byte s&wap"
 msgstr ""
 
-#: src/ui/menuedit.cc:88
+#: src/ui/menuedit.cc:89
 msgid "Performs byte order swaps on the selection"
 msgstr ""
 
-#: src/ui/menuedit.cc:91
+#: src/ui/menuedit.cc:92
 msgid "&Reverse"
 msgstr ""
 
-#: src/ui/menuedit.cc:92
+#: src/ui/menuedit.cc:93
 msgid "Reverses the order of bytes within the selection"
 msgstr ""
 
-#: src/ui/menuedit.cc:93
+#: src/ui/menuedit.cc:94
 msgid "&Operations"
 msgstr ""
 
-#: src/ui/menuedit.cc:94
+#: src/ui/menuedit.cc:95
 msgid "Performs operations on the selection"
 msgstr ""
 
-#: src/ui/menuedit.cc:97
+#: src/ui/menuedit.cc:98
 msgid "&Insert mode"
 msgstr ""
 
-#: src/ui/menuedit.cc:98
+#: src/ui/menuedit.cc:99
 msgid "Inserts bytes typed in instead of overwriting existing ones"
 msgstr ""
 
-#: src/ui/menuedit.cc:101
+#: src/ui/menuedit.cc:102
 msgid "&Options"
 msgstr ""
 
-#: src/ui/menuedit.cc:102
+#: src/ui/menuedit.cc:103
 msgid "Opens the dialog for editing options or preferences"
 msgstr ""
 
-#: src/ui/menuedit.cc:104
+#: src/ui/menuedit.cc:105
 msgid "&Edit"
 msgstr ""
 
@@ -326,11 +637,6 @@ msgstr ""
 msgid "Exit"
 msgstr ""
 
-#: src/ui/textinput.cc:54 src/ui/dialogs/find.cc:62
-#: src/ui/plugins/export/text.cc:63 src/ui/plugins/export/text.cc:117
-msgid "Text"
-msgstr ""
-
 #: src/ui/textinput.cc:66 src/ui/tools/textconv.cc:79 src/ui/valueinput.cc:59
 msgid "Encoding"
 msgstr ""
@@ -366,111 +672,156 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/menuview.cc:32
+#: src/ui/menuview.cc:33
 msgid "&Hex and text"
 msgstr ""
 
-#: src/ui/menuview.cc:33
+#: src/ui/menuview.cc:34
 msgid "Both columns; hex and text data"
 msgstr ""
 
-#: src/ui/menuview.cc:36
+#: src/ui/menuview.cc:37
 msgid "He&x only"
 msgstr ""
 
-#: src/ui/menuview.cc:37
+#: src/ui/menuview.cc:38
 msgid "Show hex column only"
 msgstr ""
 
-#: src/ui/menuview.cc:40
+#: src/ui/menuview.cc:41
 msgid "&Text only"
 msgstr ""
 
-#: src/ui/menuview.cc:41
+#: src/ui/menuview.cc:42
 msgid "Show text column only"
 msgstr ""
 
-#: src/ui/menuview.cc:43
+#: src/ui/menuview.cc:44
 msgid "&Columns"
 msgstr ""
 
-#: src/ui/menuview.cc:44
+#: src/ui/menuview.cc:45
 msgid "Controls which columns to show"
 msgstr ""
 
-#: src/ui/menuview.cc:47
+#: src/ui/menuview.cc:48
 msgid "&Off"
 msgstr ""
 
-#: src/ui/menuview.cc:48
+#: src/ui/menuview.cc:49
 msgid "Show single-byte characters"
 msgstr ""
 
-#: src/ui/menuview.cc:51
+#: src/ui/menuview.cc:52
 msgid "UTF-16LE (little endian)"
 msgstr ""
 
-#: src/ui/menuview.cc:52
+#: src/ui/menuview.cc:53
 msgid "Show little-endian UTF-16 characters"
 msgstr ""
 
-#: src/ui/menuview.cc:55
+#: src/ui/menuview.cc:56
 msgid "UTF-16BE (big endian)"
 msgstr ""
 
-#: src/ui/menuview.cc:56
+#: src/ui/menuview.cc:57
 msgid "Show big-endian UTF-16 characters"
 msgstr ""
 
-#: src/ui/menuview.cc:59
+#: src/ui/menuview.cc:60
 msgid "UTF-32LE (little endian)"
 msgstr ""
 
-#: src/ui/menuview.cc:60
+#: src/ui/menuview.cc:61
 msgid "Show little-endian UTF-32 characters"
 msgstr ""
 
-#: src/ui/menuview.cc:63
+#: src/ui/menuview.cc:64
 msgid "UTF-32BE (big endian)"
 msgstr ""
 
-#: src/ui/menuview.cc:64
+#: src/ui/menuview.cc:65
 msgid "Show big-endian UTF-32 characters"
 msgstr ""
 
-#: src/ui/menuview.cc:66
+#: src/ui/menuview.cc:67
 msgid "&UTF mode"
 msgstr ""
 
-#: src/ui/menuview.cc:67
+#: src/ui/menuview.cc:68
 msgid "Controls UTF text mode"
 msgstr ""
 
-#: src/ui/menuview.cc:69
+#: src/ui/menuview.cc:70
 msgid "&Bit editor"
 msgstr ""
 
-#: src/ui/menuview.cc:70
+#: src/ui/menuview.cc:71
 msgid "Shows the bit editor"
 msgstr ""
 
-#: src/ui/menuview.cc:71
+#: src/ui/menuview.cc:72
 msgid "&Data inspector"
 msgstr ""
 
-#: src/ui/menuview.cc:72
+#: src/ui/menuview.cc:73
 msgid "Shows the data inspector"
 msgstr ""
 
-#: src/ui/menuview.cc:73
+#: src/ui/menuview.cc:74
 msgid "Te&xt converter"
 msgstr ""
 
-#: src/ui/menuview.cc:74
+#: src/ui/menuview.cc:75
 msgid "Shows the text converter"
 msgstr ""
 
-#: src/ui/menuview.cc:75
+#: src/ui/menuview.cc:90
+#, c-format
+msgid "Bookmark &%u"
+msgstr ""
+
+#: src/ui/menuview.cc:98
+msgid "&Jump to bookmark"
+msgstr ""
+
+#: src/ui/menuview.cc:99
+msgid "Jumps to a bookmark (jump point)"
+msgstr ""
+
+#: src/ui/menuview.cc:100
+msgid "S&et bookmark"
+msgstr ""
+
+#: src/ui/menuview.cc:101
+msgid "Sets a bookmark (jump point)"
+msgstr ""
+
+#: src/ui/menuview.cc:103
+msgid "Pre&vious bookmark"
+msgstr ""
+
+#: src/ui/menuview.cc:104
+msgid "Jumps to the bookmark closest to the cursor when going backwards if any"
+msgstr ""
+
+#: src/ui/menuview.cc:108
+msgid "Ne&xt bookmark"
+msgstr ""
+
+#: src/ui/menuview.cc:109
+msgid "Jumps to the bookmark closest to the cursor when going forwards if any"
+msgstr ""
+
+#: src/ui/menuview.cc:114
+msgid "Add subvie&w"
+msgstr ""
+
+#: src/ui/menuview.cc:115
+msgid "Adds a new subview"
+msgstr ""
+
+#: src/ui/menuview.cc:117
 msgid "&View"
 msgstr ""
 
@@ -519,158 +870,165 @@ msgstr ""
 msgid "&Search"
 msgstr ""
 
-#: src/ui/context.cc:91
+#: src/ui/context.cc:93
 msgid "Action in progress"
 msgstr ""
 
-#: src/ui/context.cc:166
+#: src/ui/context.cc:168
 #, c-format
 msgid ""
 "Backup failed:\n"
 "%s"
 msgstr ""
 
-#: src/ui/context.cc:168 src/ui/hexbed.cc:477
+#: src/ui/context.cc:170 src/ui/hexbed.cc:497
 msgid "&Retry"
 msgstr ""
 
-#: src/ui/context.cc:168
+#: src/ui/context.cc:170
 msgid "&Ignore"
 msgstr ""
 
-#: src/ui/context.cc:168
+#: src/ui/context.cc:170
 msgid "&Abort"
 msgstr ""
 
-#: src/ui/context.cc:170
+#: src/ui/context.cc:172
 msgid "'Retry' to try again, 'Ignore' to save anyway or 'Abort' to cancel."
 msgstr ""
 
-#: src/ui/context.cc:174
+#: src/ui/context.cc:176
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 
-#: src/ui/hexbed.cc:366
+#: src/ui/hexbed.cc:386
 #, c-format
 msgid "[unsaved] %s"
 msgstr ""
 
 #. / main window title bar
-#: src/ui/hexbed.cc:376 src/ui/hexbed.cc:550
+#: src/ui/hexbed.cc:396 src/ui/hexbed.cc:575
 #, c-format
 msgid "%s - %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:397
+#: src/ui/hexbed.cc:417
 msgid "Save a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:399 src/ui/hexbed.cc:1113 src/ui/plugins/export.cc:67
-#: src/ui/plugins/import.cc:52
-msgid "All files (*.*)"
-msgstr ""
-
-#: src/ui/hexbed.cc:423
+#: src/ui/hexbed.cc:443
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:451
+#: src/ui/hexbed.cc:471
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr ""
 
-#: src/ui/hexbed.cc:471
+#: src/ui/hexbed.cc:491
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:477
+#: src/ui/hexbed.cc:497
 msgid "&Cancel"
 msgstr ""
 
-#: src/ui/hexbed.cc:479
+#: src/ui/hexbed.cc:499
 msgid "Retry?"
 msgstr ""
 
-#: src/ui/hexbed.cc:504
+#: src/ui/hexbed.cc:524
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr ""
 
-#: src/ui/hexbed.cc:659
+#: src/ui/hexbed.cc:694
 #, c-format
 msgid "[read-only] %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:669
+#: src/ui/hexbed.cc:704
 #, c-format
 msgid "New-%llu"
 msgstr ""
 
-#: src/ui/hexbed.cc:674
+#: src/ui/hexbed.cc:709
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:694
+#: src/ui/hexbed.cc:729
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:703
+#: src/ui/hexbed.cc:738
 msgid "Read only"
 msgstr ""
 
-#: src/ui/hexbed.cc:746
+#: src/ui/hexbed.cc:787
 msgid "No more results found for this search."
 msgstr ""
 
-#: src/ui/hexbed.cc:752
+#: src/ui/hexbed.cc:793
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/hexbed.cc:853 src/ui/hexbed.cc:890
+#: src/ui/hexbed.cc:894 src/ui/hexbed.cc:931
 #, c-format
 msgid "Insert failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:916
+#: src/ui/hexbed.cc:957
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:936
+#: src/ui/hexbed.cc:977
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:957
+#: src/ui/hexbed.cc:998
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1112
+#: src/ui/hexbed.cc:1153
+msgid "Bookmark beyond end of document"
+msgstr ""
+
+#: src/ui/hexbed.cc:1182
+msgid "No next bookmark"
+msgstr ""
+
+#: src/ui/hexbed.cc:1196
+msgid "No previous bookmark"
+msgstr ""
+
+#: src/ui/hexbed.cc:1223
 msgid "Open a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1159
+#: src/ui/hexbed.cc:1270
 msgid "Import file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1179
+#: src/ui/hexbed.cc:1290
 #, c-format
 msgid ""
 "Error on line %llu:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1181
+#: src/ui/hexbed.cc:1292
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -678,25 +1036,25 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1189
+#: src/ui/hexbed.cc:1300
 #, c-format
 msgid ""
 "Failed to import:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1213
+#: src/ui/hexbed.cc:1324
 msgid "Export file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1250
+#: src/ui/hexbed.cc:1361
 #, c-format
 msgid ""
 "Failed to export:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1316
+#: src/ui/hexbed.cc:1427
 msgid "A hex editor."
 msgstr ""
 
@@ -1099,53 +1457,53 @@ msgstr ""
 msgid "Fit as many columns as possible"
 msgstr ""
 
-#: src/ui/settings/layout.cc:68
+#: src/ui/settings/layout.cc:67
 msgid "Number of columns"
 msgstr ""
 
 #. / group sizes
-#: src/ui/settings/layout.cc:71
+#: src/ui/settings/layout.cc:70
 msgid "Group size"
 msgstr ""
 
-#: src/ui/settings/layout.cc:72
+#: src/ui/settings/layout.cc:71
 msgid "1 (byte)"
 msgstr ""
 
-#: src/ui/settings/layout.cc:72
+#: src/ui/settings/layout.cc:71
 msgid "2 (word)"
 msgstr ""
 
-#: src/ui/settings/layout.cc:72
+#: src/ui/settings/layout.cc:71
 msgid "4 (dword)"
 msgstr ""
 
-#: src/ui/settings/layout.cc:73
+#: src/ui/settings/layout.cc:72
 msgid "8 (qword)"
 msgstr ""
 
-#: src/ui/settings/layout.cc:73
+#: src/ui/settings/layout.cc:72
 msgid "16 (oword)"
 msgstr ""
 
 #. / offset radix
-#: src/ui/settings/layout.cc:76
+#: src/ui/settings/layout.cc:75
 msgid "Offset radix"
 msgstr ""
 
-#: src/ui/settings/layout.cc:77
+#: src/ui/settings/layout.cc:76
 msgid "8 (octal)"
 msgstr ""
 
-#: src/ui/settings/layout.cc:77
+#: src/ui/settings/layout.cc:76
 msgid "10 (decimal)"
 msgstr ""
 
-#: src/ui/settings/layout.cc:77
+#: src/ui/settings/layout.cc:76
 msgid "16 (hex)"
 msgstr ""
 
-#: src/ui/settings/layout.cc:94
+#: src/ui/settings/layout.cc:93
 msgid "Text encoding"
 msgstr ""
 
@@ -1244,305 +1602,4 @@ msgstr ""
 #: src/ui/status.cc:131
 #, c-format
 msgid "Length: %s"
-msgstr ""
-
-#: src/ui/plugins/inspector/uint8.cc:38
-msgid "uint8 (unsigned 8-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/int8.cc:38
-msgid "int8 (signed 8-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/uint16.cc:39
-msgid "uint16 (unsigned 16-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/uint32.cc:39
-msgid "uint32 (unsigned 32-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/uint64.cc:39
-msgid "uint64 (unsigned 64-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/int16.cc:38
-msgid "int16 (signed 16-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/int32.cc:38
-msgid "int32 (signed 32-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/int64.cc:38
-msgid "int64 (signed 64-bit integer)"
-msgstr ""
-
-#: src/ui/plugins/inspector/float32.cc:43
-msgid "float (IEEE 754 binary32 single-precision floating-point)"
-msgstr ""
-
-#: src/ui/plugins/inspector/float64.cc:43
-msgid "double (IEEE 754 binary64 double-precision floating-point)"
-msgstr ""
-
-#: src/ui/plugins/inspector/float32x.cc:43
-msgid "Hexadecimal float (IEEE 754 binary32 single-precision floating-point)"
-msgstr ""
-
-#: src/ui/plugins/inspector/float64x.cc:44
-msgid "Hexadecimal double (IEEE 754 binary64 double-precision floating-point)"
-msgstr ""
-
-#. / format name, perhaps should not be translated
-#: src/ui/plugins/export/intelhex.cc:64 src/ui/plugins/export/intelhex.cc:208
-#: src/ui/plugins/import/intelhex.cc:47 src/ui/plugins/import/intelhex.cc:76
-msgid "Intel HEX"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:87 src/ui/plugins/export/srec.cc:87
-msgid "Bytes per row"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:97 src/ui/plugins/export/srec.cc:97
-msgid "Mode"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:101
-msgid "I8 (8080)"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:107
-msgid "I16 (8086)"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:113
-msgid "I32 (80386)"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:119 src/ui/plugins/export/srec.cc:119
-msgid "Offset base"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:125 src/ui/plugins/export/srec.cc:125
-msgid "Zero"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:133 src/ui/plugins/export/srec.cc:134
-#, c-format
-msgid "Selection (%s)"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:141 src/ui/plugins/export/srec.cc:144
-msgid "Custom:"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:195 src/ui/plugins/export/srec.cc:198
-msgid ""
-"The exported offset would be out of range for the given amount of data.\n"
-"Decrease the offset, try another mode or select less data to export."
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:211 src/ui/plugins/import/intelhex.cc:79
-msgid "Intel HEX file (*.hex, *.h86)"
-msgstr ""
-
-#: src/ui/plugins/export/intelhex.cc:219
-msgid ""
-"The exported section is 4 GiB (2^32 bytes) or longer, which is too long for "
-"Intel HEX files."
-msgstr ""
-
-#. / format name, perhaps should not be translated
-#: src/ui/plugins/export/srec.cc:63 src/ui/plugins/export/srec.cc:211
-#: src/ui/plugins/import/srec.cc:47 src/ui/plugins/import/srec.cc:76
-msgid "Motorola S-record"
-msgstr ""
-
-#: src/ui/plugins/export/srec.cc:101
-msgid "S19 (16-bit)"
-msgstr ""
-
-#: src/ui/plugins/export/srec.cc:107
-msgid "S28 (24-bit)"
-msgstr ""
-
-#: src/ui/plugins/export/srec.cc:113
-msgid "S37 (32-bit)"
-msgstr ""
-
-#: src/ui/plugins/export/srec.cc:214 src/ui/plugins/import/srec.cc:79
-msgid "Motorola S-record file (*.s19, *.s28, *.s37)"
-msgstr ""
-
-#: src/ui/plugins/export/srec.cc:222
-msgid ""
-"The exported section is 4 GiB (2^32 bytes) or longer, which is too long for "
-"Motorola S-record files."
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:67 src/ui/plugins/export/carray.cc:218
-msgid "C source code"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:86
-msgid "signed assumes two's complement."
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:90
-msgid "Signed"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:101 src/ui/plugins/export/java.cc:97
-#: src/ui/plugins/export/csharp.cc:98
-msgid "Determine width by"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:106 src/ui/plugins/export/java.cc:102
-#: src/ui/plugins/export/csharp.cc:103
-msgid "Bytes per line"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:121 src/ui/plugins/export/java.cc:117
-#: src/ui/plugins/export/csharp.cc:118
-msgid "Columns per line"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:135 src/ui/plugins/export/java.cc:131
-#: src/ui/plugins/export/csharp.cc:132
-msgid "Indentation"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:140 src/ui/plugins/export/java.cc:136
-#: src/ui/plugins/export/csharp.cc:137
-msgid "Use tab instead of spaces"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:149 src/ui/plugins/export/java.cc:145
-#: src/ui/plugins/export/csharp.cc:146
-msgid "Spaces to indent/per tab"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:160 src/ui/plugins/export/java.cc:170
-#: src/ui/plugins/export/csharp.cc:171
-msgid "Format"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:164 src/ui/plugins/export/java.cc:174
-#: src/ui/plugins/export/csharp.cc:175
-msgid "Encode bytes as hex"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:169
-msgid "Use C99 stdint type instead of char"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:173
-msgid "static (internal linkage)"
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:192
-msgid ""
-"There are not enough columns for the current settings to fit a single byte "
-"on a line.\n"
-"Increase the number of columns or switch to using bytes per line instead."
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:199 src/ui/plugins/export/java.cc:200
-#: src/ui/plugins/export/csharp.cc:201
-msgid "The variable name may not be empty."
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:205 src/ui/plugins/export/java.cc:206
-#: src/ui/plugins/export/csharp.cc:207
-msgid ""
-"The current variable name contains characters that the system is unable to "
-"presently convert into a multibyte string.\n"
-"Please change the name so that it only uses ASCII characters."
-msgstr ""
-
-#: src/ui/plugins/export/carray.cc:221
-msgid "C source code file (*.c)"
-msgstr ""
-
-#: src/ui/plugins/export/java.cc:67 src/ui/plugins/export/java.cc:219
-msgid "Java source code"
-msgstr ""
-
-#. / data type, perhaps should be left untranslated
-#: src/ui/plugins/export/java.cc:87 src/ui/plugins/export/csharp.cc:88
-msgid "byte"
-msgstr ""
-
-#: src/ui/plugins/export/java.cc:159 src/ui/plugins/export/csharp.cc:160
-msgid "Variable indent"
-msgstr ""
-
-#: src/ui/plugins/export/java.cc:192 src/ui/plugins/export/csharp.cc:193
-msgid ""
-"There are not enough columns for the current settings to fit a single byte "
-"on a line.\n"
-"Increase the number of columns, decrease the variable indent level or switch "
-"to using bytes per line instead."
-msgstr ""
-
-#: src/ui/plugins/export/java.cc:222
-msgid "Java source code file (*.java)"
-msgstr ""
-
-#: src/ui/plugins/export/csharp.cc:68 src/ui/plugins/export/csharp.cc:220
-msgid "C# source code"
-msgstr ""
-
-#: src/ui/plugins/export/csharp.cc:223
-msgid "C# source code file (*.cs)"
-msgstr ""
-
-#: src/ui/plugins/export/text.cc:84 src/ui/plugins/export/html.cc:86
-msgid "Column count"
-msgstr ""
-
-#: src/ui/plugins/export/text.cc:90 src/ui/plugins/export/html.cc:92
-#, c-format
-msgid "From editor (%s)"
-msgstr ""
-
-#: src/ui/plugins/export/text.cc:96 src/ui/plugins/export/html.cc:98
-msgid "Custom"
-msgstr ""
-
-#: src/ui/plugins/export/text.cc:120
-msgid "Text file (*.txt)"
-msgstr ""
-
-#: src/ui/plugins/export/html.cc:65 src/ui/plugins/export/html.cc:119
-msgid "HTML"
-msgstr ""
-
-#: src/ui/plugins/export/html.cc:122
-msgid "HTML file (*.html, *.htm)"
-msgstr ""
-
-#: src/ui/plugins/import/intelhex.cc:61 src/ui/plugins/import/srec.cc:61
-msgid "Verify checksums"
-msgstr ""
-
-#: src/ui/plugins/import/intelhex.cc:97 src/ui/plugins/import/srec.cc:97
-msgid "Unexpected end-of-file while reading line."
-msgstr ""
-
-#: src/ui/plugins/import/intelhex.cc:101 src/ui/plugins/import/srec.cc:101
-msgid "Invalid character while reading line; expected hex digit."
-msgstr ""
-
-#: src/ui/plugins/import/intelhex.cc:134 src/ui/plugins/import/srec.cc:136
-msgid "Checksum error."
-msgstr ""
-
-#: src/ui/plugins/import/intelhex.cc:154 src/ui/plugins/import/srec.cc:180
-msgid "Unrecognized record type."
-msgstr ""
-
-#: src/ui/plugins/import/srec.cc:130
-msgid "Invalid record type."
 msgstr ""
