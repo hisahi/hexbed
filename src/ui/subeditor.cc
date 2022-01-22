@@ -36,7 +36,7 @@ void HexBedSubEditor::OnMainFileClose() { subviewParent_->OnMainFileClose(); }
 
 HexBedSubView::HexBedSubView(HexBedMainFrame* frame, HexBedContextMain* ctx,
                              const std::shared_ptr<HexBedDocument>& document,
-                             const wxString& title)
+                             const wxString& title, bufsize pos)
     : wxFrame(frame, wxID_ANY, title, wxDefaultPosition, wxDefaultSize,
               wxRESIZE_BORDER | wxCAPTION | wxCLOSE_BOX | wxCLIP_CHILDREN),
       ctx_(ctx) {
@@ -45,6 +45,7 @@ HexBedSubView::HexBedSubView(HexBedMainFrame* frame, HexBedContextMain* ctx,
                wxSizerFlags().Expand().Proportion(1));
     SetSizer(sizer);
     ctx->addWindow(editor_, true);
+    editor_->SelectBytes(pos, 0, SelectFlags().highlightBeginning());
 }
 
 HexBedSubView::~HexBedSubView() { ctx_->removeWindow(editor_); }

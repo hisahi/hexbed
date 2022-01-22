@@ -28,6 +28,7 @@
 #include "app/config.hh"
 #include "common/logger.hh"
 #include "ui/config.hh"
+#include "ui/dialogs/jump.hh"
 #include "ui/hexbed.hh"
 #include "ui/hexedit.hh"
 
@@ -155,6 +156,9 @@ HexBedEditor::HexBedEditor(HexBedMainFrame* frame, wxWindow* parent,
 
     grid_->AddGrowableRow(0);
     grid_->AddGrowableCol(2);
+
+    colOffset_->Bind(wxEVT_LEFT_DCLICK, &HexBedEditor::OnOffsetDoubleClick,
+                     this);
 
     Bind(wxEVT_SIZE, &HexBedEditor::OnResize, this);
     Bind(wxEVT_TIMER, &HexBedEditor::OnResizeTimer, this);
@@ -525,6 +529,19 @@ void HexBedEditor::BringOffsetToScreen(bufsize offset) {
         DisplayUpdate();
     } else if (scroll_->GetThumbPositionLong() > maxRow) {
         scroll_->SetThumbPositionLong(maxRow);
+        ScrollUpdate();
+        DisplayUpdate();
+    }
+}
+
+void HexBedEditor::OnOffsetDoubleClick(wxMouseEvent& event) {
+    OffsetJumpDialog dial{this, hexEdit_->GetCaretPosition(),
+                          document().size()};
+    if (dial.ShowModal() == wxID_OK) {
+        bufsize o = dial.GetOffset() / config().hexColumns;
+        hexEdit_->SelectBytes(dial.GetOffset(), 0, SelectFlags());
+        if (o == scroll_->GetThumbPositionLong()) return;
+        scroll_->SetThumbPositionLong(o);
         ScrollUpdate();
         DisplayUpdate();
     }

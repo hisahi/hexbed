@@ -17,52 +17,48 @@
 /* along with this program.  If not, see <https://www.gnu.org/licenses/>.   */
 /*                                                                          */
 /****************************************************************************/
-// ui/subeditor.hh -- header for the HexBed subview editor class
+// ui/dialog/jump.hh -- header for the jump (quick go to) dialog
 
-#ifndef HEXBED_UI_SUBEDITOR_HH
-#define HEXBED_UI_SUBEDITOR_HH
+#ifndef HEXBED_UI_DIALOG_JUMP_HH
+#define HEXBED_UI_DIALOG_JUMP_HH
 
-#include <wx/frame.h>
+#include <wx/button.h>
+#include <wx/dialog.h>
+#include <wx/stattext.h>
+#include <wx/textctrl.h>
 
-#include "ui/editor.hh"
+#include "common/types.hh"
+#include "ui/dialogs/radixpicker.hh"
 
 namespace hexbed {
+
 namespace ui {
 
-class HexBedSubView;
-
-class HexBedSubEditor : public HexBedEditor {
+class OffsetJumpDialog : public wxDialog {
   public:
-    HexBedSubEditor(HexBedMainFrame* frame, HexBedSubView* parent,
-                    HexBedContextMain* ctx,
-                    std::shared_ptr<HexBedDocument> document);
+    OffsetJumpDialog(wxWindow* parent, bufsize cur, bufsize end);
+    bufsize GetOffset() const noexcept;
 
-    inline bool IsSubView() const override { return true; }
-    void OnMainFileClose();
+  protected:
+    void OnOK(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+
+    void OnTextInput(wxCommandEvent& event);
 
   private:
-    HexBedSubView* subviewParent_;
-};
+    void EndDialog(int result);
 
-class HexBedSubView : public wxFrame {
-  public:
-    HexBedSubView(HexBedMainFrame* frame, HexBedContextMain* ctx,
-                  const std::shared_ptr<HexBedDocument>& document,
-                  const wxString& title, bufsize pos);
-    HexBedSubView(const HexBedSubView& copy) = delete;
-    HexBedSubView(HexBedSubView&& move) = delete;
-    HexBedSubView& operator=(const HexBedSubView& copy) = delete;
-    HexBedSubView& operator=(HexBedSubView&& move) = delete;
-    ~HexBedSubView();
+    bool CheckInput();
 
-    void OnMainFileClose();
+    wxTextCtrl* text_;
+    wxButton* okButton_;
 
-  private:
-    HexBedContextMain* ctx_;
-    HexBedSubEditor* editor_;
+    bufsize cur_;
+    bufsize end_;
 };
 
 };  // namespace ui
+
 };  // namespace hexbed
 
-#endif /* HEXBED_UI_SUBEDITOR_HH */
+#endif /* HEXBED_UI_DIALOG_JUMP_HH */

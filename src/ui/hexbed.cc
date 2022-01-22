@@ -1202,7 +1202,8 @@ void HexBedMainFrame::OnViewNewSubView(wxCommandEvent& event) {
     if (ed) {
         auto view = new hexbed::ui::HexBedSubView(
             this, context_.get(), ed->copyDocument(),
-            pathToWxString(ed->document().path().filename()));
+            pathToWxString(ed->document().path().filename()),
+            ed->GetCaretPosition());
         view->Show();
         view->SetFocus();
     }

@@ -605,27 +605,29 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
     TrebleNode* node = res.it.get();
     HEXBED_ASSERT(node, "trying to replace beyond file!");
     if (count == node->length()) {
-        /* replace full block */
+        // replace full block
         bytespan span = usurp(node);
         f(span.begin(), span.end());
         return;
     }
     if (!node->data()) {
         if (res.suboffset) {
+            // split original node to the left
             splitLeft(node, res.suboffset);
             res.suboffset = 0;
-        } else if (index && node->length() >= count) {
+        } else if (index && count <= node->length()) {
+            // special case if we are replacing data within only one
+            // implicit node; try to find previous node and check if it's
+            // explicit. if so, append there
             TrebleNode* pnode = res.it->predecessor();
             if (pnode && pnode->data()) {
                 bufsize l = pnode->length();
                 bufsize nc = expandCapacity(l, count);
-                if (pnode->capacity() < nc) {
-                    renewTrebleData(*pnode, nc);
-                    pnode->capacity(nc);
-                }
+                if (pnode->capacity() < nc) renewTrebleData(*pnode, nc);
                 byte* d = pnode->data() + l;
                 pnode->lengthAdd(count);
                 f(d, d + count);
+                node->offsetAdd(count);
                 if (!(node->lengthSub(count))) tryMerge(erase(node));
                 return;
             }
@@ -634,6 +636,7 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
     while (count) {
         bufsize l = node->length() - res.suboffset;
         if (count < l && !node->data()) {
+            // split original node to the right
             l = res.suboffset + count;
             splitRight(node, l, true);
         }
@@ -684,6 +687,7 @@ void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
         // inserting new data to the end of the file
         node = root_->maximum();
         if (!node->data()) {
+            // add new node
             auto newnode = newTrebleNode(node, count);
             bufsize zz = roundCapacity<true>(count);
             newnode->offset(index);
@@ -692,42 +696,43 @@ void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
             d = newnode->data();
             insertRight(node, std::move(newnode));
         } else {
+            // append to existing explicit data node
             bufsize l = node->length();
             bufsize nc = expandCapacity(l, count);
-            if (node->capacity() < nc) {
-                renewTrebleData(*node, nc);
-                node->capacity(nc);
-            }
+            if (node->capacity() < nc) renewTrebleData(*node, nc);
             d = node->data() + l;
             node->lengthAdd(count);
         }
         f(d, d + count);
         return;
     }
+    // find *previous* node
     bool zero = !index;
     TrebleFindResult res = find(zero ? index : index - 1);
     if (!zero) ++res.suboffset;
     node = res.it.get();
     if (!node->data() && res.suboffset == node->length()) {
+        // if previous node is implicit, maybe the next node isn't
+        // if its size is below the shift threshold, try it instead
         TrebleNode* node2 = node->successor();
         if (node2->data() && node2->length() < INSERT_SUBBLOCK_THRESHOLD) {
             node = node2;
+            res.suboffset = 0;
         }
     }
     if (!node->data()) {
+        // split implicit node both ways
         if (res.suboffset) splitLeft(node, res.suboffset);
         if (node->length()) splitRight(node, 0, false);
         bytespan span = usurpNew(node, count);
         f(span.begin(), span.end());
         return;
     }
-    if (node->length() - res.suboffset < INSERT_SUBBLOCK_THRESHOLD) {
+    if (node->length() - res.suboffset <= INSERT_SUBBLOCK_THRESHOLD) {
+        // try inserting data into the middle of an explicit node
         bufsize l = node->length();
         bufsize nc = expandCapacity(l, count);
-        if (node->capacity() < nc) {
-            renewTrebleData(*node, nc);
-            node->capacity(nc);
-        }
+        if (node->capacity() < nc) renewTrebleData(*node, nc);
         byte* p = node->data();
         d = p + res.suboffset;
         memCopyBack(d + count, d, l - res.suboffset);
@@ -735,10 +740,7 @@ void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
         splitRight(node, res.suboffset, false);
         bufsize l = res.suboffset;
         bufsize nc = expandCapacity(l, count);
-        if (node->capacity() < nc) {
-            renewTrebleData(*node, nc);
-            node->capacity(nc);
-        }
+        if (node->capacity() < nc) renewTrebleData(*node, nc);
         d = node->data() + l;
     }
     node->lengthAdd(count);
@@ -778,13 +780,11 @@ void Treble::reinsert(bufsize index, bufsize count, bufsize offset) {
     LOG_TREBLE("reinsert(" << index << ", " << count << ", " << offset << ")");
     if (index == total_) {
         // inserting old data to the end of the file
-        TrebleFindResult res = find(index - 1);
-        TrebleNode* node = res.it.get();
+        TrebleNode* node = root_->maximum();
         if (!node->data() && node->offset() + node->length() == offset) {
             node->lengthAdd(count);
             return;
         }
-        node = root_->maximum();
         auto newnode = newTrebleNode(node, count);
         newnode->offset(offset);
         insertRight(node, std::move(newnode));
