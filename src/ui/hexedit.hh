@@ -104,7 +104,7 @@ class HexEditor : public wxWindow {
     void OnResize(wxSizeEvent& event);
     void OnLMouseDown(wxMouseEvent& event);
     void OnLMouseUp(wxMouseEvent& event);
-    void OnRMouseDown(wxMouseEvent& event);
+    void OnMMouseDown(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
     void OnSetCursor(wxSetCursorEvent& event);
     void OnScrollTimer(wxTimerEvent& event);

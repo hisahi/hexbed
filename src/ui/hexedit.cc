@@ -70,7 +70,7 @@ HexEditor::HexEditor(wxWindow* parent, HexEditorParent* editor)
     Bind(wxEVT_ERASE_BACKGROUND, &HexEditor::OnEraseBackground, this);
     Bind(wxEVT_LEFT_DOWN, &HexEditor::OnLMouseDown, this);
     Bind(wxEVT_LEFT_UP, &HexEditor::OnLMouseUp, this);
-    Bind(wxEVT_RIGHT_DOWN, &HexEditor::OnRMouseDown, this);
+    Bind(wxEVT_MIDDLE_DOWN, &HexEditor::OnMMouseDown, this);
     Bind(wxEVT_MOTION, &HexEditor::OnMouseMove, this);
     Bind(wxEVT_SET_CURSOR, &HexEditor::OnSetCursor, this);
     Bind(wxEVT_TIMER, &HexEditor::OnScrollTimer, this);
@@ -301,7 +301,13 @@ void HexEditor::DoCtrlCut() {
     bufsize sel = seln_ ? sel_ : cur_;
     bufsize seln = seldown_ ? 0 : seln_;
     if (!DoEditorCopy()) return;
-    if (document().remove(sel, seln)) {
+    bool removeOk;
+    try {
+        removeOk = document().remove(sel, seln);
+    } catch (const std::bad_alloc&) {
+        return;
+    }
+    if (removeOk) {
         SelectBytes(sel, 0, SelectFlags().highlightCaret());
         HintBytesChanged(sel);
     }
@@ -348,7 +354,12 @@ void HexEditor::DoCtrlPasteOverwrite() { DoEditorPaste(false); }
 
 void HexEditor::DoCtrlUndo() {
     if (document().canUndo()) {
-        HexBedRange sel = document().undo();
+        HexBedRange sel;
+        try {
+            document().undo();
+        } catch (const std::bad_alloc&) {
+            return;
+        }
         HintBytesChanged(0);
         OnUndoRedo();
         SelectBytes(sel.offset, sel.length,
@@ -358,7 +369,12 @@ void HexEditor::DoCtrlUndo() {
 
 void HexEditor::DoCtrlRedo() {
     if (document().canRedo()) {
-        HexBedRange sel = document().redo();
+        HexBedRange sel;
+        try {
+            sel = document().redo();
+        } catch (const std::bad_alloc&) {
+            return;
+        }
         HintBytesChanged(0);
         OnUndoRedo();
         SelectBytes(sel.offset, sel.length,
@@ -661,29 +677,41 @@ void HexEditor::HintBytesChanged(bufsize begin, bufsize end) {
 
 void HexEditor::DoReplaceByte(byte v) {
     if (seln_) Deselect();
-    document().impose(cur_, v);
+    try {
+        document().impose(cur_, v);
+    } catch (const std::bad_alloc&) {
+    }
     // HintByteChanged(cur_); roundtrip
 }
 
 void HexEditor::DoInsertByte(byte v) {
-    if (seln_) {
-        cur_ = sel_;
-        document().replace(sel_, seln_, 1, v);
-        Deselect();
-        parent_->OnCaretMoved();
-    } else {
-        document().insert(cur_, v);
+    try {
+        if (seln_) {
+            cur_ = sel_;
+            document().replace(sel_, seln_, 1, v);
+            Deselect();
+            parent_->OnCaretMoved();
+        } else {
+            document().insert(cur_, v);
+        }
+    } catch (const std::bad_alloc&) {
     }
     // HintBytesChanged(cur_); roundtrip
 }
 
 void HexEditor::DoRemoveByte(bufsize offset) {
-    document().remove(offset);
+    try {
+        document().remove(offset);
+    } catch (const std::bad_alloc&) {
+    }
     // HintBytesChanged(offset); roundtrip
 }
 
 void HexEditor::DoRemoveBytes(bufsize offset, bufsize len) {
-    document().remove(offset, len);
+    try {
+        document().remove(offset, len);
+    } catch (const std::bad_alloc&) {
+    }
     // HintBytesChanged(offset); roundtrip
 }
 
@@ -743,13 +771,17 @@ void HexEditor::HandleUnicodeTextInput(char32_t u) {
     }
     cur_ &= ~(g - 1);
     parent_->BringOffsetToScreen(cur_);
-    if (context().state.insert || cur_ == off_ + bufn_) {
-        document().insert(cur_, const_bytespan{tmp, n});
-    } else {
-        document().replace(cur_,
-                           static_cast<std::size_t>(
-                               std::min<bufsize>(n, document().size() - cur_)),
-                           const_bytespan{tmp, n});
+    try {
+        if (context().state.insert || cur_ == off_ + bufn_) {
+            document().insert(cur_, const_bytespan{tmp, n});
+        } else {
+            document().replace(cur_,
+                               static_cast<std::size_t>(std::min<bufsize>(
+                                   n, document().size() - cur_)),
+                               const_bytespan{tmp, n});
+        }
+    } catch (const std::bad_alloc&) {
+        return;
     }
     UpdateCaret(cur_ + g);
 }
@@ -1052,11 +1084,12 @@ void HexEditor::OnLMouseUp(wxMouseEvent& event) {
     event.Skip();
 }
 
-void HexEditor::OnRMouseDown(wxMouseEvent& event) {
+void HexEditor::OnMMouseDown(wxMouseEvent& event) {
     HitPoint hit;
     if (HitPos(event.GetX(), event.GetY(), hit, false)) {
         if (std::exchange(curtext_, hit.text) != hit.text) Redraw();
     }
+    event.Skip();
 }
 
 void HexEditor::OnMouseMove(wxMouseEvent& event) {

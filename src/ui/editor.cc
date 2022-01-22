@@ -173,6 +173,7 @@ HexBedEditor::HexBedEditor(HexBedMainFrame* frame, wxWindow* parent,
     scroll_->Bind(wxEVT_SCROLL_THUMBRELEASE, &HexBedEditor::OnScroll, this);
     scroll_->Bind(wxEVT_SCROLL_CHANGED, &HexBedEditor::OnScroll, this);
 
+    hexEdit_->Bind(wxEVT_CONTEXT_MENU, &HexBedEditor::OnContextMenu, this);
     hexEdit_->Bind(wxEVT_MOUSEWHEEL, &HexBedEditor::OnMouseWheel, this);
     Layout();
     cols_ = 0;  // force a first-time row/column count update
@@ -472,6 +473,11 @@ void HexBedEditor::OnMouseWheel(wxMouseEvent& event) {
         ScrollUpdate();
         DisplayUpdate();
     }
+}
+
+void HexBedEditor::OnContextMenu(wxContextMenuEvent& event) {
+    wxMenu* menu = frame_->GetEditorContextMenu();
+    if (menu) wxWindow::PopupMenu(menu);
 }
 
 template <std::size_t M>

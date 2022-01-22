@@ -235,6 +235,7 @@ class HexBedEditor : public wxPanel, public HexEditorParent {
     void OnResizeTimer(wxTimerEvent& event);
     void OnScroll(wxScrollEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
+    void OnContextMenu(wxContextMenuEvent& event);
     void OnOffsetDoubleClick(wxMouseEvent& event);
 
   private:

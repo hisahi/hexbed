@@ -64,6 +64,7 @@ class HexBedMainFrame : public wxFrame {
     bool DoFindPrevious();
     void OnReplaceDone(bufsize count);
     void OnActiveEditorResize();
+    wxMenu* GetEditorContextMenu();
 
     void Attention(const wxString& text);
 
@@ -177,6 +178,7 @@ class HexBedMainFrame : public wxFrame {
     std::unique_ptr<DataInspector> dataInspector_;
     std::unique_ptr<TextConverterTool> textConverter_;
     hexbed::menu::MenuIds menuIds_;
+    std::unique_ptr<wxMenu> editContextMenu_;
 };
 
 };  // namespace ui

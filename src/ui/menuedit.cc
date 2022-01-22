@@ -106,5 +106,23 @@ wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
     return menuEdit;
 }
 
+wxMenu* createEditContextMenu(MenuIds& menus) {
+    wxMenu* menuContext = new wxMenu;
+    menuContext->Append(wxID_UNDO, _("&Undo"));
+    menuContext->Append(wxID_REDO, _("&Redo"));
+    menuContext->AppendSeparator();
+    menuContext->Append(wxID_CUT, _("Cu&t"));
+    menuContext->Append(wxID_COPY, _("&Copy"));
+    menuContext->Append(wxID_PASTE, _("&Paste Insert"));
+    menuContext->Append(MenuEdit_PasteReplace, _("P&aste Overwrite"));
+    menuContext->Append(wxID_DELETE, _("&Delete"));
+    menuContext->AppendSeparator();
+    menuContext->Append(wxID_SELECTALL, _("Select &all"));
+    menuContext->Append(MenuEdit_SelectRange, _("Select &block..."));
+    menuContext->AppendSeparator();
+    menuContext->Append(MenuEdit_CopyOffset, _("Cop&y offset"));
+    return menuContext;
+}
+
 };  // namespace menu
 };  // namespace hexbed

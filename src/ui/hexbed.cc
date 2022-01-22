@@ -75,6 +75,7 @@ class HexBedWxApp : public wxApp {
   public:
     virtual bool OnInit();
     virtual int OnExit();
+    virtual bool OnExceptionInMainLoop();
 
   private:
     HexBedMainFrame* window_;
@@ -271,6 +272,25 @@ int HexBedWxApp::OnExit() {
     return 0;
 }
 
+bool HexBedWxApp::OnExceptionInMainLoop() {
+    try {
+        throw;
+    } catch (const std::bad_alloc& e) {
+        try {
+            wxMessageBox(wxString::Format(_("Out of memory: %s."), e.what()),
+                         "HexBed", wxOK | wxICON_ERROR);
+        } catch (...) {
+            try {
+                wxMessageBox(_("Out of memory."), "HexBed",
+                             wxOK | wxICON_ERROR);
+            } catch (...) {
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 static int addImportPlugins(HexBedMainFrame* main, wxMenu* menu, int n) {
     if (!n) return wxID_NONE;
     int id = wxWindow::NewControlId(n);
@@ -311,6 +331,7 @@ HexBedMainFrame::HexBedMainFrame()
     hexbed::menu::createSearchMenu(menuBar, fileOnlyMenuItems_, menuIds_);
     hexbed::menu::createViewMenu(menuBar, fileOnlyMenuItems_, menuIds_);
     hexbed::menu::createHelpMenu(menuBar, fileOnlyMenuItems_, menuIds_);
+    editContextMenu_ = std::unique_ptr<wxMenu>(createEditContextMenu(menuIds_));
     wxToolBar* toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
     hexbed::menu::populateToolBar(toolBar, fileOnlyToolItems_);
     toolBar->Show(true);
@@ -597,6 +618,14 @@ void HexBedMainFrame::InitMenuEnabled() {
     mbar.Enable(wxID_DELETE, false);
     mbar.Enable(wxID_UNDO, false);
     mbar.Enable(wxID_REDO, false);
+
+    editContextMenu_->Enable(wxID_CUT, false);
+    editContextMenu_->Enable(wxID_COPY, false);
+    editContextMenu_->Enable(wxID_PASTE, false);
+    editContextMenu_->Enable(hexbed::menu::MenuEdit_PasteReplace, false);
+    editContextMenu_->Enable(wxID_DELETE, false);
+    editContextMenu_->Enable(wxID_UNDO, false);
+    editContextMenu_->Enable(wxID_REDO, false);
 }
 
 void HexBedMainFrame::UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& ed) {
@@ -617,12 +646,19 @@ void HexBedMainFrame::UpdateMenuEnabledSelect(hexbed::ui::HexEditorParent& ed) {
     mbar.Enable(hexbed::menu::MenuEdit_ByteSwap8, selwr && !(seln & 7));
     mbar.Enable(hexbed::menu::MenuEdit_ByteSwap16, selwr && !(seln & 15));
     mbar.Enable(hexbed::menu::MenuEdit_Reverse, selwr);
+
+    editContextMenu_->Enable(wxID_CUT, selwr);
+    editContextMenu_->Enable(wxID_COPY, selhas);
+    editContextMenu_->Enable(wxID_DELETE, selwr);
 }
 
 void HexBedMainFrame::OnUndoRedo(hexbed::ui::HexEditorParent& ed) {
     wxMenuBar& mbar = *GetMenuBar();
     mbar.Enable(wxID_UNDO, ed.document().canUndo());
     mbar.Enable(wxID_REDO, ed.document().canRedo());
+
+    editContextMenu_->Enable(wxID_UNDO, ed.document().canUndo());
+    editContextMenu_->Enable(wxID_REDO, ed.document().canRedo());
 }
 
 void HexBedMainFrame::OnEditorCopy(hexbed::ui::HexEditorParent& ed) {
@@ -630,6 +666,9 @@ void HexBedMainFrame::OnEditorCopy(hexbed::ui::HexEditorParent& ed) {
     bool hasClip = !ed.document().readOnly() && hexbed::clip::HasClipboard();
     mbar.Enable(wxID_PASTE, hasClip);
     mbar.Enable(hexbed::menu::MenuEdit_PasteReplace, hasClip);
+
+    editContextMenu_->Enable(wxID_PASTE, hasClip);
+    editContextMenu_->Enable(hexbed::menu::MenuEdit_PasteReplace, hasClip);
 }
 
 void HexBedMainFrame::UpdateMenuEnabled(hexbed::ui::HexEditorParent& ed) {
@@ -794,6 +833,10 @@ void HexBedMainFrame::OnReplaceDone(bufsize count) {
                                 "Found and replaced %llu matches.", count),
                          count),
         "HexBed", wxOK | wxICON_INFORMATION);
+}
+
+wxMenu* HexBedMainFrame::GetEditorContextMenu() {
+    return editContextMenu_.get();
 }
 
 hexbed::ui::HexEditorParent* HexBedMainFrame::GetCurrentEditor() {

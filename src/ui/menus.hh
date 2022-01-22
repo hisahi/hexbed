@@ -54,6 +54,7 @@ enum {
     MenuEdit_ByteSwap8,
     MenuEdit_ByteSwap16,
     MenuEdit_Reverse,
+    MenuEdit_CopyOffset,
 
     MenuSearch_FindNext = 0x300,
     MenuSearch_FindPrevious,
@@ -102,6 +103,7 @@ wxMenu* createFileMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
 // menuedit.cc
 wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
                        MenuIds& menus);
+wxMenu* createEditContextMenu(MenuIds& menus);
 // menusearch.cc
 wxMenu* createSearchMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
                          MenuIds& menus);
