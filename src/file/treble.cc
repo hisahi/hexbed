@@ -21,8 +21,11 @@
 
 #include "file/treble.hh"
 
-//#define TREBLE_CALL_DEBUG 1
+#ifndef NDEBUG
+#define TREBLE_CALL_DEBUG 1
 //#define TREBLE_TREE_DEBUG 1
+#define TREBLE_SANITY_DEBUG 1
+#endif
 
 #include <cmath>
 #if TREBLE_CALL_DEBUG || TREBLE_TREE_DEBUG
@@ -161,7 +164,7 @@ static void printTreble(TrebleNode* node, unsigned depth = 0) {
     std::cerr << pref << "\\ Left";
     if (node->left()) {
         std::cerr << "\n";
-        HEXBED_ASSERT(node->left()->parent_ == node, "broken parent link");
+        HEXBED_ASSERT(node->left()->parent() == node, "broken parent link");
         printTreble(node->left(), depth + 2);
     } else
         std::cerr << " ---";
@@ -169,7 +172,7 @@ static void printTreble(TrebleNode* node, unsigned depth = 0) {
     std::cerr << pref << "\\ Right";
     if (node->right()) {
         std::cerr << "\n";
-        HEXBED_ASSERT(node->right()->parent_ == node, "broken parent link");
+        HEXBED_ASSERT(node->right()->parent() == node, "broken parent link");
         printTreble(node->right(), depth + 2);
     } else
         std::cerr << " ---";
@@ -179,6 +182,39 @@ static void printTreble(TrebleNode* node, unsigned depth = 0) {
 #else
 #define PRINT_TREBLE() HEXBED_NOOP
 #endif
+
+#if TREBLE_SANITY_DEBUG
+static void checkTrebleSanity(TrebleNode* node) {
+    if (node->left()) {
+        TrebleNode* l = node->left();
+        HEXBED_ASSERT(l->parent() == node,
+                      "sanity check failed: broken parent link on left child");
+        checkTrebleSanity(l);
+        bufsize ll = 0;
+        do {
+            ll += l->leftlen();
+            ll += l->length();
+        } while ((l = l->right()));
+        HEXBED_ASSERT(node->leftlen() == ll,
+                    "sanity check failed: invalid leftlen on node");
+    } else {
+        HEXBED_ASSERT(!node->leftlen(),
+                    "sanity check failed: invalid leftlen on node");
+    }
+    if (node->right()) {
+        HEXBED_ASSERT(node->right()->parent() == node,
+                      "sanity check failed: broken parent link on right child");
+        checkTrebleSanity(node->right());
+    }
+}
+#define CHECK_TREBLE() checkTrebleSanity(root_.get())
+#else
+#define CHECK_TREBLE() HEXBED_NOOP
+#endif
+
+#define TREBLE_AFTER_OP() \
+    CHECK_TREBLE();       \
+    PRINT_TREBLE()
 
 #if TREBLE_CALL_DEBUG
 #define L_HEX(v)                                          \
@@ -410,7 +446,7 @@ TrebleNode* Treble::erase(TrebleNode* node) {
         if (node->left()) {
             succ = child->minimum();
             if (child == succ) {
-                // succ->parent == child, node->right == child
+                // replace node with child
                 owner = std::exchange(plink, std::move(node->rightLink()));
                 child->parent(parent);
                 if ((child->leftLink() = std::move(node->leftLink())))
@@ -457,9 +493,12 @@ TrebleNode* Treble::tryMerge(TrebleNode* node) {
     if (prec && !node->data() && !prec->data() &&
         prec->offset() + prec->length() == node->offset()) {
         node->offset(prec->offset());
-        propagate(prec, prec->length(), 0);
+
+        propagate(node, 0, prec->length());
         node->lengthAdd(prec->length());
+        propagate(prec, prec->length(), 0);
         prec->length(0);
+
         [[maybe_unused]] TrebleNode* precsucc = erase(prec);
         HEXBED_ASSERT(node == precsucc);
     }
@@ -507,7 +546,7 @@ void Treble::splitLeft(TrebleNode* node, bufsize offset) {
     }
     newnode->offset(node->offset());
     node->offsetAdd(offset);
-    node->leftlenAdd(newnode->length());
+    node->leftlenAdd(offset);
     if (!node->left()) {
         insertLeft(node, std::move(newnode));
         return;
@@ -625,9 +664,11 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
                 bufsize nc = expandCapacity(l, count);
                 if (pnode->capacity() < nc) renewTrebleData(*pnode, nc);
                 byte* d = pnode->data() + l;
+                propagate(pnode, 0, count);
                 pnode->lengthAdd(count);
                 f(d, d + count);
                 node->offsetAdd(count);
+                propagate(node, count, 0);
                 if (!(node->lengthSub(count))) tryMerge(erase(node));
                 return;
             }
@@ -657,7 +698,7 @@ void Treble::replace(bufsize index, bufsize count, byte v) {
     LOG_TREBLE("replace(" << index << ", " << count << ", " << L_HEX(v) << ")");
     FillFeeder feeder{v};
     replace_(index, count, feeder);
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 void Treble::replace(bufsize index, bufsize count, const byte* data) {
@@ -665,7 +706,7 @@ void Treble::replace(bufsize index, bufsize count, const byte* data) {
                           << ")");
     CopyFeeder feeder{data};
     replace_(index, count, feeder);
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 void Treble::replace(bufsize index, bufsize count, bufsize scount,
@@ -674,13 +715,13 @@ void Treble::replace(bufsize index, bufsize count, bufsize scount,
                           << L_PTR(sdata) << ", " << soffset << ")");
     RepeatFeeder feeder{scount, sdata, soffset};
     replace_(index, count, feeder);
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 template <typename Feeder>
 void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
     if (!count) return;
-    HEXBED_ASSERT(index <= total_, "no inserting beyond end of file");
+    HEXBED_ASSERT(index <= total_, "trying to insert beyond end of file!");
     byte* d;
     TrebleNode* node;
     if (index == total_) {
@@ -701,6 +742,7 @@ void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
             bufsize nc = expandCapacity(l, count);
             if (node->capacity() < nc) renewTrebleData(*node, nc);
             d = node->data() + l;
+            // no propagate, this cannot be a left child of any node
             node->lengthAdd(count);
         }
         f(d, d + count);
@@ -743,8 +785,8 @@ void Treble::insert_(bufsize index, bufsize count, Feeder& f) {
         if (node->capacity() < nc) renewTrebleData(*node, nc);
         d = node->data() + l;
     }
-    node->lengthAdd(count);
     propagate(node, 0, count);
+    node->lengthAdd(count);
     f(d, d + count);
 }
 
@@ -753,7 +795,7 @@ void Treble::insert(bufsize index, bufsize count, byte v) {
     FillFeeder feeder{v};
     insert_(index, count, feeder);
     total_ += count;
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 void Treble::insert(bufsize index, bufsize count, const byte* data) {
@@ -762,7 +804,7 @@ void Treble::insert(bufsize index, bufsize count, const byte* data) {
     CopyFeeder feeder{data};
     insert_(index, count, feeder);
     total_ += count;
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 void Treble::insert(bufsize index, bufsize count, bufsize scount,
@@ -772,7 +814,7 @@ void Treble::insert(bufsize index, bufsize count, bufsize scount,
     RepeatFeeder feeder{scount, sdata, soffset};
     insert_(index, count, feeder);
     total_ += count;
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 void Treble::reinsert(bufsize index, bufsize count, bufsize offset) {
@@ -782,6 +824,7 @@ void Treble::reinsert(bufsize index, bufsize count, bufsize offset) {
         // inserting old data to the end of the file
         TrebleNode* node = root_->maximum();
         if (!node->data() && node->offset() + node->length() == offset) {
+            // no propagate, cannot be the left child of any node
             node->lengthAdd(count);
             return;
         }
@@ -811,7 +854,7 @@ void Treble::reinsert(bufsize index, bufsize count, bufsize offset) {
     total_ += count;
     TrebleNode* succ = node->successor();
     if (succ) tryMerge(succ);
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 void Treble::revert(bufsize index, bufsize count) {
@@ -839,7 +882,7 @@ void Treble::revert(bufsize index, bufsize count) {
         node = node->successor();
         res.suboffset = 0;
     }
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 void Treble::remove(bufsize index, bufsize count) {
@@ -854,6 +897,7 @@ void Treble::remove(bufsize index, bufsize count) {
         bufsize z = node->length();
         if (count < z) {
             node->offsetAdd(count);
+            propagate(node, count, 0);
             node->lengthSub(count);
             removed += count;
             if (node->data()) {
@@ -861,7 +905,6 @@ void Treble::remove(bufsize index, bufsize count) {
                 memCopy(p, p + count, z - count);
                 compact(node);
             }
-            propagate(node, count, 0);
             break;
         } else {
             node = tryMerge(erase(node));
@@ -873,7 +916,7 @@ void Treble::remove(bufsize index, bufsize count) {
     }
     tryMerge(node);
     total_ -= removed;
-    PRINT_TREBLE();
+    TREBLE_AFTER_OP();
 }
 
 };  // namespace hexbed
