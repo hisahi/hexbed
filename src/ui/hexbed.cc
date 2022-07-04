@@ -220,6 +220,16 @@ void HexBedWxApp::Knock(const wxString& s) {
     }
 }
 
+struct WindowProps {
+    wxRect rectangle;
+    bool maximized;
+    bool minimized;
+};
+
+static WindowProps getWindowProps() {
+    return WindowProps{wxRect(wxDefaultPosition, wxDefaultSize), true, false};
+}
+
 bool HexBedWxApp::OnInit() {
     auto fn = argc > 1 ? stringFromWx(argv[1]) : string();
     setlocale(LC_ALL, "C");
@@ -259,6 +269,10 @@ bool HexBedWxApp::OnInit() {
     hexbed::plugins::loadExternalPlugins();
     window_ = new HexBedMainFrame();
     window_->Show(true);
+    auto props = getWindowProps();
+    window_->SetSize(props.rectangle);
+    window_->Maximize(props.maximized);
+    window_->Iconize(props.minimized);
     for (const wxString& s : openFiles) window_->FileKnock(s, false);
     openFiles.clear();
     return true;
@@ -321,7 +335,7 @@ static int addExportPlugins(HexBedMainFrame* main, wxMenu* menu, int n) {
 }
 
 HexBedMainFrame::HexBedMainFrame()
-    : wxFrame(NULL, wxID_ANY, "HexBed", wxDefaultPosition, wxSize(-1, -1)) {
+    : wxFrame(NULL, wxID_ANY, "HexBed", wxDefaultPosition, wxDefaultSize) {
     tabs_ = new wxAuiNotebook(this, tabContainerID);
     context_ = std::make_shared<HexBedContextMain>(this);
     wxMenuBar* menuBar = new wxMenuBar;

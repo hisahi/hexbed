@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-18 00:18+0200\n"
+"POT-Creation-Date: 2022-07-04 18:25+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,8 +66,8 @@ msgstr ""
 msgid "Hexadecimal double (IEEE 754 binary64 double-precision floating-point)"
 msgstr ""
 
-#: src/plugins/export.cc:67 src/plugins/import.cc:52 src/ui/hexbed.cc:419
-#: src/ui/hexbed.cc:1224
+#: src/plugins/export.cc:67 src/plugins/import.cc:52 src/ui/hexbed.cc:440
+#: src/ui/hexbed.cc:1268
 msgid "All files (*.*)"
 msgstr ""
 
@@ -341,7 +341,7 @@ msgstr ""
 msgid "&Help"
 msgstr ""
 
-#: src/ui/menuedit.cc:31
+#: src/ui/menuedit.cc:31 src/ui/menuedit.cc:111
 msgid "&Undo"
 msgstr ""
 
@@ -349,7 +349,7 @@ msgstr ""
 msgid "Undoes the last action"
 msgstr ""
 
-#: src/ui/menuedit.cc:33
+#: src/ui/menuedit.cc:33 src/ui/menuedit.cc:112
 msgid "&Redo"
 msgstr ""
 
@@ -357,7 +357,7 @@ msgstr ""
 msgid "Redoes the last undone action"
 msgstr ""
 
-#: src/ui/menuedit.cc:36
+#: src/ui/menuedit.cc:36 src/ui/menuedit.cc:114
 msgid "Cu&t"
 msgstr ""
 
@@ -365,7 +365,7 @@ msgstr ""
 msgid "Copies the selection and removes it"
 msgstr ""
 
-#: src/ui/menuedit.cc:38
+#: src/ui/menuedit.cc:38 src/ui/menuedit.cc:115
 msgid "&Copy"
 msgstr ""
 
@@ -373,7 +373,7 @@ msgstr ""
 msgid "Copies the selection"
 msgstr ""
 
-#: src/ui/menuedit.cc:40
+#: src/ui/menuedit.cc:40 src/ui/menuedit.cc:116
 msgid "&Paste Insert"
 msgstr ""
 
@@ -381,7 +381,7 @@ msgstr ""
 msgid "Pastes data from the clipboard and inserts it at the caret"
 msgstr ""
 
-#: src/ui/menuedit.cc:43
+#: src/ui/menuedit.cc:43 src/ui/menuedit.cc:117
 msgid "P&aste Overwrite"
 msgstr ""
 
@@ -389,7 +389,7 @@ msgstr ""
 msgid "Pastes data from the clipboard, overwriting existing data"
 msgstr ""
 
-#: src/ui/menuedit.cc:46
+#: src/ui/menuedit.cc:46 src/ui/menuedit.cc:118
 msgid "&Delete"
 msgstr ""
 
@@ -397,7 +397,7 @@ msgstr ""
 msgid "Deletes the currently selected data"
 msgstr ""
 
-#: src/ui/menuedit.cc:50
+#: src/ui/menuedit.cc:50 src/ui/menuedit.cc:120
 msgid "Select &all"
 msgstr ""
 
@@ -405,7 +405,7 @@ msgstr ""
 msgid "Selects the entire file"
 msgstr ""
 
-#: src/ui/menuedit.cc:54
+#: src/ui/menuedit.cc:54 src/ui/menuedit.cc:121
 msgid "Select &block..."
 msgstr ""
 
@@ -527,6 +527,10 @@ msgstr ""
 
 #: src/ui/menuedit.cc:105
 msgid "&Edit"
+msgstr ""
+
+#: src/ui/menuedit.cc:123
+msgid "Cop&y offset"
 msgstr ""
 
 #: src/ui/menufile.cc:30
@@ -661,11 +665,11 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/hexedit.cc:284 src/ui/hexedit.cc:329
+#: src/ui/hexedit.cc:284 src/ui/hexedit.cc:335
 msgid "Failed to open the clipboard"
 msgstr ""
 
-#: src/ui/hexedit.cc:328 src/ui/hexedit.cc:336
+#: src/ui/hexedit.cc:334 src/ui/hexedit.cc:342
 #, c-format
 msgid ""
 "Failed to paste:\n"
@@ -881,7 +885,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/context.cc:170 src/ui/hexbed.cc:497
+#: src/ui/context.cc:170 src/ui/hexbed.cc:518
 msgid "&Retry"
 msgstr ""
 
@@ -901,134 +905,143 @@ msgstr ""
 msgid "Retry? 'Yes' to try again, 'No' to save anyway or 'Cancel' to cancel."
 msgstr ""
 
-#: src/ui/hexbed.cc:386
+#: src/ui/hexbed.cc:280
+#, c-format
+msgid "Out of memory: %s."
+msgstr ""
+
+#: src/ui/hexbed.cc:284
+msgid "Out of memory."
+msgstr ""
+
+#: src/ui/hexbed.cc:407
 #, c-format
 msgid "[unsaved] %s"
 msgstr ""
 
 #. / main window title bar
-#: src/ui/hexbed.cc:396 src/ui/hexbed.cc:575
+#: src/ui/hexbed.cc:417 src/ui/hexbed.cc:596
 #, c-format
 msgid "%s - %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:417
+#: src/ui/hexbed.cc:438
 msgid "Save a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:443
+#: src/ui/hexbed.cc:464
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:471
+#: src/ui/hexbed.cc:492
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr ""
 
-#: src/ui/hexbed.cc:491
+#: src/ui/hexbed.cc:512
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:497
+#: src/ui/hexbed.cc:518
 msgid "&Cancel"
 msgstr ""
 
-#: src/ui/hexbed.cc:499
+#: src/ui/hexbed.cc:520
 msgid "Retry?"
 msgstr ""
 
-#: src/ui/hexbed.cc:524
+#: src/ui/hexbed.cc:545
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr ""
 
-#: src/ui/hexbed.cc:694
+#: src/ui/hexbed.cc:733
 #, c-format
 msgid "[read-only] %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:704
+#: src/ui/hexbed.cc:743
 #, c-format
 msgid "New-%llu"
 msgstr ""
 
-#: src/ui/hexbed.cc:709
+#: src/ui/hexbed.cc:748
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:729
+#: src/ui/hexbed.cc:768
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:738
+#: src/ui/hexbed.cc:777
 msgid "Read only"
 msgstr ""
 
-#: src/ui/hexbed.cc:787
+#: src/ui/hexbed.cc:826
 msgid "No more results found for this search."
 msgstr ""
 
-#: src/ui/hexbed.cc:793
+#: src/ui/hexbed.cc:832
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/hexbed.cc:894 src/ui/hexbed.cc:931
+#: src/ui/hexbed.cc:937 src/ui/hexbed.cc:974
 #, c-format
 msgid "Insert failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:957
+#: src/ui/hexbed.cc:1000
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:977
+#: src/ui/hexbed.cc:1020
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:998
+#: src/ui/hexbed.cc:1041
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1153
+#: src/ui/hexbed.cc:1196
 msgid "Bookmark beyond end of document"
 msgstr ""
 
-#: src/ui/hexbed.cc:1182
+#: src/ui/hexbed.cc:1225
 msgid "No next bookmark"
 msgstr ""
 
-#: src/ui/hexbed.cc:1196
+#: src/ui/hexbed.cc:1239
 msgid "No previous bookmark"
 msgstr ""
 
-#: src/ui/hexbed.cc:1223
+#: src/ui/hexbed.cc:1267
 msgid "Open a file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1270
+#: src/ui/hexbed.cc:1314
 msgid "Import file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1290
+#: src/ui/hexbed.cc:1334
 #, c-format
 msgid ""
 "Error on line %llu:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1292
+#: src/ui/hexbed.cc:1336
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -1036,25 +1049,25 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1300
+#: src/ui/hexbed.cc:1344
 #, c-format
 msgid ""
 "Failed to import:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1324
+#: src/ui/hexbed.cc:1368
 msgid "Export file"
 msgstr ""
 
-#: src/ui/hexbed.cc:1361
+#: src/ui/hexbed.cc:1405
 #, c-format
 msgid ""
 "Failed to export:\n"
 "%s"
 msgstr ""
 
-#: src/ui/hexbed.cc:1427
+#: src/ui/hexbed.cc:1471
 msgid "A hex editor."
 msgstr ""
 
@@ -1188,6 +1201,10 @@ msgstr ""
 
 #: src/ui/dialogs/radixpicker.cc:48
 msgid "Hex"
+msgstr ""
+
+#: src/ui/dialogs/jump.cc:35
+msgid "Jump"
 msgstr ""
 
 #: src/ui/dialogs/selectblock.cc:36

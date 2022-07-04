@@ -1067,12 +1067,19 @@ void HexEditor::OnLMouseDown(wxMouseEvent& event) {
     HitPoint hit;
     if (HitPos(event.GetX(), event.GetY(), hit, false)) {
         seldown_ = true;
-        selst_ = hit.offset;
         curtext_ = hit.text;
         curnibble_ = hit.nibble;
         dragPoint_ = hit;
-        Deselect();
-        UpdateCaret(hit.offset, true, hit.eol);
+        if (event.ShiftDown()) {
+            StartSelection(cur_);
+            UpdateCaret(hit.offset, true, hit.eol);
+            UpdateSelectionDrag();
+            parent_->OnSelectChanged();
+        } else {
+            selst_ = hit.offset;
+            Deselect();
+            UpdateCaret(hit.offset, true, hit.eol);
+        }
     }
     event.Skip();
 }

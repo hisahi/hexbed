@@ -99,9 +99,9 @@ SelectBlockDialog::SelectBlockDialog(wxWindow* parent, bufsize cur, bufsize len,
     SetSizer(top);
     wxSize sz = GetSize();
     Fit();
-    SetSize(sz.GetWidth(), GetSize().GetHeight());
+    SetSize(std::max(GetSize().GetWidth(), sz.GetWidth()),
+            GetSize().GetHeight());
     SetSizeHints(GetSize().GetWidth(), GetSize().GetHeight());
-    FitInside();
     Layout();
 }
 

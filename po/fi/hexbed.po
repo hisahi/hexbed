@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.6.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-18 00:18+0200\n"
+"POT-Creation-Date: 2022-07-04 18:25+0300\n"
 "PO-Revision-Date: 2021-12-23 21:14+0200\n"
 "Last-Translator: Sampo Hippeläinen <sampo.hippelainen@gmail.com>\n"
 "Language-Team: fi\n"
@@ -55,20 +55,20 @@ msgstr "float (IEEE 754 binary32, liukuluku perustarkkuudella)"
 
 #: src/plugins/inspector/float64.cc:43
 msgid "double (IEEE 754 binary64 double-precision floating-point)"
-msgstr "double (IEEE 754 binary64, liukuluku kaksoistarkkuudella"
+msgstr "double (IEEE 754 binary64, liukuluku kaksoistarkkuudella)"
 
 #: src/plugins/inspector/float32x.cc:43
 msgid "Hexadecimal float (IEEE 754 binary32 single-precision floating-point)"
 msgstr ""
-"Heksadesimaalinen float (IEEE 754 binary32, liukuluku perustarkkuudella"
+"Heksadesimaalinen float (IEEE 754 binary32, liukuluku perustarkkuudella)"
 
 #: src/plugins/inspector/float64x.cc:44
 msgid "Hexadecimal double (IEEE 754 binary64 double-precision floating-point)"
 msgstr ""
-"Heksadesimaalinen double (IEEE 754 binary64, liukuluku kaksoistarkkuudella"
+"Heksadesimaalinen double (IEEE 754 binary64, liukuluku kaksoistarkkuudella)"
 
-#: src/plugins/export.cc:67 src/plugins/import.cc:52 src/ui/hexbed.cc:419
-#: src/ui/hexbed.cc:1224
+#: src/plugins/export.cc:67 src/plugins/import.cc:52 src/ui/hexbed.cc:440
+#: src/ui/hexbed.cc:1268
 msgid "All files (*.*)"
 msgstr "Kaikki tiedostot (*.*)"
 
@@ -357,7 +357,7 @@ msgstr "Näyttää tietoja ohjelmasta"
 msgid "&Help"
 msgstr "&Ohje"
 
-#: src/ui/menuedit.cc:31
+#: src/ui/menuedit.cc:31 src/ui/menuedit.cc:111
 msgid "&Undo"
 msgstr "&Kumoa"
 
@@ -365,7 +365,7 @@ msgstr "&Kumoa"
 msgid "Undoes the last action"
 msgstr "Kumoaa viimeisimmän muokkauksen"
 
-#: src/ui/menuedit.cc:33
+#: src/ui/menuedit.cc:33 src/ui/menuedit.cc:112
 msgid "&Redo"
 msgstr "&Tee uudelleen"
 
@@ -373,7 +373,7 @@ msgstr "&Tee uudelleen"
 msgid "Redoes the last undone action"
 msgstr "Suorittaa viimeksi kumotun muokkauksen uudelleen"
 
-#: src/ui/menuedit.cc:36
+#: src/ui/menuedit.cc:36 src/ui/menuedit.cc:114
 msgid "Cu&t"
 msgstr "&Leikkaa"
 
@@ -381,7 +381,7 @@ msgstr "&Leikkaa"
 msgid "Copies the selection and removes it"
 msgstr "Kopioi valinnan ja poistaa sen"
 
-#: src/ui/menuedit.cc:38
+#: src/ui/menuedit.cc:38 src/ui/menuedit.cc:115
 msgid "&Copy"
 msgstr "K&opioi"
 
@@ -389,7 +389,7 @@ msgstr "K&opioi"
 msgid "Copies the selection"
 msgstr "Kopioi valinnan"
 
-#: src/ui/menuedit.cc:40
+#: src/ui/menuedit.cc:40 src/ui/menuedit.cc:116
 msgid "&Paste Insert"
 msgstr "L&iitä väliin"
 
@@ -397,7 +397,7 @@ msgstr "L&iitä väliin"
 msgid "Pastes data from the clipboard and inserts it at the caret"
 msgstr "Liittää leikepöydältä tavuja ja lisää väliin kohdistimen kohdalle"
 
-#: src/ui/menuedit.cc:43
+#: src/ui/menuedit.cc:43 src/ui/menuedit.cc:117
 msgid "P&aste Overwrite"
 msgstr "Liit&ä ja korvaa"
 
@@ -405,7 +405,7 @@ msgstr "Liit&ä ja korvaa"
 msgid "Pastes data from the clipboard, overwriting existing data"
 msgstr "Liittää leikepöydältä tavuja kohdistimen kohdalla olevia korvaten"
 
-#: src/ui/menuedit.cc:46
+#: src/ui/menuedit.cc:46 src/ui/menuedit.cc:118
 msgid "&Delete"
 msgstr "&Poista"
 
@@ -413,7 +413,7 @@ msgstr "&Poista"
 msgid "Deletes the currently selected data"
 msgstr "Poistaa valitun tavualueen"
 
-#: src/ui/menuedit.cc:50
+#: src/ui/menuedit.cc:50 src/ui/menuedit.cc:120
 msgid "Select &all"
 msgstr "&Valitse kaikki"
 
@@ -421,7 +421,7 @@ msgstr "&Valitse kaikki"
 msgid "Selects the entire file"
 msgstr "Valitsee koko tiedoston"
 
-#: src/ui/menuedit.cc:54
+#: src/ui/menuedit.cc:54 src/ui/menuedit.cc:121
 msgid "Select &block..."
 msgstr "V&alitse alue..."
 
@@ -544,6 +544,10 @@ msgstr "Avaa ohjelman asetukset"
 #: src/ui/menuedit.cc:105
 msgid "&Edit"
 msgstr "&Muokkaa"
+
+#: src/ui/menuedit.cc:123
+msgid "Cop&y offset"
+msgstr "Kopioi osoit&e"
 
 #: src/ui/menufile.cc:30
 msgid "&New"
@@ -679,11 +683,11 @@ msgstr ""
 "Kopiointi epäonnistui:\n"
 "%s"
 
-#: src/ui/hexedit.cc:284 src/ui/hexedit.cc:329
+#: src/ui/hexedit.cc:284 src/ui/hexedit.cc:335
 msgid "Failed to open the clipboard"
 msgstr "Leikepöydän avaaminen epäonnistui"
 
-#: src/ui/hexedit.cc:328 src/ui/hexedit.cc:336
+#: src/ui/hexedit.cc:334 src/ui/hexedit.cc:342
 #, c-format
 msgid ""
 "Failed to paste:\n"
@@ -823,7 +827,8 @@ msgstr "E&dellinen kirjanmerkki"
 
 #: src/ui/menuview.cc:104
 msgid "Jumps to the bookmark closest to the cursor when going backwards if any"
-msgstr "Hyppää lähimpään kohdistinta edeltävään kirjanmerkkiin jos sellainen on"
+msgstr ""
+"Hyppää lähimpään kohdistinta edeltävään kirjanmerkkiin jos sellainen on"
 
 #: src/ui/menuview.cc:108
 msgid "Ne&xt bookmark"
@@ -831,7 +836,8 @@ msgstr "Seuraava k&irjanmerkki"
 
 #: src/ui/menuview.cc:109
 msgid "Jumps to the bookmark closest to the cursor when going forwards if any"
-msgstr "Hyppää lähimpään kohdistinta seuraavaan kirjanmerkkiin jos sellainen on"
+msgstr ""
+"Hyppää lähimpään kohdistinta seuraavaan kirjanmerkkiin jos sellainen on"
 
 #: src/ui/menuview.cc:114
 msgid "Add subvie&w"
@@ -903,7 +909,7 @@ msgstr ""
 "Varmuuskopiointi epäonnistui:\n"
 "%s"
 
-#: src/ui/context.cc:170 src/ui/hexbed.cc:497
+#: src/ui/context.cc:170 src/ui/hexbed.cc:518
 msgid "&Retry"
 msgstr "&Uudelleen"
 
@@ -927,32 +933,41 @@ msgstr ""
 "Yritetäänkö uudelleen? 'Ei' tallentaa silti ja 'Peruuta' peruuttaa "
 "tallennuksen."
 
-#: src/ui/hexbed.cc:386
+#: src/ui/hexbed.cc:280
+#, c-format
+msgid "Out of memory: %s."
+msgstr "Muisti loppu: %s."
+
+#: src/ui/hexbed.cc:284
+msgid "Out of memory."
+msgstr "Muisti loppu."
+
+#: src/ui/hexbed.cc:407
 #, c-format
 msgid "[unsaved] %s"
 msgstr "[muokattu] %s"
 
 #. / main window title bar
-#: src/ui/hexbed.cc:396 src/ui/hexbed.cc:575
+#: src/ui/hexbed.cc:417 src/ui/hexbed.cc:596
 #, c-format
 msgid "%s - %s"
 msgstr "%s - %s"
 
-#: src/ui/hexbed.cc:417
+#: src/ui/hexbed.cc:438
 msgid "Save a file"
 msgstr "Tallenna tiedosto"
 
-#: src/ui/hexbed.cc:443
+#: src/ui/hexbed.cc:464
 #, c-format
 msgid "Failed to save file %s: %s"
 msgstr "Tiedoston %s tallentaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:471
+#: src/ui/hexbed.cc:492
 #, c-format
 msgid "'%s' has unsaved changes. Discard them and reload?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Hylätäänkö ne?"
 
-#: src/ui/hexbed.cc:491
+#: src/ui/hexbed.cc:512
 #, c-format
 msgid ""
 "Failed to load from file %s:\n"
@@ -961,95 +976,95 @@ msgstr ""
 "Tiedostosta %s ei voitu lukea:\n"
 "%s"
 
-#: src/ui/hexbed.cc:497
+#: src/ui/hexbed.cc:518
 msgid "&Cancel"
 msgstr "&Peruuta"
 
-#: src/ui/hexbed.cc:499
+#: src/ui/hexbed.cc:520
 msgid "Retry?"
 msgstr "Yritetäänkö uudelleen?"
 
-#: src/ui/hexbed.cc:524
+#: src/ui/hexbed.cc:545
 #, c-format
 msgid "'%s' has unsaved changes. Do you want to save it?"
 msgstr "Tiedostossa '%s' on tallentamattomia muutoksia. Haluatko tallentaa ne?"
 
-#: src/ui/hexbed.cc:694
+#: src/ui/hexbed.cc:733
 #, c-format
 msgid "[read-only] %s"
 msgstr "[vain luku] %s"
 
-#: src/ui/hexbed.cc:704
+#: src/ui/hexbed.cc:743
 #, c-format
 msgid "New-%llu"
 msgstr "Uusi-%llu"
 
-#: src/ui/hexbed.cc:709
+#: src/ui/hexbed.cc:748
 #, c-format
 msgid "Failed to create a new file: %s"
 msgstr "Uuden tiedoston luonti epäonnistui: %s"
 
-#: src/ui/hexbed.cc:729
+#: src/ui/hexbed.cc:768
 #, c-format
 msgid "Failed to open file %s: %s"
 msgstr "Tiedoston %s avaaminen epäonnistui: %s"
 
-#: src/ui/hexbed.cc:738
+#: src/ui/hexbed.cc:777
 msgid "Read only"
 msgstr "Vain luku"
 
-#: src/ui/hexbed.cc:787
+#: src/ui/hexbed.cc:826
 msgid "No more results found for this search."
 msgstr "Tällä haulla ei löytynyt lisää tuloksia."
 
-#: src/ui/hexbed.cc:793
+#: src/ui/hexbed.cc:832
 #, c-format
 msgid "Found and replaced %llu match."
 msgid_plural "Found and replaced %llu matches."
 msgstr[0] "%llu esiintymä korvattiin."
 msgstr[1] "%llu esiintymää korvattiin."
 
-#: src/ui/hexbed.cc:894 src/ui/hexbed.cc:931
+#: src/ui/hexbed.cc:937 src/ui/hexbed.cc:974
 #, c-format
 msgid "Insert failed: %s"
 msgstr "Lisäys epäonnistui: %s"
 
-#: src/ui/hexbed.cc:957
+#: src/ui/hexbed.cc:1000
 #, c-format
 msgid "Bitwise binary op failed: %s"
 msgstr "Binäärilaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:977
+#: src/ui/hexbed.cc:1020
 #, c-format
 msgid "Bitwise unary op failed: %s"
 msgstr "Unaarilaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:998
+#: src/ui/hexbed.cc:1041
 #, c-format
 msgid "Bitwise shift op failed: %s"
 msgstr "Bittisiirtolaskutoimitus epäonnistui: %s"
 
-#: src/ui/hexbed.cc:1153
+#: src/ui/hexbed.cc:1196
 msgid "Bookmark beyond end of document"
 msgstr "Kirjanmerkki on tiedoston loppuakin edempänä"
 
-#: src/ui/hexbed.cc:1182
+#: src/ui/hexbed.cc:1225
 msgid "No next bookmark"
 msgstr "Ei seuraavaa kirjanmerkkiä"
 
-#: src/ui/hexbed.cc:1196
+#: src/ui/hexbed.cc:1239
 msgid "No previous bookmark"
 msgstr "Ei edellistä kirjanmerkkiä"
 
-#: src/ui/hexbed.cc:1223
+#: src/ui/hexbed.cc:1267
 msgid "Open a file"
 msgstr "Avaa tiedosto"
 
-#: src/ui/hexbed.cc:1270
+#: src/ui/hexbed.cc:1314
 msgid "Import file"
 msgstr "Tuo tiedosto"
 
-#: src/ui/hexbed.cc:1290
+#: src/ui/hexbed.cc:1334
 #, c-format
 msgid ""
 "Error on line %llu:\n"
@@ -1058,7 +1073,7 @@ msgstr ""
 "Virhe rivillä %llu:\n"
 "%s"
 
-#: src/ui/hexbed.cc:1292
+#: src/ui/hexbed.cc:1336
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -1069,7 +1084,7 @@ msgstr ""
 "Tuotu tiedosto on virheellinen.\n"
 "%s"
 
-#: src/ui/hexbed.cc:1300
+#: src/ui/hexbed.cc:1344
 #, c-format
 msgid ""
 "Failed to import:\n"
@@ -1078,11 +1093,11 @@ msgstr ""
 "Tuonti epäonnistui:\n"
 "%s"
 
-#: src/ui/hexbed.cc:1324
+#: src/ui/hexbed.cc:1368
 msgid "Export file"
 msgstr "Vie tiedosto"
 
-#: src/ui/hexbed.cc:1361
+#: src/ui/hexbed.cc:1405
 #, c-format
 msgid ""
 "Failed to export:\n"
@@ -1091,7 +1106,7 @@ msgstr ""
 "Vienti epäonnistui:\n"
 "%s"
 
-#: src/ui/hexbed.cc:1427
+#: src/ui/hexbed.cc:1471
 msgid "A hex editor."
 msgstr "Tavumuokkain."
 
@@ -1226,6 +1241,10 @@ msgstr "Desimaali"
 #: src/ui/dialogs/radixpicker.cc:48
 msgid "Hex"
 msgstr "Heksa"
+
+#: src/ui/dialogs/jump.cc:35
+msgid "Jump"
+msgstr "Siirry"
 
 #: src/ui/dialogs/selectblock.cc:36
 msgid "Select block"

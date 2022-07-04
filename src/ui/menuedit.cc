@@ -101,7 +101,7 @@ wxMenu* createEditMenu(wxMenuBar* menuBar, std::vector<wxMenuItem*>& fileOnly,
     menuEdit->AppendSeparator();
     addItem(menuEdit, wxID_PREFERENCES, _("&Options"),
             _("Opens the dialog for editing options or preferences"),
-            wxACCEL_CTRL, 'O');
+            wxACCEL_CTRL | wxACCEL_SHIFT, 'P');
     menuBar->Append(menuEdit, _("&Edit"));
     return menuEdit;
 }

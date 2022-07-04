@@ -22,9 +22,16 @@
 #ifndef HEXBED_COMMON_SPECS_HH
 #define HEXBED_COMMON_SPECS_HH
 
+#if defined(__GNUC__)
+#define HEXBED_INLINE inline
+#define HEXBED_UNREACHABLE() __builtin_unreachable()
+#define HEXBED_LIKELY(x) (__builtin_expect(!!(x), 1))
+#define HEXBED_UNLIKELY(x) (__builtin_expect(!!(x), 0))
+#else
 #define HEXBED_INLINE
 #define HEXBED_UNREACHABLE()
 #define HEXBED_LIKELY(x) (x)
 #define HEXBED_UNLIKELY(x) (x)
+#endif
 
 #endif /* HEXBED_COMMON_SPECS_HH */

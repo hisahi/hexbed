@@ -68,9 +68,9 @@ OffsetJumpDialog::OffsetJumpDialog(wxWindow* parent, bufsize cur, bufsize end)
     SetSizer(top);
     wxSize sz = GetSize();
     Fit();
-    SetSize(sz.GetWidth(), GetSize().GetHeight());
+    SetSize(std::max(GetSize().GetWidth(), sz.GetWidth()),
+            GetSize().GetHeight());
     SetSizeHints(GetSize().GetWidth(), GetSize().GetHeight());
-    FitInside();
     Layout();
 }
 
