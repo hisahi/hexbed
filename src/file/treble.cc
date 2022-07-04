@@ -23,8 +23,9 @@
 
 #ifndef NDEBUG
 #define TREBLE_CALL_DEBUG 1
-//#define TREBLE_TREE_DEBUG 1
+#define TREBLE_TREE_DEBUG 1
 #define TREBLE_SANITY_DEBUG 1
+#define TREBLE_NOMERGE_DEBUG 0
 #endif
 
 #include <cmath>
@@ -49,7 +50,7 @@ auto newTrebleNode(Args&&... args) -> TrebleNodePointer {
 template <bool newRegion>
 static constexpr bufsize roundCapacity(bufsize l) {
     bufsize ll = newRegion ? std::max<bufsize>(l, sizeof(int)) : l;
-    return (ll + 3) & ~3;
+    return internal::roundToTrebleNodeCapacity(ll);
 }
 
 template <class T>
@@ -154,18 +155,18 @@ Treble::Treble(bufsize size)
 Treble::iterator Treble::root() noexcept { return iterator(root_.get()); }
 
 #if TREBLE_TREE_DEBUG
-static void printTreble(TrebleNode* node, unsigned depth = 0) {
+static void printTreblePre(TrebleNode* node, unsigned depth = 0) {
     std::string pref(depth, ' ');
     if (!depth) std::cerr << "=========== TREBLE DEBUG ===========\n";
     std::cerr << pref << "| " << node
               << "\tBF=" << static_cast<int>(node->balance())
-              << "\tLL=" << node->leftlen() << "\tO=" << !node->data()
-              << "\tL=" << node->length() << "\tP=" << node->offset() << "\n";
+              << "\tLL=" << node->leftlen() << "\tEX=" << !!node->data()
+              << "\tL=" << node->length() << "\tO=" << node->offset() << "\n";
     std::cerr << pref << "\\ Left";
     if (node->left()) {
         std::cerr << "\n";
         HEXBED_ASSERT(node->left()->parent() == node, "broken parent link");
-        printTreble(node->left(), depth + 2);
+        printTreblePre(node->left(), depth + 2);
     } else
         std::cerr << " ---";
     std::cerr << "\n";
@@ -173,56 +174,142 @@ static void printTreble(TrebleNode* node, unsigned depth = 0) {
     if (node->right()) {
         std::cerr << "\n";
         HEXBED_ASSERT(node->right()->parent() == node, "broken parent link");
-        printTreble(node->right(), depth + 2);
+        printTreblePre(node->right(), depth + 2);
     } else
         std::cerr << " ---";
     std::cerr << "\n";
 }
-#define PRINT_TREBLE() printTreble(root_.get())
+
+static void printTrebleIn(TrebleNode* node, unsigned depth = 0, int dir = 0) {
+    std::string pref(depth, ' ');
+    if (!depth) std::cerr << "=========== TREBLE DEBUG ===========\n";
+    if (node->left()) {
+        HEXBED_ASSERT(node->left()->parent() == node, "broken parent link");
+        printTrebleIn(node->left(), depth + 2, -1);
+    } else
+        std::cerr << pref << "/ ---\n";
+    if (dir != 0) {
+        std::cerr << std::string(depth - 2, ' ');
+        std::cerr << (dir < 0 ? '/' : '\\');
+        std::cerr << " + ";
+    } else {
+        std::cerr << pref << "| ";
+    }
+    std::cerr << node << "\tBF=" << static_cast<int>(node->balance())
+              << "\tLL=" << node->leftlen() << "\tEX=" << !!node->data()
+              << "\tL=" << node->length() << "\tO=" << node->offset() << "\n";
+    if (node->right()) {
+        HEXBED_ASSERT(node->right()->parent() == node, "broken parent link");
+        printTrebleIn(node->right(), depth + 2, 1);
+    } else
+        std::cerr << pref << "\\ ---\n";
+    if (!depth) std::cerr << "\n";
+}
+#define PRINT_TREBLE() printTrebleIn(root_.get())
 #else
 #define PRINT_TREBLE() HEXBED_NOOP
 #endif
 
 #if TREBLE_SANITY_DEBUG
+TrebleNode* getRoot(TrebleNode* node) {
+    TrebleNode* root = node;
+    while (root->parent()) root = root->parent();
+    return root;
+}
+
+int getDepth(TrebleNode* node) {
+    if (!node) return 0;
+    return 1 + std::max(getDepth(node->left()), getDepth(node->right()));
+}
+
 static void checkTrebleSanity(TrebleNode* node) {
     if (node->left()) {
         TrebleNode* l = node->left();
-        HEXBED_ASSERT(l->parent() == node,
-                      "sanity check failed: broken parent link on left child");
+        HEXBED_ASSERTF(l->parent() == node,
+                       "sanity check failed: broken parent link on left child"
+                       " (left=%p, node=%p, left.parent=%p)",
+                       l, node, l->parent());
         checkTrebleSanity(l);
         bufsize ll = 0;
         do {
             ll += l->leftlen();
             ll += l->length();
         } while ((l = l->right()));
-        HEXBED_ASSERT(node->leftlen() == ll,
-                    "sanity check failed: invalid leftlen on node");
+        HEXBED_ASSERTF(node->leftlen() == ll,
+                       "sanity check failed: invalid leftlen on node"
+                       " (node=%p, expected=%zu, actual=%zu)",
+                       node, ll, node->leftlen());
     } else {
-        HEXBED_ASSERT(!node->leftlen(),
-                    "sanity check failed: invalid leftlen on node");
+        HEXBED_ASSERTF(!node->leftlen(),
+                       "sanity check failed: invalid leftlen on node"
+                       " (node=%p, expected=0, actual=%zu)",
+                       node, node->leftlen());
     }
     if (node->right()) {
-        HEXBED_ASSERT(node->right()->parent() == node,
-                      "sanity check failed: broken parent link on right child");
+        HEXBED_ASSERTF(node->right()->parent() == node,
+                       "sanity check failed: broken parent link on right child"
+                       " (right=%p, node=%p, right.parent=%p)",
+                       node->right(), node, node->right()->parent());
         checkTrebleSanity(node->right());
     }
 }
-#define CHECK_TREBLE() checkTrebleSanity(root_.get())
+
+static int getLeftDepth(TrebleNode* node) {
+    return node ? getDepth(node->left()) : 0;
+}
+
+static int getRightDepth(TrebleNode* node) {
+    return node ? getDepth(node->right()) : 0;
+}
+
+static int getTrueBalance(TrebleNode* node) {
+    return getRightDepth(node) - getLeftDepth(node);
+}
+
+#define CHECK_TREBLE_BALANCE(node)                                    \
+    HEXBED_ASSERTF(getTrueBalance(node) == node->balance(),           \
+                   "sanity check failed: treble balance mismatch"     \
+                   " (node=%p, balance=%d, expected=%d, L=%d, R=%d)", \
+                   node, node->balance(), getTrueBalance(node),       \
+                   getLeftDepth(node), getRightDepth(node));
+static void checkTrebleBalance(TrebleNode* node) {
+    if (!node) return;
+    CHECK_TREBLE_BALANCE(node);
+    checkTrebleBalance(node->left());
+    checkTrebleBalance(node->right());
+}
+#if TREBLE_CALL_DEBUG
+#define LOG_TREBLE_OK() std::cerr << " = OK\n";
+#else
+#define LOG_TREBLE_OK() HEXBED_NOOP
+#endif
+#define CHECK_TREBLE()              \
+    checkTrebleSanity(root_.get()); \
+    LOG_TREBLE_OK()
+#define CHECK_TREBLE_BALANCE_REC() checkTrebleBalance(root_.get())
 #else
 #define CHECK_TREBLE() HEXBED_NOOP
+#define CHECK_TREBLE_BALANCE() HEXBED_NOOP
+#define CHECK_TREBLE_BALANCE_REC() HEXBED_NOOP
 #endif
 
 #define TREBLE_AFTER_OP() \
     CHECK_TREBLE();       \
-    PRINT_TREBLE()
+    PRINT_TREBLE();       \
+    CHECK_TREBLE_BALANCE_REC();
 
 #if TREBLE_CALL_DEBUG
 #define L_HEX(v)                                          \
     "0x" << std::hex << std::setw(2) << std::setfill('0') \
          << static_cast<unsigned int>(v) << std::dec
 #define L_PTR(v) reinterpret_cast<const void*>(v)
+#if TREBLE_SANITY_DEBUG
+#define LOG_TREBLE_EOL
+#else
+#define LOG_TREBLE_EOL << '\n'
+#endif
 #define LOG_TREBLE(...) \
-    std::cerr << "Treble(" << L_PTR(this) << ")->" << __VA_ARGS__ << '\n'
+    std::cerr << "Treble(" << L_PTR(this) << ")->" << __VA_ARGS__ LOG_TREBLE_EOL
 #else
 #define LOG_TREBLE(...) HEXBED_NOOP
 #endif
@@ -323,6 +410,7 @@ TrebleNode* Treble::rotateR(TrebleNode* node) {
 
 TrebleNode* Treble::rotateLL(TrebleNode* node) {
     TrebleNode* child = rotateL(node);
+    HEXBED_ASSERT(child->balance() >= 0);
     if (!child->balance()) {
         node->balance(1);
         child->balance(-1);
@@ -330,11 +418,14 @@ TrebleNode* Treble::rotateLL(TrebleNode* node) {
         node->balance(0);
         child->balance(0);
     }
+    CHECK_TREBLE_BALANCE(node);
+    CHECK_TREBLE_BALANCE(child);
     return child;
 }
 
 TrebleNode* Treble::rotateRR(TrebleNode* node) {
     TrebleNode* child = rotateR(node);
+    HEXBED_ASSERT(child->balance() <= 0);
     if (!child->balance()) {
         node->balance(-1);
         child->balance(1);
@@ -342,6 +433,8 @@ TrebleNode* Treble::rotateRR(TrebleNode* node) {
         node->balance(0);
         child->balance(0);
     }
+    CHECK_TREBLE_BALANCE(node);
+    CHECK_TREBLE_BALANCE(child);
     return child;
 }
 
@@ -353,6 +446,9 @@ TrebleNode* Treble::rotateLR(TrebleNode* node) {
     node->balance(bal >= 0 ? 0 : 1);
     child->balance(bal <= 0 ? 0 : -1);
     sub->balance(0);
+    CHECK_TREBLE_BALANCE(node);
+    CHECK_TREBLE_BALANCE(child);
+    CHECK_TREBLE_BALANCE(sub);
     return sub;
 }
 
@@ -364,62 +460,79 @@ TrebleNode* Treble::rotateRL(TrebleNode* node) {
     node->balance(bal <= 0 ? 0 : -1);
     child->balance(bal >= 0 ? 0 : 1);
     sub->balance(0);
+    CHECK_TREBLE_BALANCE(node);
+    CHECK_TREBLE_BALANCE(child);
+    CHECK_TREBLE_BALANCE(sub);
     return sub;
 }
 
-template <bool incr>
+template <bool insert>
 void Treble::balance(TrebleNode* node, int swing) {
     TrebleNode* parent;
     while (node) {
         int bf = node->balance() + swing;
+        bool proceed;
         switch (bf) {
         case 0:
         case -1:
         case 1:
             node->balance(bf);
+            proceed = insert ? bf != 0 : bf == 0;
             break;
         case -2:  // too left-heavy
             HEXBED_ASSERT(node->left(), "no left child on left-heavy tree?");
-            if (node->left()->balance() > 0)
+            if (node->left()->balance() > 0) {
                 node = rotateLR(node);
-            else
+                proceed = !insert;
+            } else {
                 node = rotateRR(node);
+                proceed = !insert && node->balance() <= 0;
+            }
             break;
         case 2:  // too right-heavy
             HEXBED_ASSERT(node->right(), "no right child on right-heavy tree?");
-            if (node->right()->balance() < 0)
+            if (node->right()->balance() < 0) {
                 node = rotateRL(node);
-            else
+                proceed = !insert;
+            } else {
                 node = rotateLL(node);
+                proceed = !insert && node->balance() >= 0;
+            }
             break;
         }
-        if (!bf) break;
-        parent = node->parent();
-        if (!parent) break;
-        swing = (incr ? 1 : -1) * Treble::swing(parent, node);
+        CHECK_TREBLE_BALANCE(node);
+        if (!proceed || !(parent = node->parent())) break;
+        swing = (insert ? 1 : -1) * Treble::swing(parent, node);
         node = parent;
     }
+}
+
+void Treble::balanceOnInsert(TrebleNode* node, int swing) {
+    balance<true>(node, swing);
+}
+
+void Treble::balanceOnDelete(TrebleNode* node, int swing) {
+    balance<false>(node, swing);
 }
 
 void Treble::insertLeft(TrebleNode* node, TrebleNodePointer&& child) {
     HEXBED_ASSERT(!node->left());
     HEXBED_ASSERT(child->parent() == node);
     node->left(std::move(child));
-    balance<true>(node, -1);
+    balanceOnInsert(node, -1);
 }
 
 void Treble::insertRight(TrebleNode* node, TrebleNodePointer&& child) {
     HEXBED_ASSERT(!node->right());
     HEXBED_ASSERT(child->parent() == node);
     node->right(std::move(child));
-    balance<true>(node, 1);
+    balanceOnInsert(node, 1);
 }
 
 void Treble::propagate_(TrebleNode* node, bufdiff d) {
     TrebleNode* p;
     while ((p = node->parent())) {
-        if (isRightChild(p, node)) return;
-        p->leftlenAdd(d);
+        if (!isRightChild(p, node)) p->leftlenAdd(d);
         node = p;
     }
 }
@@ -431,64 +544,70 @@ void Treble::propagate(TrebleNode* node, bufsize was, bufsize now) {
 // returns the successor of the erased node
 TrebleNode* Treble::erase(TrebleNode* node) {
     TrebleNode* parent = node->parent();
-    // node was the left child?
-    bool left = parent && !isRightChild(parent, node);
     TrebleNodePointer& plink = getParentLink(parent, node);
     // successor
     TrebleNode* succ;
     // temporary pointer holder for removed node
     TrebleNodePointer owner;
 
-    if (left && node->length()) propagate(parent, node->length(), 0);
+    if (node->length()) propagate(parent, node->length(), 0);
 
-    if (node->right()) {
-        TrebleNode* child = node->right();
-        if (node->left()) {
-            succ = child->minimum();
-            if (child == succ) {
-                // replace node with child
-                owner = std::exchange(plink, std::move(node->rightLink()));
-                child->parent(parent);
-                if ((child->leftLink() = std::move(node->leftLink())))
-                    child->left()->parent(succ);
-                child->leftlen(node->leftlen());
-                child->balance(node->balance());
-                balance<false>(child, -1);
-            } else {
-                TrebleNode* sp = succ->parent();
-                propagate(succ, succ->length(), 0);
-                owner = std::exchange(
-                    plink,
-                    std::exchange(sp->leftLink(),
-                                  std::exchange(succ->rightLink(),
-                                                std::move(node->rightLink()))));
-                if (sp->left()) sp->left()->parent(sp);
-                if ((succ->leftLink() = std::move(node->leftLink())))
-                    succ->left()->parent(succ);
-                succ->leftlen(node->leftlen());
-                succ->parent(parent);
-                succ->balance(node->balance());
-                child->parent(succ);
-                child->leftlenSub(succ->length());
-                balance<false>(sp, 1);
-            }
-        } else {
-            child->parent(parent);
-            owner = std::exchange(plink, std::move(node->rightLink()));
-            succ = child->minimum();
-        }
-    } else {
+    TrebleNode* child = node->right();
+    if (!child) {
+        // only has left child (if even that)
         succ = node->successor();
-        TrebleNode* child = node->left();
+        child = node->left();
         if (child) child->parent(parent);
         owner = std::exchange(plink, std::move(node->leftLink()));
+        if (parent)
+            balanceOnDelete(parent, &plink == &parent->leftLink() ? 1 : -1);
+        return succ;
+    } else if (!node->left()) {
+        // only has right child
+        child->parent(parent);
+        owner = std::exchange(plink, std::move(node->rightLink()));
+        if (parent)
+            balanceOnDelete(parent, &plink == &parent->leftLink() ? 1 : -1);
+        return child->minimum();
+    } else if (!child->left()) {
+        // has both, but the right child has no left child
+        // replace node with its right child
+        owner = std::exchange(plink, std::move(node->rightLink()));
+        child->parent(parent);
+        child->leftLink() = std::move(node->leftLink());
+        child->left()->parent(child);
+        child->leftlen(node->leftlen());
+        child->balance(node->balance());
+        balanceOnDelete(child, -1);
+        CHECK_TREBLE_BALANCE(child);
+        return child;
+    } else {
+        // has both, and the right child has a left child
+        succ = child->minimum();
+        TrebleNode* sp = succ->parent();
+        propagate(succ, succ->length(), 0);
+        owner = std::exchange(
+            plink, std::exchange(sp->leftLink(),
+                                 std::exchange(succ->rightLink(),
+                                               std::move(node->rightLink()))));
+        succ->parent(parent);
+        child->parent(succ);
+        if (sp->left()) sp->left()->parent(sp);
+        succ->leftLink() = std::move(node->leftLink());
+        succ->left()->parent(succ);
+        succ->leftlen(node->leftlen());
+        succ->balance(node->balance());
+        propagate(succ, node->length(), succ->length());
+        balanceOnDelete(sp, 1);
+        CHECK_TREBLE_BALANCE(sp);
+        CHECK_TREBLE_BALANCE(succ);
+        return succ;
     }
-    if (parent) balance<false>(parent, left ? 1 : -1);
-    return succ;
 }
 
 TrebleNode* Treble::tryMerge(TrebleNode* node) {
     if (!node) return nullptr;
+#if !TREBLE_NOMERGE_DEBUG
     TrebleNode* prec = node->predecessor();
     if (prec && !node->data() && !prec->data() &&
         prec->offset() + prec->length() == node->offset()) {
@@ -502,6 +621,7 @@ TrebleNode* Treble::tryMerge(TrebleNode* node) {
         [[maybe_unused]] TrebleNode* precsucc = erase(prec);
         HEXBED_ASSERT(node == precsucc);
     }
+#endif
     return node;
 }
 
@@ -549,11 +669,11 @@ void Treble::splitLeft(TrebleNode* node, bufsize offset) {
     node->leftlenAdd(offset);
     if (!node->left()) {
         insertLeft(node, std::move(newnode));
-        return;
+    } else {
+        node = node->left()->maximum();
+        newnode->parent(node);
+        insertRight(node, std::move(newnode));
     }
-    node = node->left()->maximum();
-    newnode->parent(node);
-    insertRight(node, std::move(newnode));
 }
 
 void Treble::splitRight(TrebleNode* node, bufsize offset, bool adjust,
@@ -580,12 +700,12 @@ void Treble::splitRight(TrebleNode* node, bufsize offset, bool adjust,
     newnode->offset(adjust ? node->offset() + offset : node->offset());
     if (!node->right()) {
         insertRight(node, std::move(newnode));
-        return;
+    } else {
+        node = node->right()->minimum();
+        propagate(node, 0, newnode->length());
+        newnode->parent(node);
+        insertLeft(node, std::move(newnode));
     }
-    node = node->right()->minimum();
-    propagate(node, 0, newnode->length());
-    newnode->parent(node);
-    insertLeft(node, std::move(newnode));
 }
 
 void Treble::compact(TrebleNode* node) {
@@ -643,11 +763,8 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
     TrebleFindResult res = find(index);
     TrebleNode* node = res.it.get();
     HEXBED_ASSERT(node, "trying to replace beyond file!");
-    if (count == node->length()) {
-        // replace full block
-        bytespan span = usurp(node);
-        f(span.begin(), span.end());
-        return;
+    if (index == 25045448) {
+        HEXBED_BREAKPOINT();
     }
     if (!node->data()) {
         if (res.suboffset) {
@@ -666,12 +783,18 @@ void Treble::replace_(bufsize index, bufsize count, Feeder& f) {
                 byte* d = pnode->data() + l;
                 propagate(pnode, 0, count);
                 pnode->lengthAdd(count);
-                f(d, d + count);
                 node->offsetAdd(count);
                 propagate(node, count, 0);
                 if (!(node->lengthSub(count))) tryMerge(erase(node));
+                f(d, d + count);
                 return;
             }
+        }
+        if (count == node->length()) {
+            // replace full block
+            bytespan span = usurp(node);
+            f(span.begin(), span.end());
+            return;
         }
     }
     while (count) {

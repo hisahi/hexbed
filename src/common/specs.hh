@@ -24,5 +24,7 @@
 
 #define HEXBED_INLINE
 #define HEXBED_UNREACHABLE()
+#define HEXBED_LIKELY(x) (x)
+#define HEXBED_UNLIKELY(x) (x)
 
 #endif /* HEXBED_COMMON_SPECS_HH */

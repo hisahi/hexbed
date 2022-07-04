@@ -54,6 +54,20 @@ class MockTrebleNode {
     MockTrebleNode();
 };
 
+namespace internal {
+
+inline constexpr int toTrebleNodeBalance(bufsize z) {
+    return static_cast<int>(z & 3);
+}
+
+inline constexpr bufsize toTrebleNodeCapacity(bufsize z) { return z & ~3; }
+
+inline constexpr bufsize roundToTrebleNodeCapacity(bufsize z) {
+    return toTrebleNodeCapacity(z + 3);
+}
+
+};  // namespace internal
+
 using TrebleNodePointer =
     AlignedUniquePtr<TrebleNode,
                      std::bit_ceil<std::size_t>(sizeof(MockTrebleNode))>;
@@ -64,21 +78,23 @@ struct TrebleNode {
         : parent_(parent), length_(length) {}
     inline TrebleNode(TrebleNode* parent, bufsize length, byte value)
         : parent_(parent),
-          data_(makeUniqueOf<TrebleDataPointer>(length)),
+          data_(makeUniqueOf<TrebleDataPointer>(
+              internal::roundToTrebleNodeCapacity(length))),
           length_(length),
-          capacity_(length) {
+          capacity_(internal::roundToTrebleNodeCapacity(length)) {
         std::fill(data_.get(), data_.get() + length_, value);
     }
     inline TrebleNode(TrebleNode* parent, bufsize length, const byte* src)
         : parent_(parent),
-          data_(makeUniqueOf<TrebleDataPointer>(length)),
+          data_(makeUniqueOf<TrebleDataPointer>(
+              internal::roundToTrebleNodeCapacity(length))),
           length_(length),
-          capacity_(length) {
+          capacity_(internal::roundToTrebleNodeCapacity(length)) {
         std::copy(src, src + length, data_.get());
     }
 
     inline int balance() const noexcept {
-        switch (capacity_ & 3) {
+        switch (internal::toTrebleNodeBalance(capacity_)) {
         case 0:
             return 0;
         case 1:
@@ -94,7 +110,7 @@ struct TrebleNode {
 
     inline void balance(int balance) noexcept {
         HEXBED_ASSERT(balance == -1 || balance == 0 || balance == 1);
-        capacity_ &= ~3;
+        capacity_ = internal::toTrebleNodeCapacity(capacity_);
         switch (balance) {
         case 0:
             break;
@@ -149,10 +165,13 @@ struct TrebleNode {
     inline bufsize offsetAdd(bufsize n) noexcept { return offset_ += n; }
     inline bufsize offsetSub(bufsize n) noexcept { return offset_ -= n; }
 
-    inline std::size_t capacity() const noexcept { return capacity_ & ~3; }
+    inline std::size_t capacity() const noexcept {
+        return internal::toTrebleNodeCapacity(capacity_);
+    }
     inline std::size_t capacity(std::size_t n) noexcept {
         HEXBED_ASSERT(!(n & 3));
-        return capacity_ = n;
+        capacity_ = n | (capacity_ & 3);
+        return n;
     }
 
     inline byte* data() const noexcept { return data_.get(); }
@@ -451,6 +470,9 @@ class Treble {
 
     template <bool incr>
     void balance(TrebleNode* node, int swing);
+
+    void balanceOnInsert(TrebleNode* node, int swing);
+    void balanceOnDelete(TrebleNode* node, int swing);
 
     void insertLeft(TrebleNode* node, TrebleNodePointer&& child);
     void insertRight(TrebleNode* node, TrebleNodePointer&& child);

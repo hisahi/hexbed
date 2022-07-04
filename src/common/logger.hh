@@ -134,6 +134,7 @@ extern bool logger_ok;
 #if NDEBUG
 #define HEXBED_BREAKPOINT()
 #define HEXBED_ASSERT(...) HEXBED_NOOP
+#define HEXBED_ASSERTF(...) HEXBED_NOOP
 #else
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 #define HEXBED_BREAKPOINT() __asm__ volatile("int $0x03")
@@ -155,6 +156,18 @@ inline void hexbedAssert(const char* file, size_t line, bool cond,
     }
 }
 
+template <typename... Ts>
+inline void hexbedAssertf(const char* file, size_t line, bool cond,
+                          const char* scond, const char* msgfmt, Ts&&... args) {
+    if (!cond) {
+        if (logger_ok) {
+            logger.fail(file, line, "assertion '%s' failed", scond);
+            logger.fail(file, line, msgfmt, std::forward<Ts>(args)...);
+        }
+        HEXBED_BREAKPOINT();
+    }
+}
+
 #define HEXBED_ASSERT1(cond)                                                \
     hexbed::hexbedAssert(__FILE__, __LINE__, !!(cond), "assertion failure", \
                          #cond)
@@ -165,6 +178,8 @@ inline void hexbedAssert(const char* file, size_t line, bool cond,
 #define HEXBED_ASSERT(...)                                           \
     HEXBED_ASSERT_PICK(, ##__VA_ARGS__, HEXBED_ASSERT2(__VA_ARGS__), \
                        HEXBED_ASSERT1(__VA_ARGS__))
+#define HEXBED_ASSERTF(cond, ...) \
+    hexbed::hexbedAssertf(__FILE__, __LINE__, !!(cond), #cond, __VA_ARGS__)
 #endif
 
 };  // namespace hexbed
