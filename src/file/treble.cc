@@ -21,9 +21,10 @@
 
 #include "file/treble.hh"
 
+// TODO clean up debug code here
 #ifndef NDEBUG
-#define TREBLE_CALL_DEBUG 1
-#define TREBLE_TREE_DEBUG 1
+#define TREBLE_CALL_DEBUG 0
+#define TREBLE_TREE_DEBUG 0
 #define TREBLE_SANITY_DEBUG 1
 #define TREBLE_NOMERGE_DEBUG 0
 #endif
@@ -289,7 +290,7 @@ static void checkTrebleBalance(TrebleNode* node) {
 #define CHECK_TREBLE_BALANCE_REC() checkTrebleBalance(root_.get())
 #else
 #define CHECK_TREBLE() HEXBED_NOOP
-#define CHECK_TREBLE_BALANCE() HEXBED_NOOP
+#define CHECK_TREBLE_BALANCE(...) HEXBED_NOOP
 #define CHECK_TREBLE_BALANCE_REC() HEXBED_NOOP
 #endif
 
